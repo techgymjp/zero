@@ -182,7 +182,7 @@ export class HUD {
     const gh = g.terrain.groundAt(pl.pos.x, pl.pos.z);
     if (!fl.onGround && pl.vel.y < -5 && (pl.pos.y - gh) / -pl.vel.y < 5) this.text('引き起こせ！', this.W / 2, this.H / 2 + 118, RED, 22, 'center', true);
     if (pl.onFire) this.text('火災発生', this.W / 2, this.H / 2 + 146, RED, 18, 'center', true);
-    const t = this.compact ? '「出力＋」で全開、速度が乗ったらスティックを下へ引いて発艦' : '赤城 甲板上 — 発動機全開(Shift)で発艦、S で引き起こし';
+    const t = this.compact ? '「出力＋」で全開、速度が乗ったらスティックを上へ倒して発艦' : '赤城 甲板上 — 発動機全開(Shift)で発艦、W で引き起こし';
     if (fl.onGround && fl.onGround.kind === 'deck') this.text(g.rearmT > 0 ? `補給中… ${Math.ceil(g.rearmT)}` : t, this.W / 2, this.H / 2 + 64, GREEN, 15, 'center', true);
     const ak = g.akagi;
     if (ak && !fl.onGround && pl.pos.distanceTo(ak.pos) < 3000 && pl.pos.y < 600) this.text(this.compact ? '「着艦」ボタンで自動着艦' : 'L: 着艦（自動）', this.W / 2, this.H / 2 + 64, GREEN, 15, 'center', true);

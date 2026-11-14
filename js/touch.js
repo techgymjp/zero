@@ -60,7 +60,7 @@ export class TouchControls {
       const l = Math.hypot(dx, dy); if (l > 1) { dx /= l; dy /= l; }
       knob.style.transform = `translate(${dx * R}px, ${dy * R}px)`;
       T.roll = Math.sign(dx) * Math.min(1, Math.abs(dx) ** 1.3 * 1.15);
-      T.pitch = Math.sign(dy) * Math.min(1, Math.abs(dy) ** 1.3 * 1.15); // 下へ引く = 機首上げ
+      T.pitch = -Math.sign(dy) * Math.min(1, Math.abs(dy) ** 1.3 * 1.15); // 上へなぞる = 機首上げ（上昇）
     };
     zone.addEventListener('touchstart', (e) => {
       e.preventDefault();

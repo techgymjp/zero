@@ -40,7 +40,7 @@ $('startBtn').addEventListener('click', async () => {
   audio.init(); audio.resume();
   $('loading').classList.remove('hidden');
   try {
-    game = new Game({ difficulty: 'normal', invert: $('invert').checked, audio });
+    game = new Game({ difficulty: 'normal', audio });
     game.ui = ui;
     window.game = game;
     await game.init((msg, pct) => { $('loadmsg').textContent = msg; $('loadbar').style.width = pct + '%'; });

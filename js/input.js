@@ -5,7 +5,6 @@ export class Input {
   constructor() {
     this.keys = new Set();
     this.pressed = new Set();
-    this.invert = false;
     this.mouseBtn = [false, false, false];
     this.drag = { active: false, dx: 0, dy: 0 };
     this.pitch = 0; this.roll = 0; this.yaw = 0; this.throttle = 0;
@@ -33,9 +32,8 @@ export class Input {
 
   update(dt) {
     const k = (a, b) => (this.down(...a) ? 1 : 0) - (this.down(...b) ? 1 : 0);
-    // W/↑ = 機首下げ（操縦桿を押す）、S/↓ = 機首上げ
-    let p = k(['KeyS', 'ArrowDown'], ['KeyW', 'ArrowUp']);
-    if (this.invert) p = -p;
+    // W/↑ = 機首上げ（上昇）、S/↓ = 機首下げ
+    let p = k(['KeyW', 'ArrowUp'], ['KeyS', 'ArrowDown']);
     let r = k(['KeyD', 'ArrowRight'], ['KeyA', 'ArrowLeft']);
     let y = k(['KeyE'], ['KeyQ']);
     let t = k(['ShiftLeft', 'ShiftRight', 'KeyR', 'Equal'], ['ControlLeft', 'ControlRight', 'KeyF', 'Minus']);
@@ -47,7 +45,7 @@ export class Input {
     if (gp) {
       const dz = (v) => (Math.abs(v) < 0.12 ? 0 : v);
       const ly = dz(gp.axes[1] || 0), lx = dz(gp.axes[0] || 0), rx = dz(gp.axes[2] || 0);
-      if (ly) p = this.invert ? -ly : ly;
+      if (ly) p = -ly; // スティックを上に倒す = 上昇
       if (lx) r = lx;
       if (rx) y = rx;
       if (gp.buttons[5]?.pressed) t = 1; if (gp.buttons[4]?.pressed) t = -1;
@@ -64,7 +62,7 @@ export class Input {
     if (this.touch) {
       this.touchUI?.update();
       const T = this.touch;
-      if (T.pitch || T.roll) { p = this.invert ? -T.pitch : T.pitch; r = T.roll; }
+      if (T.pitch || T.roll) { p = T.pitch; r = T.roll; }
       if (T.yaw) y = T.yaw;
       if (T.thr) t = T.thr;
       if (T.mg) mg = true;

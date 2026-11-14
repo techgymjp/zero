@@ -36,7 +36,7 @@ export class Game {
     this.lives = this.diff.lives;
     this.wingOrder = 'cover';
     this.camMode = 'chase';
-    this.input = new Input(); this.input.invert = !!opts.invert;
+    this.input = new Input();
     this.audio = opts.audio || new Audio();
     this.music = new Music(this.audio);
     this.isTouch = isTouchDevice();
