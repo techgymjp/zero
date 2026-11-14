@@ -91,7 +91,10 @@ export class PlayerFlight {
     F.addScaledVector(bodyX, -Math.sin(this.slip) * qd * P.S * 0.9);
     // 推力（栄一二型 950馬力）
     const thrust = ac.throttle * Math.min(P.Tstatic, P.power * P.eff / V) * Math.pow(rho / 1.225, 0.6);
-    F.addScaledVector(ac.fwd, thrust);
+    // 加速ボタン（スマホ）・スロットル増（PC）を押している間は推力を足す。800km/h に近づくほど弱める
+    const boosting = inp.touch ? inp.touch.boost : inp.throttle > 0;
+    const boostThrust = boosting ? 16000 * clamp((235 - V) / 70, 0, 1) : 0;
+    F.addScaledVector(ac.fwd, thrust + boostThrust);
     F.y -= m * G;
     const acc = F.divideScalar(m);
     this.gload = L / (m * G);
