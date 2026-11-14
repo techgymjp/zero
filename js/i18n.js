@@ -73,7 +73,6 @@ const HTML_EN = {
   lead: 'You lead Akagi\'s fighter section. Destroy the US Pacific Fleet.<br><b>Win: sink 8 battleships and 3 carriers</b>',
   sub: 'December 8, 1941 (Japan time) — December 7 in Hawaii',
   start: 'SORTIE', how: 'HOW TO PLAY', privacy: 'Privacy policy', adSettings: 'Ad settings', toTitle: 'Back to title', share: 'Share',
-  mobile: 'Portrait or landscape. Drag the left side to fly; buttons at lower right to fire and bomb.',
   shotdown: 'Shot down', respawn: 'Sortie again from Akagi', paused: 'Paused', pauseHint: 'Press P or Esc to resume', resume: 'Resume', again: 'Play again',
   help: `<h2>How to play</h2>
     <h3>Mission</h3>

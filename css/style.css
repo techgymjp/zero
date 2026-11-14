@@ -40,8 +40,10 @@ select { font-size: 15px; padding: 3px 8px; background: #222; color: var(--ink);
 .lead b { color: var(--gold); }
 .sub-btn { background: transparent; border-color: var(--gold); color: var(--gold); font-size: 16px; padding: 8px 28px; }
 .help { max-height: 90vh; overflow-y: auto; background: #131512; }
-.help h3 { color: var(--gold); margin: 14px 0 4px; font-size: 16px; border-bottom: 1px solid rgba(217,180,90,0.3); }
-.help p, .help li { font-size: 14px; line-height: 1.75; }
+.help h3 { color: var(--gold); margin: 16px 0 6px; font-size: 20px; border-bottom: 1px solid rgba(217,180,90,0.3); }
+.help p, .help li { font-size: 17px; line-height: 1.8; color: #f1ead6; }
+.help li { margin-bottom: 6px; }
+.help b { color: var(--gold); }
 .help .warn { color: #ffb0a0; }
 #help { z-index: 20; }
 /* ---- タッチ操作 ---- */
@@ -62,8 +64,6 @@ select { font-size: 15px; padding: 3px 8px; background: #222; color: var(--ink);
 .tb.small { width: 54px; height: 40px; border-radius: 10px; font-size: 12px; }
 .tb.mini { width: 44px; height: 30px; border-radius: 8px; font-size: 11px; }
 @media (max-height: 420px) { .tb.fire { width: 72px; height: 72px; } .tb { width: 56px; height: 56px; } }
-.mobile-hint { display: none; font-size: 14px; color: #ddd6c4; line-height: 1.5; }
-@media (pointer: coarse) { .mobile-hint { display: block; } }
 .tb.land { display: none; background: rgba(40,90,160,0.65); position: absolute; right: 50%; bottom: 18px; transform: translateX(50%); width: 96px; height: 44px; border-radius: 12px; font-size: 16px; }
 .tb.boost { width: 76px; height: 76px; background: rgba(200,160,40,0.5); font-size: 15px; }
 .tb.pause { position: absolute; top: 80px; right: 10px; width: 40px; height: 34px; border-radius: 8px; font-size: 13px; background: rgba(20,20,20,0.35); }
@@ -96,7 +96,6 @@ body.app .screen { padding-bottom: 64px; }
   #title .btn { font-size: 18px; padding: 8px 30px; margin: 4px 6px; }
   #title .sub-btn { font-size: 16px; padding: 7px 24px; }
   #title .appinfo { margin-top: 6px; font-size: 12px; }
-  #title .mobile-hint { margin: 4px 0 0; font-size: 13px; }
 }
 /* タッチ操作の端末ではキーの説明を隠し、PC ではタッチの説明を隠す */
 body.touch .pc-only { display: none !important; }

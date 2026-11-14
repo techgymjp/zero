@@ -41,7 +41,6 @@
 ■ かんたん操作
 ・画面左側をなぞって操縦（上で上昇、左右で旋回）
 ・右下のボタンで「機銃」「爆弾」「加速」
-・縦向き・横向きどちらでも遊べます
 
 ■ 難易度
 爆弾は当たりやすく、ある程度は撃沈できます。それでも全艦撃沈はかなりの難関。対空砲火の中をどう攻めるかが勝負です。
@@ -91,7 +90,6 @@ Sink 8 battleships and 3 carriers.
 ■ Simple controls
 - Drag on the left side of the screen to fly
 - Buttons at the lower right: GUN, BOMB, BOOST
-- Play in portrait or landscape
 
 ■ Notes
 - This game is fiction inspired by history; it does not recreate actual events.
