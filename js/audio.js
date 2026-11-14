@@ -49,6 +49,22 @@ const RECIPES = {
     for (const x of [o, o2, lfo]) { x.start(0); x.stop(1.4); }
     burst(c, out, noise, 0.05, 1.1, 'bandpass', 1200, 0.6, 0.35); // 風のうなり
   } },
+  // 加速中に鳴らし続ける音（2 秒でぴったり周期がそろうループ）
+  boostLoop: { dur: 2.0, loop: true, fn: (c, out, noise) => {
+    const o = c.createOscillator(); o.type = 'sawtooth'; o.frequency.value = 160;
+    const o2 = c.createOscillator(); o2.type = 'square'; o2.frequency.value = 80;
+    const lfo = c.createOscillator(); lfo.frequency.value = 40;
+    const am = c.createGain(); am.gain.value = 0.6; const dep = c.createGain(); dep.gain.value = 0.4; lfo.connect(dep); dep.connect(am.gain);
+    const f = c.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = 1700;
+    const g2 = c.createGain(); g2.gain.value = 0.5;
+    const g = c.createGain(); g.gain.value = 0.8;
+    o.connect(f); o2.connect(g2); g2.connect(f); f.connect(am); am.connect(g); g.connect(out);
+    for (const x of [o, o2, lfo]) { x.start(0); x.stop(2.0); }
+    const s = c.createBufferSource(); s.buffer = noise; s.loop = true;
+    const nf = c.createBiquadFilter(); nf.type = 'bandpass'; nf.frequency.value = 1300; nf.Q.value = 0.6;
+    const ng = c.createGain(); ng.gain.value = 0.3;
+    s.connect(nf); nf.connect(ng); ng.connect(out); s.start(0); s.stop(2.0);
+  } },
   beep: { dur: 0.14, fn: (c, out) => {
     const o = c.createOscillator(); o.type = 'square'; o.frequency.value = 1200;
     const g = c.createGain(); g.gain.setValueAtTime(0.4, 0); g.gain.exponentialRampToValueAtTime(0.001, 0.12);
@@ -151,9 +167,28 @@ export class Audio {
   setEngineVolume(v) { this.engineVol = v; }
   // 加速ボタン: 押した瞬間に吹け上がり音、押している間はうなりを重ねる
   setBoost(on) {
-    if (on && !this.boosting) { this.play('boost', 0.9 * Math.max(0.6, this.engineVol)); this._engLast = 0; }
-    if (!on && this.boosting) this._engLast = 0;
+    if (on && !this.boosting) { this.play('boost', 0.9 * Math.max(0.6, this.engineVol)); this._startBoostLoop(); this._engLast = 0; }
+    if (!on && this.boosting) { this._stopBoostLoop(); this._engLast = 0; }
     this.boosting = on;
+  }
+  _startBoostLoop() {
+    if (!this.ctx || !this.ready || this.muted) return;
+    this._stopBoostLoop(true);
+    const c = this.ctx, t = c.currentTime;
+    const s = c.createBufferSource(); s.buffer = this.buffers.boostLoop; s.loop = true;
+    const g = c.createGain(); g.gain.setValueAtTime(0.0001, t);
+    // 吹け上がり音に続いて、途切れずに鳴り続ける
+    g.gain.exponentialRampToValueAtTime(0.55 * Math.max(0.6, this.engineVol), t + 0.5);
+    s.connect(g); g.connect(this.sfx); s.start(t);
+    this._boostLoop = { s, g };
+  }
+  _stopBoostLoop(now = false) {
+    const b = this._boostLoop; if (!b) return;
+    this._boostLoop = null;
+    const t = this.ctx.currentTime;
+    b.g.gain.cancelScheduledValues(t); b.g.gain.setValueAtTime(Math.max(0.0001, b.g.gain.value), t);
+    b.g.gain.exponentialRampToValueAtTime(0.0001, t + (now ? 0.02 : 0.3));
+    b.s.stop(t + (now ? 0.05 : 0.35));
   }
 
   setEngine(throttle, speed, on = true) {

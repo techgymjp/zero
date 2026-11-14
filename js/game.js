@@ -290,6 +290,8 @@ export class Game {
       const sdt = sim / Math.max(1, steps);
       for (let i = 0; i < steps; i++) this.step(sdt);
     }
+    // ポーズ中・撃墜後は加速音を止める
+    if (this.audio.boosting && (this.state !== 'play' || !this.player || !this.player.alive)) this.audio.setBoost(false);
     this.updateCamera(dt);
     this.fx.streaks.begin(); this.bullets.draw(this.fx.streaks); this.drawWindLines(); this.fx.streaks.end();
     this.water.material.uniforms.uTime.value = this.time;
