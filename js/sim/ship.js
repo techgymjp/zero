@@ -97,6 +97,9 @@ export class Ship {
       // 味方 AI 攻撃隊の雷撃・爆撃は難易度設定で弱める（プレイヤーの爆撃が主役になるように）
       if (owner && !owner.isPlayer && kind !== 'gun') amount *= g.diff.aiShipDmg ?? 1;
       this.hp -= amount;
+      // 戦艦・空母はプレイヤー以外（味方攻撃隊・列機）の攻撃では沈まない（耐久力25%で止まる）。
+      // とどめはプレイヤーが刺す: 甲板で待っているだけではクリアできないように
+      if (this.isTarget && !(owner && owner.isPlayer)) this.hp = Math.max(this.hp, this.maxHp * 0.25);
       if (amount >= 60 && local) {
         local.y = clamp(local.y, this.deckY - 2, this.deckY + 6);
         local.x = clamp(local.x, -this.B * 0.4, this.B * 0.4);
