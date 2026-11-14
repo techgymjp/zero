@@ -72,3 +72,6 @@ Android 端末でリリース画面を開き、`zero.apk` をタップしてイ�
 
 ## ライセンス
 著作権はテックジム株式会社に帰属します（All rights reserved）。許可なく複製・改変・再配布すること、Web サイトやアプリ（Google Play・App Store など）として公開・販売すること、名前・アイコン・画像を使用することを禁止します。テックジムの受講生が学習目的で複製・改変することは許可しますが、アプリストアでの公開・広告の掲載・販売などの商用利用は禁止です。詳しくは [LICENSE](LICENSE) を参照してください。three.js は MIT License です。
+
+### 地図データ
+真珠湾の海岸線・桟橋・乾ドックは OpenStreetMap のデータ（`data/osm/pearl-harbor.json`）から生成しています（`js/world/harbor-osm.js`）。地図データ © OpenStreetMap contributors。データは [ODbL](https://opendatacommons.org/licenses/odbl/) で提供されています（https://www.openstreetmap.org/copyright）。

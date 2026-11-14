@@ -5,7 +5,7 @@ import { buildBattleship, buildCarrier, buildCruiser, buildDestroyer, buildAux, 
 import { Ship } from './sim/ship.js';
 import { Aircraft } from './sim/aircraft.js';
 import { FighterBrain, BomberBrain } from './sim/ai.js';
-import { fordPt, DRYDOCKS, AIRFIELDS, KIDO_BUTAI, US_TF, ROUTE_WEST, BARBERS, ll } from './world/geo.js';
+import { fordPt, FORD, DRYDOCKS, AIRFIELDS, KIDO_BUTAI, US_TF, ROUTE_WEST, BARBERS, ll } from './world/geo.js';
 import { DECAL } from './models/aircraft.js';
 import { rand, randSigned, clamp } from './util.js';
 
@@ -21,6 +21,52 @@ function circleMover(center, R, speed, phase0, ox, oz, dir = 1) {
     const fx = Math.sin(h), fz = -Math.cos(h), sx = Math.cos(h), sz = Math.sin(h);
     return { x: ax + fx * oz + sx * ox, z: az + fz * oz + sz * ox, h };
   };
+}
+
+// 実際の海岸線（OSM）に合わせて、陸に乗り上げた艦を水面へずらす
+function fitHarborShips(game) {
+  const T = game.terrain;
+  const harbor = game.ships.filter(s => s.harbor && !s.dock);
+  const corners = (s, x, z, m) => {
+    const sn = Math.sin(s.heading), cs = Math.cos(s.heading), out = [];
+    for (let a = -1; a <= 1.001; a += 0.25) for (const b of [-1, 0, 1]) {
+      const lz = a * (s.L / 2 + m), lx = b * (s.B / 2 + m);
+      out.push([x + lx * -cs + lz * sn, z + lx * -sn + lz * -cs]);
+    }
+    return out;
+  };
+  const wet = (s, x, z, m = 6) => corners(s, x, z, m).every(([px, pz]) => T.isWater(px, pz));
+  const placed = [];
+  const free = (s, x, z) => placed.every(o => {
+    if (o === s) return true;
+    const d = Math.hypot(o.pos.x - x, o.pos.z - z);
+    return d > (o.B + s.B) / 2 + 6 && (d > (o.L + s.L) / 2 + 6 || !corners(s, x, z, 3).some(([px, pz]) => o.distanceToHull(new THREE.Vector3(px, 0, pz)) < 1));
+  });
+  const move = (s, x, z) => { s.pos.set(x, 0, z); s._place(); };
+  // 戦艦列（南東岸）と北西岸の列は、列ごと岸から離して並びを保つ
+  const groups = [
+    { ships: harbor.filter(s => /アリゾナ|カリフォルニア|メリーランド|オクラホマ|テネシー|ウェストバージニア|ネバダ|ネオショー|ヴェスタル/.test(s.name)), dir: FORD.N },
+    { ships: harbor.filter(s => /ユタ|ローリー|デトロイト/.test(s.name)), dir: [-FORD.N[0], -FORD.N[1]] },
+  ];
+  for (const g of groups) {
+    let d = 0;
+    while (d < 400 && !g.ships.every(s => wet(s, s.pos.x + g.dir[0] * d, s.pos.z + g.dir[1] * d))) d += 5;
+    if (d < 400) for (const s of g.ships) move(s, s.pos.x + g.dir[0] * d, s.pos.z + g.dir[1] * d);
+    placed.push(...g.ships);
+  }
+  // その他の艦は個別に、近くの水面を探す
+  for (const s of harbor) {
+    if (placed.includes(s)) continue;
+    const x0 = s.pos.x, z0 = s.pos.z;
+    let ok = wet(s, x0, z0) && free(s, x0, z0);
+    for (let r = 10; !ok && r <= 1500; r += 10) {
+      for (let k = 0, n = Math.ceil(r / 8); k < n && !ok; k++) {
+        const a = k / n * Math.PI * 2, x = x0 + Math.cos(a) * r, z = z0 + Math.sin(a) * r;
+        if (wet(s, x, z) && free(s, x, z)) { move(s, x, z); ok = true; }
+      }
+    }
+    placed.push(s);
+  }
 }
 
 export function setupShips(game) {
@@ -42,10 +88,11 @@ export function setupShips(game) {
   }
   add({ name: '給油艦ネオショー', cls: 'AUX', side: 'us', hp: 200, harbor: true, model: buildAux({ L: 168, B: 23, kind: 'oiler' }), ...at(-541, 578), heading: ROW_HDG, aa: aaAux });
   add({ name: '工作艦ヴェスタル', cls: 'AUX', side: 'us', hp: 180, harbor: true, model: buildAux({ L: 141, B: 18.6, kind: 'repair' }), ...at(136, 606), heading: ROW_HDG, aa: aaAux });
-  // ペンシルベニア（第1乾ドック）
+  // ペンシルベニア（第1乾ドック）・ショー（第2乾ドック）: ドックの長軸に合わせる
+  const dockHdg = (d) => Math.atan2(d.dir[0], -d.dir[1]) * 180 / Math.PI;
   const dd = DRYDOCKS[0];
-  add({ name: '戦艦ペンシルベニア', cls: 'BB', side: 'us', target: true, hp: BBHP, harbor: true, model: buildBattleship(BB_SPECS.pennsylvania), x: dd.c[0], z: dd.c[1], heading: 130, aa: aaBB });
-  add({ name: '駆逐艦ショー', cls: 'DD', side: 'us', hp: 120, harbor: true, model: buildDestroyer({ L: 104, funnels: 1, guns: 5 }), x: DRYDOCKS[1].c[0], z: DRYDOCKS[1].c[1], heading: 130, aa: aaDD });
+  add({ name: '戦艦ペンシルベニア', cls: 'BB', side: 'us', target: true, hp: BBHP, harbor: true, dock: true, model: buildBattleship(BB_SPECS.pennsylvania), x: dd.c[0], z: dd.c[1], heading: dockHdg(dd), aa: aaBB });
+  add({ name: '駆逐艦ショー', cls: 'DD', side: 'us', hp: 120, harbor: true, dock: true, model: buildDestroyer({ L: 104, funnels: 1, guns: 5 }), x: DRYDOCKS[1].c[0], z: DRYDOCKS[1].c[1], heading: dockHdg(DRYDOCKS[1]), aa: aaDD });
   // フォード島北西岸
   add({ name: '標的艦ユタ', cls: 'AUX', side: 'us', hp: 250, harbor: true, model: buildAux({ L: 159, B: 32, kind: 'target' }), ...at(-150, -610), heading: 40, aa: aaAux });
   add({ name: '軽巡ローリー', cls: 'CL', side: 'us', hp: 300, harbor: true, model: buildCruiser({ L: 169, B: 16.9, fwd: 1, aft: 1, guns: 2, funnels: 4 }), ...at(130, -600), heading: 40, aa: aaCA });
@@ -57,9 +104,11 @@ export function setupShips(game) {
   add({ name: '軽巡セントルイス', cls: 'CL', side: 'us', hp: 320, harbor: true, model: buildCruiser({ L: 185, B: 18.8 }), x: 2150, z: 790, heading: 100, aa: aaCA });
   // 東入江の駆逐艦群
   let k = 0;
-  for (const [cx, cz] of [[1250, -2100], [1450, -2700], [1650, -3200]]) for (let i = 0; i < 3; i++) {
+  for (const [cx, cz] of [[1200, -2000], [900, -2400], [1600, -1500]]) for (let i = 0; i < 3; i++) {
     add({ name: `駆逐艦${['フェルプス', 'デューイ', 'ファラガット', 'ハル', 'マクドノー', 'ワーデン', 'デール', 'モナハン', 'アイルウィン'][k++]}`, cls: 'DD', side: 'us', hp: 120, harbor: true, model: buildDestroyer({ funnels: 1 + (i % 2), guns: 4 + (i % 2) }), x: cx + i * 13, z: cz, heading: 160, aa: aaDD });
   }
+
+  fitHarborShips(game);
 
   // ---- 米空母機動部隊（真珠湾南方を哨戒）----
   const tf = (ox, oz) => circleMover(US_TF.center, US_TF.radius, US_TF.speed, 0.3, ox, oz);

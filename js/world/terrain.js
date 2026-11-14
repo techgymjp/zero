@@ -1,6 +1,7 @@
 // オアフ島 地形生成（高さ・テクスチャ・メッシュ）
 import * as THREE from 'three';
-import { TERRAIN, DETAIL, OAHU, RIDGES, CRATERS, HARBOR_STROKES, HARBOR_ELLIPSES, DRYDOCKS, AIRFIELDS, TOWNS, FORD, fordPt } from './geo.js';
+import { TERRAIN, DETAIL, OAHU, RIDGES, CRATERS, AIRFIELDS, TOWNS, fordPt } from './geo.js';
+import { OSM_BOUNDS, OSM_WATER, OSM_PIERS } from './harbor-osm.js';
 import { fbm, ridged, valueNoise, smoothstep, clamp, lerp, segDist2D, mulberry32 } from '../util.js';
 
 const MASK = 1024;
@@ -70,29 +71,22 @@ function pathCoast(ctx, coast, tx) {
   ctx.closePath();
 }
 
-function drawHarborWater(ctx, tx, scale) {
-  ctx.lineCap = 'round'; ctx.lineJoin = 'round';
-  for (const s of HARBOR_STROKES) {
-    ctx.lineWidth = s.w * scale;
-    ctx.beginPath();
-    s.pts.forEach((p, i) => { const q = tx(p[0], p[1]); i ? ctx.lineTo(q[0], q[1]) : ctx.moveTo(q[0], q[1]); });
-    ctx.stroke();
-  }
-  for (const e of HARBOR_ELLIPSES) {
-    const q = tx(e.cx, e.cz);
-    ctx.beginPath(); ctx.ellipse(q[0], q[1], e.a * scale, e.b * scale, e.ang * Math.PI / 180, 0, Math.PI * 2); ctx.fill();
-  }
-  for (const d of DRYDOCKS) {
-    const q = tx(d.c[0], d.c[1]);
-    ctx.save(); ctx.translate(q[0], q[1]); ctx.rotate(Math.atan2(d.dir[1], d.dir[0]));
-    ctx.fillRect(-d.len * scale / 2, -d.w * scale / 2, d.len * scale, d.w * scale); ctx.restore();
+// 真珠湾の水域（OpenStreetMap の海岸線から生成）を偶奇規則で塗る
+function pathOsmWater(ctx, tx) {
+  ctx.beginPath();
+  for (const r of OSM_WATER) {
+    for (let i = 0; i < r.length; i += 2) { const q = tx(r[i], r[i + 1]); i ? ctx.lineTo(q[0], q[1]) : ctx.moveTo(q[0], q[1]); }
+    ctx.closePath();
   }
 }
-function drawFordIsland(ctx, tx, scale) {
-  const q = tx(FORD.cx, FORD.cz);
-  ctx.beginPath();
-  ctx.ellipse(q[0], q[1], FORD.a * scale, FORD.b * scale, FORD.ang * Math.PI / 180, 0, Math.PI * 2);
-  ctx.fill();
+// OSM 範囲内を「陸」で塗り、水域を抜く（範囲外は従来の海岸線のまま）
+function paintOsmLand(ctx, tx, landStyle, waterStyle) {
+  const a = tx(OSM_BOUNDS.x0, OSM_BOUNDS.z0), b = tx(OSM_BOUNDS.x1, OSM_BOUNDS.z1);
+  ctx.save();
+  ctx.beginPath(); ctx.rect(a[0], a[1], b[0] - a[0], b[1] - a[1]); ctx.clip();
+  ctx.fillStyle = landStyle; ctx.fillRect(a[0], a[1], b[0] - a[0], b[1] - a[1]);
+  ctx.fillStyle = waterStyle; pathOsmWater(ctx, tx); ctx.fill('evenodd');
+  ctx.restore();
 }
 
 export class Terrain {
@@ -112,9 +106,7 @@ export class Terrain {
     ctx.fillStyle = '#000'; ctx.fillRect(0, 0, MASK, MASK);
     ctx.fillStyle = '#fff'; pathCoast(ctx, this.coast, tx); ctx.fill();
     const island = ctx.getImageData(0, 0, MASK, MASK).data;
-    ctx.fillStyle = '#000'; ctx.strokeStyle = '#000';
-    drawHarborWater(ctx, tx, k);
-    ctx.fillStyle = '#fff'; drawFordIsland(ctx, tx, k);
+    paintOsmLand(ctx, tx, '#fff', '#000');
     const land = ctx.getImageData(0, 0, MASK, MASK).data;
     this.islandMask = new Float32Array(MASK * MASK);
     this.landMask = new Float32Array(MASK * MASK);
@@ -188,6 +180,14 @@ export class Terrain {
       const x = TERRAIN.x0 + i * step, z = TERRAIN.z0 + j * step;
       const d = Math.hypot(x - 300, z - 800);
       if (d < 3500) { const idx = j * n + i; if (H[idx] > 0) H[idx] = lerp(2.5, H[idx], smoothstep(1800, 3500, d)); }
+    }
+    // 真珠湾の詳細範囲: 頂点間隔（200m）ではフォード島や細い入江が水没するので、
+    // 地形メッシュは海面より少し上に保ち、海岸線は詳細テクスチャ（OSM 由来、約2.4m/px）の透明部分で切り抜く
+    for (let j = 0; j < n; j++) for (let i = 0; i < n; i++) {
+      const x = TERRAIN.x0 + i * step, z = TERRAIN.z0 + j * step;
+      if (x < DETAIL.x0 + step || x > DETAIL.x0 + DETAIL.size - step || z < DETAIL.z0 + step || z > DETAIL.z0 + DETAIL.size - step) continue;
+      const idx = j * n + i;
+      H[idx] = Math.max(H[idx], 2.5);
     }
     this.H = H;
   }
@@ -291,18 +291,11 @@ export class Terrain {
     dx.fillStyle = dx.createPattern(noiseC, 'repeat'); dx.globalCompositeOperation = 'multiply'; dx.fillRect(0, 0, DT, DT);
     dx.globalCompositeOperation = 'source-over';
     this._drawHarborDetail(dx, dtx, dk);
-    // 海と湾を抜く
-    dx.globalCompositeOperation = 'destination-in';
-    dx.fillStyle = '#fff'; pathCoast(dx, this.coast, dtx); dx.fill();
-    dx.globalCompositeOperation = 'destination-out';
-    dx.fillStyle = '#000'; dx.strokeStyle = '#000';
-    drawHarborWater(dx, dtx, dk);
-    dx.globalCompositeOperation = 'source-over';
-    // フォード島を塗り直す
-    dx.save(); pathCoast(dx, this.coast, dtx); dx.clip();
-    dx.fillStyle = '#7a8a50'; drawFordIsland(dx, dtx, dk);
-    dx.restore();
     this._drawFordDetail(dx, dtx, dk);
+    // 海と湾を抜く（詳細範囲は OSM の範囲内に収まっている）
+    dx.globalCompositeOperation = 'destination-out';
+    dx.fillStyle = '#000'; pathOsmWater(dx, dtx); dx.fill('evenodd');
+    dx.globalCompositeOperation = 'source-over';
     this._drawPiers(dx, dtx, dk);
     this.detailCanvas = dc;
     // CPU 用 水面マスク
@@ -390,7 +383,6 @@ export class Terrain {
     const rng = mulberry32(5);
     for (let i = 0; i < 60; i++) {
       const t = -800 + rng() * 1600, off = (rng() < 0.5 ? -1 : 1) * (200 + rng() * 220);
-      if (Math.abs(off) > 520 * Math.sqrt(Math.max(0, 1 - (t / 1000) ** 2)) - 30) continue;
       const p = tx(...fordPt(t, off));
       ctx.fillStyle = `rgb(${120 + rng() * 50},${110 + rng() * 40},${100 + rng() * 30})`;
       ctx.save(); ctx.translate(p[0], p[1]); ctx.rotate(-50 * Math.PI / 180);
@@ -399,21 +391,14 @@ export class Terrain {
   }
 
   _drawPiers(ctx, tx, k) {
-    ctx.fillStyle = '#8c8a82';
-    // 戦艦用係留柱 (F岸壁)
-    for (const t of [-760, -541, -322, -92, 136, 358]) {
-      for (const dt of [-55, 55]) {
-        const p = tx(...fordPt(t + dt, 548));
-        ctx.save(); ctx.translate(p[0], p[1]); ctx.rotate(-50 * Math.PI / 180);
-        ctx.fillRect(-9 * k, -6 * k, 18 * k, 12 * k); ctx.restore();
-      }
-    }
-    // 1010 岸壁と工廠の桟橋
-    const piers = [[fordPt(150, 1180), 420, 22, -50], [fordPt(700, 1130), 260, 20, 40], [fordPt(-700, 1180), 200, 20, 40], [[2000, 820], 180, 18, 0], [[2350, 760], 180, 18, 0], [[2700, 780], 160, 18, 0]];
-    for (const [p, L, W, rot] of piers) {
-      const q = tx(p[0], p[1]);
-      ctx.save(); ctx.translate(q[0], q[1]); ctx.rotate(rot * Math.PI / 180);
-      ctx.fillRect(-L * k / 2, -W * k / 2, L * k, W * k); ctx.restore();
+    // OSM の桟橋・防波堤
+    ctx.fillStyle = '#8c8a82'; ctx.strokeStyle = '#8c8a82'; ctx.lineCap = 'butt'; ctx.lineJoin = 'round';
+    for (const pr of OSM_PIERS) {
+      const p = pr.p;
+      ctx.beginPath();
+      for (let i = 0; i < p.length; i += 2) { const q = tx(p[i], p[i + 1]); i ? ctx.lineTo(q[0], q[1]) : ctx.moveTo(q[0], q[1]); }
+      if (pr.c) { ctx.closePath(); ctx.fill(); }
+      else { ctx.lineWidth = Math.max(pr.w, 4) * k; ctx.stroke(); }
     }
   }
 

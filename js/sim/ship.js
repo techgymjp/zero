@@ -10,7 +10,7 @@ export class Ship {
   // def: {name, cls, side, model, x, z, heading(deg), target(bool), hp, mover, harbor, aa:{heavy,light}, special}
   constructor(game, def) {
     this.game = game;
-    Object.assign(this, { name: def.name, cls: def.cls, side: def.side, isTarget: !!def.target, special: def.special, harbor: !!def.harbor });
+    Object.assign(this, { name: def.name, cls: def.cls, side: def.side, isTarget: !!def.target, special: def.special, harbor: !!def.harbor, dock: !!def.dock });
     const m = def.model;
     this.model = m; this.group = m.group;
     this.L = m.L; this.B = m.B; this.top = m.top; this.draft = m.draft; this.deckY = m.deckY;

@@ -86,6 +86,7 @@ export class Ground {
 
   _structure(kind, x, z, opts = {}) {
     const g = this.game, T = g.terrain;
+    if (T.isWater(x, z)) return null; // 実際の海岸線で水上になる建物は置かない
     const y = opts.y ?? Math.max(T.heightAt(x, z), 1.5);
     const b = new Builder();
     let r = 20, hp = 40, score = 80, h = 10;
@@ -157,7 +158,7 @@ export class Ground {
     // 石油タンク群
     for (const [x, z] of this.game.terrain.tankPositions()) {
       const t = this._structure('tank', x, z, { r: 25 });
-      t.name = '石油タンク';
+      if (t) t.name = '石油タンク';
     }
     // 他飛行場の格納庫
     const add = (id, n, ox, oz, rot) => { const f = AIRFIELDS.find(a => a.id === id); for (let i = 0; i < n; i++) this._structure('hangar', f.c[0] + ox + i * 80 * Math.cos(rot), f.c[1] + oz + i * 80 * Math.sin(rot), { rot: -rot, w: 60, d: 45, h: 18 }); };
