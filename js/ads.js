@@ -110,6 +110,10 @@ window.Ads = (() => {
       } catch (e) { /* 非対応 */ }
     }
     let rewarded = false;
+    AdMob.addListener('bannerAdLoaded', () => { if (!banner.want || showing) enforceBanner(); });
+    AdMob.addListener('bannerAdSizeChanged', () => { if (!banner.want || showing) enforceBanner(); });
+    // プレイ中は念のため定期的にも確認する
+    setInterval(() => { if (!banner.want && !banner.busy) enforceBanner(); }, 2000);
     AdMob.addListener('interstitialAdDismissed', () => finish('inter'));
     AdMob.addListener('interstitialAdFailedToShow', () => finish('inter'));
     AdMob.addListener('onRewardedVideoAdShowed', () => { rewarded = false; });
@@ -159,29 +163,31 @@ window.Ads = (() => {
   }
   async function syncBanner() {
     if (!AdMob || !ready || banner.busy || !has('banner')) return;
-    const target = banner.want && !showing ? 'shown' : 'hidden';
-    if (target === banner.state || (target === 'hidden' && banner.state === 'none')) return;
+    const target = banner.want && !showing ? 'shown' : 'none';
+    if (target === banner.state) return;
     banner.busy = true;
     try {
       if (target === 'shown') {
-        if (banner.state === 'none') {
-          await AdMob.showBanner({ adId: ids.banner, adSize: 'BANNER', position: 'BOTTOM_CENTER', margin: 0, isTesting: testing });
-        } else {
-          await AdMob.resumeBanner();
-        }
+        await AdMob.showBanner({ adId: ids.banner, adSize: 'BANNER', position: 'BOTTOM_CENTER', margin: 0, isTesting: testing });
         banner.state = 'shown';
       } else {
-        await AdMob.hideBanner();
-        banner.state = 'hidden';
+        // 隠すときは一時停止ではなく取り除く（読み込み途中の hide は無視され、あとから表示されることがあるため）
+        await AdMob.removeBanner();
+        banner.state = 'none';
       }
     } catch (e) {
-      // 読み込めなかったときは次の機会にやり直す
-      if (target === 'shown') banner.state = 'none';
+      banner.state = target === 'shown' ? 'none' : banner.state;
     }
     banner.busy = false;
     // 待っている間に状態が変わっていたら追いかける
-    const again = banner.want && !showing ? 'shown' : 'hidden';
-    if (again !== banner.state && !(again === 'hidden' && banner.state === 'none')) syncBanner();
+    const again = banner.want && !showing ? 'shown' : 'none';
+    if (again !== banner.state) syncBanner();
+  }
+  // 読み込みが遅れて終わったバナーが、プレイ中に出てしまわないようにする
+  function enforceBanner() {
+    if (!AdMob || !has('banner') || (banner.want && !showing)) return;
+    AdMob.removeBanner().catch(() => {});
+    banner.state = 'none';
   }
 
   // 同意した内容をあとから変更するための Google のフォームを開く
