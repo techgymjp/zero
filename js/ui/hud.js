@@ -106,7 +106,7 @@ export class HUD {
         c.beginPath(); c.moveTo(lp[0] - 14, lp[1]); c.lineTo(lp[0] - 9, lp[1]); c.moveTo(lp[0] + 9, lp[1]); c.lineTo(lp[0] + 14, lp[1]); c.stroke();
       }
     }
-    // 爆撃照準: 爆弾が残っていれば、機銃照準から落下予測地点まで点線を常に表示。
+    // 爆撃照準: 爆弾が残っていれば、機銃照準から落下予測地点まで緑の点線を常に表示。
     // 落下地点が戦艦・空母に重なったら赤い◇
     const stores = pl.model.userData.stores.filter(s => s.parent);
     const airborne = !pl.brain.onGround && !(g.akagi && pl.pos.distanceTo(g.akagi.pos) < 3000);
@@ -123,7 +123,7 @@ export class HUD {
     const ex = clamp(sp[0], 4, this.W - 4), ey = clamp(sp[1], 4, this.H - 4);
     const y0 = y + 14;
     if (ey > y0 + 4 || Math.abs(ex - x) > 4) {
-      c.strokeStyle = 'rgba(255,255,255,0.75)'; c.lineWidth = 1.5; c.setLineDash([5, 6]);
+      c.strokeStyle = 'rgba(110,255,120,0.85)'; c.lineWidth = 2; c.setLineDash([6, 6]); // 爆弾ボタンと同じ緑
       c.beginPath(); c.moveTo(x, y0); c.lineTo(ex, ey); c.stroke(); c.setLineDash([]);
     }
     if (!onScreen) return;
@@ -134,9 +134,9 @@ export class HUD {
       c.strokeStyle = RED; c.lineWidth = 2.5;
       c.beginPath(); c.moveTo(sp[0], sp[1] - 10); c.lineTo(sp[0] + 10, sp[1]); c.lineTo(sp[0], sp[1] + 10); c.lineTo(sp[0] - 10, sp[1]); c.closePath(); c.stroke();
     } else {
-      // 落下地点: 白い小さな丸
-      c.strokeStyle = 'rgba(255,255,255,0.9)'; c.lineWidth = 1.5;
-      c.beginPath(); c.arc(sp[0], sp[1], 4, 0, Math.PI * 2); c.stroke();
+      // 落下地点: 緑の小さな丸
+      c.strokeStyle = 'rgba(110,255,120,0.95)'; c.lineWidth = 2;
+      c.beginPath(); c.arc(sp[0], sp[1], 5, 0, Math.PI * 2); c.stroke();
     }
   }
 
