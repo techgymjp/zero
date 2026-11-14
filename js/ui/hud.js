@@ -215,20 +215,24 @@ export class HUD {
   drawCompass() {
     const g = this.game, c = this.ctx, pl = g.player, W = this.W;
     const hdg = (Math.atan2(pl.fwd.x, -pl.fwd.z) * 180 / Math.PI + 360) % 360;
-    const cx = W / 2, y = 26;
-    const cw = this.compact ? 90 : 200;
-    c.fillStyle = 'rgba(10,12,10,0.4)'; c.fillRect(cx - cw, y - 14, cw * 2, 30);
+    const k = this.compact ? 1.4 : 1;          // スマホでは大きく
+    const cx = W / 2, y = this.compact ? 30 : 26;
+    const cw = this.compact ? 130 : 200;
+    const sc = this.compact ? 2.6 : 2.1;       // 1度あたりの幅
+    c.fillStyle = 'rgba(10,12,10,0.4)'; c.fillRect(cx - cw, y - 14 * k, cw * 2, 30 * k);
     const names = { 0: '北', 45: '北東', 90: '東', 135: '南東', 180: '南', 225: '南西', 270: '西', 315: '北西' };
+    c.lineWidth = this.compact ? 2 : 1;
     for (let a = -90; a <= 90; a += 5) {
       const h = Math.round((hdg + a) / 5) * 5;
-      const off = (h - hdg) * 2.1;
+      const off = (h - hdg) * sc;
       if (Math.abs(off) > cw - 5) continue;
       const hh = ((h % 360) + 360) % 360;
-      c.strokeStyle = WHITE; c.beginPath(); c.moveTo(cx + off, y + 10); c.lineTo(cx + off, y + (hh % 15 ? 6 : 2)); c.stroke();
-      if (names[hh] !== undefined) this.text(t(names[hh]), cx + off, y - 4, hh % 90 ? WHITE : ORANGE, 13, 'center', true);
-      else if (hh % 30 === 0) this.text(String(hh), cx + off, y - 4, '#ccc', 11, 'center');
+      c.strokeStyle = WHITE; c.beginPath(); c.moveTo(cx + off, y + 10 * k); c.lineTo(cx + off, y + (hh % 15 ? 6 : 1) * k); c.stroke();
+      if (names[hh] !== undefined) this.text(t(names[hh]), cx + off, y - 4 * k, hh % 90 ? WHITE : ORANGE, 13 * k, 'center', true);
+      else if (hh % 30 === 0) this.text(String(hh), cx + off, y - 4 * k, '#ddd', this.compact ? 14 : 11, 'center', this.compact);
     }
-    c.fillStyle = ORANGE; c.beginPath(); c.moveTo(cx, y + 12); c.lineTo(cx - 6, y + 20); c.lineTo(cx + 6, y + 20); c.fill();
+    c.lineWidth = 1;
+    c.fillStyle = ORANGE; c.beginPath(); c.moveTo(cx, y + 12 * k); c.lineTo(cx - 6 * k, y + 20 * k); c.lineTo(cx + 6 * k, y + 20 * k); c.fill();
     const tm = 7 * 3600 + 40 * 60 + g.missionTime;
     const hh = Math.floor(tm / 3600), mm = Math.floor(tm / 60) % 60;
     if (!this.compact) this.text(t('現地時間 {t}  (昭和16年12月7日)', { t: `${hh}:${String(mm).padStart(2, '0')}` }), cx, y + 36, '#ddd', 12, 'center');
