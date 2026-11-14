@@ -2,6 +2,7 @@
 import { Game } from './game.js';
 import { Audio } from './audio.js';
 import { t, setLang, applyHTML, LANG } from './i18n.js';
+import { isTouchDevice } from './touch.js';
 
 const $ = (id) => document.getElementById(id);
 const audio = new Audio();
@@ -10,6 +11,9 @@ const Ads = window.Ads;
 const cap = window.Capacitor;
 const isApp = !!(cap && cap.isNativePlatform && cap.isNativePlatform());
 if (isApp) document.body.classList.add('app');
+// タッチ操作の端末（スマホ・タブレット）: キーボードの説明を隠す
+if (isTouchDevice()) document.body.classList.add('touch');
+
 const REVIVE_MAX = 3;          // リワード広告で「その場で復活」できる回数（1 ゲーム）
 const PRIVACY = { ja: 'https://techgym.jp/privacy-policy/', en: 'https://techgym.jp/privacy-policy-en/' };
 
@@ -179,7 +183,7 @@ $('shareBtn').onclick = async () => {
 const syncLabels = () => {
   $('muteBtn').textContent = t('音: {s}', { s: t(audio.muted ? '切' : '入') });
   $('engBtn').textContent = t('エンジン音: {s}', { s: t(ENG[engI][0]) });
-  $('bgmBtn').textContent = t('BGM: {s} (K)', { s: t(game && game.music && !game.music.playing ? '切' : '入') });
+  $('bgmBtn').textContent = t(isTouchDevice() ? 'BGM: {s}' : 'BGM: {s} (K)', { s: t(game && game.music && !game.music.playing ? '切' : '入') });
   $('privacyLink').href = PRIVACY[LANG] || PRIVACY.en;
 };
 $('muteBtn').onclick = () => { audio.setMuted(!audio.muted); syncLabels(); };

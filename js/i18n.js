@@ -34,7 +34,7 @@ const EN = {
   '作戦成功 — 米太平洋艦隊 壊滅': 'Mission accomplished — Pacific Fleet destroyed', '作戦失敗 — 未帰還': 'Mission failed — did not return',
   '撃墜王・金鵄勲章': 'Ace — Order of the Golden Kite', '殊勲甲': 'Distinguished Service, 1st class', '殊勲乙': 'Distinguished Service, 2nd class', '武功抜群': 'Outstanding Valor', '奮戦': 'Fought bravely',
   '初期化に失敗しました: ': 'Initialization failed: ',
-  '音: {s}': 'Sound: {s}', 'エンジン音: {s}': 'Engine: {s}', 'BGM: {s} (K)': 'Music: {s} (K)',
+  '音: {s}': 'Sound: {s}', 'エンジン音: {s}': 'Engine: {s}', 'BGM: {s} (K)': 'Music: {s} (K)', 'BGM: {s}': 'Music: {s}',
   '入': 'On', '切': 'Off', '普通': 'Normal', '小': 'Low', '大': 'High',
   '戦艦撃沈': 'Battleships sunk', '空母撃沈': 'Carriers sunk', '撃墜（小隊長機）': 'Kills (you)', '地上撃破': 'Ground targets', '米軍機 残存': 'US planes left',
   '被撃墜': 'Times shot down', '作戦時間': 'Mission time', '戦果点数': 'Score', '{m}分{s}秒': '{m}m {s}s',
@@ -81,24 +81,28 @@ const HTML_EN = {
     <p><b>Victory: sink all 8 battleships and 3 carriers.</b> Further strike waves (B5N Kates and D3A Vals) arrive as reinforcements.</p>
     <h3>Controls</h3>
     <ul>
-      <li><b>Flight</b>: W/S (↑/↓) climb/dive, A/D (←/→) roll, Q/E rudder, Shift·R / Ctrl·F throttle</li>
-      <li><b>Gun</b>: Space or click fires the 20 mm cannon</li>
-      <li><b>Bombs</b>: B drops 250 kg then 60 kg bombs. A red ◇ appears when a bomb would hit a battleship or carrier — release then. Dive to aim.</li>
-      <li><b>Other</b>: G gear, V camera, middle-drag / Shift+drag to look around, T time warp, M map zoom, N wingman orders, K music, P pause, H help</li>
-      <li><b>Phone / tablet</b> (portrait or landscape): <b>drag the left half to fly</b> (up = climb, down = dive, left/right = roll). Hold <b>GUN</b> to fire, <b>BOMB</b> to drop, hold <b>BOOST</b> for full power. A <b>Land</b> button appears near Akagi. Ⅱ at the top right pauses.</li>
-      <li><b>Gamepad</b>: left stick to fly, right stick rudder, RT/LT gun, A bomb, Y camera, LB/RB throttle</li>
+      <li class="touch-only"><b>Flying</b>: <b>drag on the left side of the screen</b> (up = climb, down = dive, left/right = roll).</li>
+      <li class="touch-only"><b>Buttons</b>: hold <b>GUN</b> to fire, <b>BOMB</b> to drop, hold <b>BOOST</b> for full power (release for cruise). A <b>Land</b> button appears near Akagi (within 3 km, below 600 m). Tap the map to change its scale; Ⅱ at the top right pauses.</li>
+      <li class="touch-only"><b>Bombing</b>: a red ◇ appears when a bomb would hit a battleship or carrier — press BOMB then. Dive to aim.</li>
+      <li class="pc-only"><b>Flight</b>: W/S (↑/↓) climb/dive, A/D (←/→) roll, Q/E rudder, Shift·R / Ctrl·F throttle</li>
+      <li class="pc-only"><b>Gun</b>: Space or click fires the 20 mm cannon</li>
+      <li class="pc-only"><b>Bombs</b>: B drops 250 kg then 60 kg bombs. A red ◇ appears when a bomb would hit a battleship or carrier — release then. Dive to aim.</li>
+      <li class="pc-only"><b>Other</b>: G gear, V camera, middle-drag / Shift+drag to look around, T time warp, M map zoom, N wingman orders, K music, P pause, H help</li>
+      <li class="pc-only"><b>Gamepad</b>: left stick to fly, right stick rudder, RT/LT gun, A bomb, Y camera, LB/RB throttle</li>
     </ul>
     <h3>Rearming and landing</h3>
     <ul>
       <li>When out of bombs, land on <b>Akagi</b> (off Pearl Harbor to the southwest) to restore bombs, ammo and damage.</li>
-      <li>Near Akagi (within 3 km, below 600 m) press <b>L</b> to land automatically. To land manually, lower the gear (G) and approach slowly from astern.</li>
-      <li>Take-off: full power, then pull up (W / stick up) once you have speed. Your wingmen join after take-off.</li>
+      <li class="touch-only">Near Akagi (within 3 km, below 600 m) press the <b>Land</b> button to land automatically.</li>
+      <li class="pc-only">Near Akagi (within 3 km, below 600 m) press <b>L</b> to land automatically. To land manually, lower the gear (G) and approach slowly from astern.</li>
+      <li class="touch-only">Take-off: hold BOOST, then drag the stick up once you have speed. Your wingmen join after take-off.</li>
+      <li class="pc-only">Take-off: Shift for full power, then W (↑) to pull up once you have speed. Your wingmen join after take-off.</li>
     </ul>
     <h3>Tactics</h3>
     <ul>
       <li>Each airfield scrambles fighters while it still has parked fighters. Destroy them on the ground to stop launches.</li>
       <li>US carriers keep launching aircraft until they are sunk.</li>
-      <li>Your wingmen fly behind you on either side. N switches between "cover me" and "free engage".</li>
+      <li>Your wingmen fly behind you on either side and cover you.<span class="pc-only"> N switches between "cover me" and "free engage".</span></li>
     </ul>
     <button class="btn" id="helpClose">Close</button>`,
 };

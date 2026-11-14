@@ -39,7 +39,7 @@
 </div>
 
 <div id="pause" class="screen hidden">
-  <div class="panel small"><h2 data-i18n="paused">一時停止</h2><p data-i18n="pauseHint">P または Esc で再開</p><button class="btn" id="resumeBtn" data-i18n="resume">再開</button><button class="btn" id="pauseTitleBtn" data-i18n="toTitle">タイトルに戻る</button><button class="btn" id="muteBtn">音: 入</button><button class="btn" id="engBtn">エンジン音: 普通</button><button class="btn" id="bgmBtn">BGM: 入 (K)</button></div>
+  <div class="panel small"><h2 data-i18n="paused">一時停止</h2><p data-i18n="pauseHint" class="pc-only">P または Esc で再開</p><button class="btn" id="resumeBtn" data-i18n="resume">再開</button><button class="btn" id="pauseTitleBtn" data-i18n="toTitle">タイトルに戻る</button><button class="btn" id="muteBtn">音: 入</button><button class="btn" id="engBtn">エンジン音: 普通</button><button class="btn" id="bgmBtn">BGM: 入</button></div>
 </div>
 
 <div id="help" class="screen hidden">
@@ -51,25 +51,29 @@
     <p><b>勝利条件：戦艦8隻・空母3隻をすべて撃沈。</b>第二次以降の攻撃隊（九七艦攻・九九艦爆）も援軍として到着する。</p>
     <h3>操作</h3>
     <ul>
-      <li><b>飛行</b>：W/S（↑/↓）上昇/下降（機首上げ/下げ）、A/D（←/→）横転、Q/E 方向舵、Shift・R / Ctrl・F スロットル</li>
-      <li><b>射撃</b>：Space または クリックで機銃（20mm）</li>
-      <li><b>爆撃</b>：B で 250kg → 60kg の順に投下。戦艦・空母に命中するコースに入ると赤い◇が出るので、そこで投下。急降下で狙うと当てやすい。</li>
-      <li><b>その他</b>：G 脚、V 視点、中ボタン/Shift+左ドラッグ 視点回転、T 時間加速、M 地図、N 列機への命令、K BGM、P 一時停止、H 遊び方</li>
-      <li><b>スマホ・タブレット</b>（縦向き・横向きどちらでも）：画面<b>左半分を指でなぞって操縦</b>（上へなぞる=上昇、下へ=下降、左右=横転）。右下の「機銃」は押している間射撃、「爆弾」で投下、「加速」を長押しで全開（離すと巡航）。赤城の近く（3km以内・高度600m以下）では「着艦」ボタンが現れる。右上の「Ⅱ」で一時停止。</li>
-      <li><b>ゲームパッド</b>：左スティック 操縦、右スティック 方向舵、RT/LT 機銃、A 爆弾、Y 視点、LB/RB スロットル</li>
+      <li class="touch-only"><b>操縦</b>：画面の<b>左側を指でなぞる</b>（上へ=上昇、下へ=下降、左右=横転）。</li>
+      <li class="touch-only"><b>ボタン</b>：「機銃」は押している間射撃、「爆弾」で投下、「加速」は押している間全開（離すと巡航）。赤城の近く（3km以内・高度600m以下）では「着艦」ボタンが現れる。地図をタップで縮尺切替、右上の「Ⅱ」で一時停止。</li>
+      <li class="touch-only"><b>爆撃</b>：戦艦・空母に命中するコースに入ると赤い◇が出るので、そこで「爆弾」を押す。急降下で狙うと当てやすい。</li>
+      <li class="pc-only"><b>飛行</b>：W/S（↑/↓）上昇/下降（機首上げ/下げ）、A/D（←/→）横転、Q/E 方向舵、Shift・R / Ctrl・F スロットル</li>
+      <li class="pc-only"><b>射撃</b>：Space または クリックで機銃（20mm）</li>
+      <li class="pc-only"><b>爆撃</b>：B で 250kg → 60kg の順に投下。戦艦・空母に命中するコースに入ると赤い◇が出るので、そこで投下。急降下で狙うと当てやすい。</li>
+      <li class="pc-only"><b>その他</b>：G 脚、V 視点、中ボタン/Shift+左ドラッグ 視点回転、T 時間加速、M 地図、N 列機への命令、K BGM、P 一時停止、H 遊び方</li>
+      <li class="pc-only"><b>ゲームパッド</b>：左スティック 操縦、右スティック 方向舵、RT/LT 機銃、A 爆弾、Y 視点、LB/RB スロットル</li>
     </ul>
     <h3>補給と着艦</h3>
     <ul>
       <li>爆弾を使い切ったら真珠湾沖（南西）の<b>空母赤城</b>に着艦すると、爆弾・弾薬・損傷が回復する。</li>
-      <li>赤城の近く（3km以内・高度600m以下）で <b>L</b> を押すと自動着艦。手動なら G で脚を出し低速で後方から甲板へ。</li>
-      <li>発艦：Shift（スマホは「加速」長押し）で全開、速度が乗ったら W（↑）/スティックを上へで引き起こす。発艦後に列機2機が合流する。</li>
+      <li class="touch-only">赤城の近く（3km以内・高度600m以下）で「着艦」ボタンを押すと自動で着艦する。</li>
+      <li class="pc-only">赤城の近く（3km以内・高度600m以下）で <b>L</b> を押すと自動着艦。手動なら G で脚を出し低速で後方から甲板へ。</li>
+      <li class="touch-only">発艦：「加速」を押し続け、速度が乗ったらスティックを上へなぞって引き起こす。発艦後に列機2機が合流する。</li>
+      <li class="pc-only">発艦：Shift で全開、速度が乗ったら W（↑）で引き起こす。発艦後に列機2機が合流する。</li>
     </ul>
     <h3>戦術</h3>
     <ul>
       <li>各飛行場は駐機中の戦闘機が残っている限り緊急発進させる。地上撃破で敵の発進を断てる。</li>
       <li>米空母は撃沈するまで艦載機を発艦させ続ける。</li>
-      <li>列機（2・3番機）は左右後方に続く。N で「編隊・援護」と「自由戦闘」を切替。</li>
-      <li>T で時間加速（敵機が近いと解除）。</li>
+      <li>列機（2・3番機）は左右後方に続き、長機を援護する。<span class="pc-only">N で「編隊・援護」と「自由戦闘」を切替。</span></li>
+      <li class="pc-only">T で時間加速（敵機が近いと解除）。</li>
     </ul>
     <button class="btn" id="helpClose">閉じる</button>
   </div>

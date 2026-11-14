@@ -37,7 +37,7 @@ select { font-size: 15px; padding: 3px 8px; background: #222; color: var(--ink);
 @media (max-width: 600px) { .panel { padding: 16px; } .brief { font-size: 13.5px; } }
 .lead { font-size: 17px; line-height: 1.9; margin: 14px 0 4px; }
 .sub-btn { background: transparent; border-color: var(--gold); color: var(--gold); font-size: 16px; padding: 8px 28px; }
-.help { max-height: 90vh; overflow-y: auto; }
+.help { max-height: 90vh; overflow-y: auto; background: #131512; }
 .help h3 { color: var(--gold); margin: 14px 0 4px; font-size: 16px; border-bottom: 1px solid rgba(217,180,90,0.3); }
 .help p, .help li { font-size: 14px; line-height: 1.75; }
 .help .warn { color: #ffb0a0; }
@@ -95,3 +95,6 @@ body.app .screen { padding-bottom: 64px; }
   #title .appinfo { margin-top: 4px; }
   #title .mobile-hint { margin: 2px 0 0; font-size: 12px; }
 }
+/* タッチ操作の端末ではキーの説明を隠し、PC ではタッチの説明を隠す */
+body.touch .pc-only { display: none !important; }
+body:not(.touch) .touch-only { display: none !important; }
