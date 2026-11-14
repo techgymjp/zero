@@ -5,8 +5,8 @@ import { mergeGeometries } from 'three/addons/BufferGeometryUtils.js';
 const _m = new THREE.Matrix4(), _q = new THREE.Quaternion(), _e = new THREE.Euler(), _s = new THREE.Vector3(), _p = new THREE.Vector3();
 const _c = new THREE.Color(), _c2 = new THREE.Color();
 
-export function mat4(x = 0, y = 0, z = 0, rx = 0, ry = 0, rz = 0, sx = 1, sy = 1, sz = 1) {
-  _e.set(rx, ry, rz, 'XYZ'); _q.setFromEuler(_e);
+export function mat4(x = 0, y = 0, z = 0, rx = 0, ry = 0, rz = 0, sx = 1, sy = 1, sz = 1, order = 'XYZ') {
+  _e.set(rx, ry, rz, order); _q.setFromEuler(_e);
   return new THREE.Matrix4().compose(new THREE.Vector3(x, y, z), _q.clone(), new THREE.Vector3(sx, sy, sz));
 }
 

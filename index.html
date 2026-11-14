@@ -24,20 +24,22 @@
     <button id="startBtn" class="btn" data-i18n="start">出撃</button>
     <div id="loading" class="loading hidden"><div class="bar"><div id="loadbar"></div></div><div id="loadmsg"></div></div>
     <button id="howBtn" class="btn sub-btn" data-i18n="how">遊び方</button>
+    <div class="appinfo"><span id="appVersion"></span><a id="privacyLink" href="https://techgym.jp/privacy-policy/" target="_blank" rel="noopener" data-i18n="privacy">プライバシーポリシー</a><button id="adPrivacy" class="linkbtn" hidden data-i18n="adSettings">広告の設定</button></div>
     <p class="mobile-hint" data-i18n="mobile">スマホは横向きで。画面左側をなぞって操縦、右下のボタンで射撃・爆撃。</p>
   </div>
 </div>
 
 <div id="respawn" class="screen hidden">
   <div class="panel small">
-    <h2 data-i18n="shotdown">被撃墜</h2>
+    <h2 id="respawnTitle">被撃墜</h2>
     <p id="respawnInfo"></p>
+    <button class="btn reward hidden" id="rsReward"></button>
     <button class="btn" id="rsAkagi" data-i18n="respawn">空母赤城から再出撃</button>
   </div>
 </div>
 
 <div id="pause" class="screen hidden">
-  <div class="panel small"><h2 data-i18n="paused">一時停止</h2><p data-i18n="pauseHint">P または Esc で再開</p><button class="btn" id="resumeBtn" data-i18n="resume">再開</button><button class="btn" id="muteBtn">音: 入</button><button class="btn" id="engBtn">エンジン音: 普通</button><button class="btn" id="bgmBtn">BGM: 入 (K)</button></div>
+  <div class="panel small"><h2 data-i18n="paused">一時停止</h2><p data-i18n="pauseHint">P または Esc で再開</p><button class="btn" id="resumeBtn" data-i18n="resume">再開</button><button class="btn" id="pauseTitleBtn" data-i18n="toTitle">タイトルに戻る</button><button class="btn" id="muteBtn">音: 入</button><button class="btn" id="engBtn">エンジン音: 普通</button><button class="btn" id="bgmBtn">BGM: 入 (K)</button></div>
 </div>
 
 <div id="help" class="screen hidden">
@@ -77,10 +79,13 @@
   <div class="panel">
     <h2 id="resTitle"></h2>
     <div id="resBody"></div>
-    <button class="btn" onclick="location.reload()" data-i18n="again">もう一度</button>
+    <button class="btn" id="againBtn" data-i18n="again">もう一度</button><button class="btn sub-btn" id="shareBtn" data-i18n="share">シェア</button><button class="btn sub-btn" id="resTitleBtn" data-i18n="toTitle">タイトルに戻る</button>
   </div>
 </div>
 
+<script src="js/ads-config.js"></script>
+<script src="js/build-info.js"></script>
+<script src="js/ads.js"></script>
 <script type="module" src="js/main.js"></script>
 </body>
 </html>

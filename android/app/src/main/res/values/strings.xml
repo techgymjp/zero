@@ -1,0 +1,9 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Zero</string>
+    <string name="title_activity_main">Zero</string>
+    <string name="package_name">jp.techgym.zero</string>
+    <string name="custom_url_scheme">jp.techgym.zero</string>
+    <!-- AdMob のアプリ ID（本番の ID が届いたら差し替える。今は Google 公式のテスト用 ID） -->
+    <string name="admob_app_id">ca-app-pub-3940256099942544~3347511713</string>
+</resources>

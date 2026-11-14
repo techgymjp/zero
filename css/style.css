@@ -68,3 +68,17 @@ select { font-size: 15px; padding: 3px 8px; background: #222; color: var(--ink);
 .langsw { display: flex; justify-content: center; gap: 6px; margin: 10px 0 0; }
 .langsw button { font-family: inherit; background: transparent; color: #bdb8a8; border: 1px solid #666; padding: 4px 12px; cursor: pointer; font-size: 13px; }
 .langsw button.active { color: #fff; border-color: var(--gold); background: rgba(217,180,90,0.2); }
+/* アプリ: 情報欄・バナー広告の分の余白 */
+.appinfo { margin-top: 10px; font-size: 12px; color: #9a978b; display: flex; gap: 12px; justify-content: center; align-items: center; flex-wrap: wrap; }
+.appinfo a, .linkbtn { color: #bdb8a8; text-decoration: underline; background: none; border: none; font: inherit; cursor: pointer; padding: 0; }
+body.app .screen { padding-bottom: 64px; }
+.btn.reward { background: #1f6f3a; border-color: #6fdc8c; }
+.btn.reward small { display: block; font-size: 12px; letter-spacing: 0; opacity: 0.85; }
+@media (max-height: 500px) and (orientation: landscape) {
+  .panel { padding: 12px 18px; }
+  h1 { font-size: 40px; } h1 span { font-size: 0.55em; margin-top: 2px; }
+  .lead { font-size: 14px; margin: 6px 0 2px; }
+  .btn { font-size: 16px; padding: 7px 24px; margin: 4px; }
+  #resBody { font-size: 13px; line-height: 1.5; margin-bottom: 6px; }
+  .rank { font-size: 18px; margin: 2px 0; }
+}

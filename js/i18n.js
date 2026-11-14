@@ -38,6 +38,9 @@ const EN = {
   '入': 'On', '切': 'Off', '普通': 'Normal', '小': 'Low', '大': 'High',
   '戦艦撃沈': 'Battleships sunk', '空母撃沈': 'Carriers sunk', '撃墜（小隊長機）': 'Kills (you)', '地上撃破': 'Ground targets', '米軍機 残存': 'US planes left',
   '被撃墜': 'Times shot down', '作戦時間': 'Mission time', '戦果点数': 'Score', '{m}分{s}秒': '{m}m {s}s',
+  '広告を見てその場で復活': 'Watch an ad to respawn here', 'あと {n} 回 ・ {s} 秒': '{n} left · {s}s', 'その場で復活': 'Respawns (ad)',
+  'コンティニュー？': 'Continue?', '撃墜された': 'Shot down', '『零戦 真珠湾攻撃』で戦艦 {bb}/8・空母 {cv}/3 を撃沈！ 戦果 {s} 点': 'Sank {bb}/8 battleships and {cv}/3 carriers in "Zero: Attack on Pearl Harbor"! Score {s}',
+  'コピーしました': 'Copied',
   '機銃': 'GUN', '加速': 'BOOST', '爆弾': 'BOMB', 'ここをなぞって操縦': 'Drag here to fly',
 };
 export function t(key, vars) {
@@ -68,7 +71,7 @@ export function shortName(name) { return LANG === 'en' ? nm(name) : name.replace
 const HTML_EN = {
   lead: 'You lead Akagi\'s fighter section. Destroy the US Pacific Fleet.<br><b>Win: sink 8 battleships and 3 carriers</b>',
   sub: 'December 8, 1941 (Japan time) — December 7 in Hawaii',
-  start: 'SORTIE', how: 'HOW TO PLAY',
+  start: 'SORTIE', how: 'HOW TO PLAY', privacy: 'Privacy policy', adSettings: 'Ad settings', toTitle: 'Back to title', share: 'Share',
   mobile: 'On phones, play in landscape. Drag the left side to fly; buttons at lower right to fire and bomb.',
   shotdown: 'Shot down', respawn: 'Sortie again from Akagi', paused: 'Paused', pauseHint: 'Press P or Esc to resume', resume: 'Resume', again: 'Play again',
   help: `<h2>How to play</h2>

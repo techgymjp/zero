@@ -33,7 +33,7 @@ export class Game {
     this.state = 'loading';
     this.time = 0; this.missionTime = 0; this.timeScale = 1;
     this.aircraft = []; this.ships = []; this.aa = [];
-    this.stats = { bbSunk: 0, cvSunk: 0, kills: 0, ground: 0, score: 0, shipDamage: 0, losses: 0 };
+    this.stats = { bbSunk: 0, cvSunk: 0, kills: 0, ground: 0, score: 0, shipDamage: 0, losses: 0, revives: 0 };
     this.lives = this.diff.lives;
     this.wingOrder = 'cover';
     this.camMode = 'chase';
@@ -118,20 +118,33 @@ export class Game {
   }
 
   // 空母赤城の甲板（艦尾寄り）から発艦
-  spawnPlayer() {
+  // here=true: 撃墜された場所の上空から（リワード広告での復活）
+  spawnPlayer(here = false) {
     const opts = { isPlayer: true, name: '小隊長機', modelOpts: { code: DECAL.AI101, leader: true, bombs: true } };
     const ac = new Aircraft(this, 'zero', opts);
     ac.stats = this.stats;
-    const ak = this.akagi;
-    const pos = ak.localToWorld(new THREE.Vector3(0, ak.carrier.deckY + 1.95, -ak.L * 0.32));
-    const fwd = ak.fwd.clone();
-    ac.setPose(pos, fwd, 0);
-    ac.brain = new PlayerFlight(ac, this);
-    ac.brain.gear = true;
-    ac.brain.onGround = { kind: 'deck', ship: ak };
-    ac.brain.groundYaw = Math.atan2(fwd.x, fwd.z);
-    ac.vel.copy(ak.vel);
-    ac.throttle = 0;
+    if (here && this.lastPlayer) {
+      const lp = this.lastPlayer;
+      const pos = lp.pos.clone();
+      pos.y = Math.max(pos.y, this.terrain.groundAt(pos.x, pos.z) + 600);
+      const fwd = lp.fwd.clone().setY(0);
+      if (fwd.lengthSq() < 1e-4) fwd.set(0, 0, 1);
+      fwd.normalize();
+      ac.setPose(pos, fwd, 130);
+      ac.brain = new PlayerFlight(ac, this);
+      ac.throttle = 0.85;
+    } else {
+      const ak = this.akagi;
+      const pos = ak.localToWorld(new THREE.Vector3(0, ak.carrier.deckY + 1.95, -ak.L * 0.32));
+      const fwd = ak.fwd.clone();
+      ac.setPose(pos, fwd, 0);
+      ac.brain = new PlayerFlight(ac, this);
+      ac.brain.gear = true;
+      ac.brain.onGround = { kind: 'deck', ship: ak };
+      ac.brain.groundYaw = Math.atan2(fwd.x, fwd.z);
+      ac.vel.copy(ak.vel);
+      ac.throttle = 0;
+    }
     this.aircraft.push(ac);
     this.player = ac;
     this.camPos = null;
@@ -195,14 +208,23 @@ export class Game {
     this.lastPlayer = this.player;
     this.audio.setEngine(0, 0, false);
     setTimeout(() => {
-      if (this.lives <= 0) this.finish(false);
+      if (this.state !== 'dead') return;
+      if (this.lives <= 0) { if (!this.ui.offerContinue || !this.ui.offerContinue()) this.finish(false); }
       else this.ui.showRespawn();
     }, 3500);
   }
-  respawn(where) {
+  respawn() {
     this.ui.hideRespawn();
     this.state = 'play';
     this.spawnPlayer();
+  }
+  // リワード広告: 残機を減らさずに、撃墜された場所の上空から復活
+  reviveHere() {
+    this.ui.hideRespawn();
+    this.lives++;
+    this.stats.revives++;
+    this.state = 'play';
+    this.spawnPlayer(true);
   }
   finish(win) {
     if (this.state === 'over') return;
@@ -256,8 +278,8 @@ export class Game {
     const inp = this.input;
     inp.update(dt);
     if (inp.hit('KeyP') || inp.hit('Escape')) {
-      if (this.state === 'play') { this.state = 'pause'; this.ui.showPause(true); }
-      else if (this.state === 'pause') { this.state = 'play'; this.ui.showPause(false); }
+      if (this.state === 'play') this.ui.pauseGame();
+      else if (this.state === 'pause') this.ui.resumeGame();
     }
     if (this.state === 'play' || this.state === 'dead') {
       this.handleKeys();

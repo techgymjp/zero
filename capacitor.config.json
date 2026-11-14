@@ -1,0 +1,8 @@
+{
+  "appId": "jp.techgym.zero",
+  "appName": "零戦",
+  "webDir": "www",
+  "android": {
+    "backgroundColor": "#000000"
+  }
+}

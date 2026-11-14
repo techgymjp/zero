@@ -2,7 +2,23 @@
 
 ブラウザで遊べる3Dフライトシューティング（日本語 / English 対応、タイトル画面で切替）。零式艦上戦闘機二一型の**小隊長機**として列機2機を率い、真珠湾の米太平洋艦隊を攻撃する。
 
-**▶ プレイ: GitHub Pages で公開（`index.html` をそのまま配信）**
+**▶ プレイ（Web 版）: https://techgymjp.github.io/zero/**
+
+## Android アプリ
+
+- パッケージ名: `jp.techgym.zero`（横画面専用）
+- 動作確認用 APK（デバッグ署名・テスト広告）: リリース画面 https://github.com/techgymjp/zero/releases/tag/android-latest
+- APK を直接: https://github.com/techgymjp/zero/releases/latest/download/zero.apk
+
+<img src="docs/apk-qr.png" width="200" alt="Android 版のリリース画面の QR コード">
+
+Android 端末でリリース画面を開き、`zero.apk` をタップしてインストールします（「提供元不明のアプリ」の許可が必要）。
+
+### 構成
+- [Capacitor](https://capacitorjs.com/) 8 でゲームのファイルをアプリに同梱（オフラインで遊べる）。`npm run build:app` で `www/` にまとめる
+- 広告（Google AdMob, `js/ads.js`）: バナーはタイトル・あそびかた・ポーズ・結果画面だけ。全画面広告はプレイ開始・タイトルに戻る・ポーズからの再開・もう一度のたび。リワード広告は撃墜されたときの「広告を見てその場で復活」（1 ゲーム 3 回まで、残機を減らさない）
+- 戻るボタン（プレイ中はポーズ、タイトル・結果画面では終了）、バックグラウンドで自動ポーズ、結果のシェア
+- GitHub Actions（`.github/workflows/android.yml`）が APK を作り、Release `android-latest` に載せる。Secrets を登録すると Google Play 用の署名付き AAB も作る
 
 ## 想定（史実との違い）
 - 史実では奇襲となったが、本作では **米軍が臨戦態勢** にある。オパナ・レーダーが編隊を探知し、対空砲火は即応、各飛行場（ホイラー・ヒッカム・ハレイワ・エワ・ベローズ・カネオヘ・フォード島）から迎撃機が緊急発進する。
@@ -53,3 +69,6 @@
   ```bash
   python3 -m http.server 8000
   ```
+
+## ライセンス
+著作権はテックジム株式会社に帰属します（All rights reserved）。許可なく複製・改変・再配布すること、Web サイトやアプリ（Google Play・App Store など）として公開・販売すること、名前・アイコン・画像を使用することを禁止します。テックジムの受講生が学習目的で複製・改変することは許可しますが、アプリストアでの公開・広告の掲載・販売などの商用利用は禁止です。詳しくは [LICENSE](LICENSE) を参照してください。three.js は MIT License です。

@@ -223,7 +223,7 @@ export function buildZero({ code = DECAL.AI101, leader = false, bombs = false } 
   const fin = wingGeometry(finSections(1.45, 1.45, 0.7, -3.85), { mirror: false });
   b.add(fin, AME, mat4(0, 0.25, 0, 0, 0, Math.PI / 2));
   // 20mm機銃 銃身
-  for (const s of [1, -1]) b.zcyl(0.035, 0.035, 0.6, 6, '#222', s * 2.3, -0.28, 2.0);
+  for (const s of [1, -1]) b.zcyl(0.035, 0.035, 0.5, 6, '#222', s * 2.3, -0.17, 1.25);
   // 7.7mm機銃の溝
   for (const s of [1, -1]) b.box(0.06, 0.04, 0.8, '#111', s * 0.18, 0.66, 3.3);
   // 尾輪・着艦フック
@@ -236,7 +236,7 @@ export function buildZero({ code = DECAL.AI101, leader = false, bombs = false } 
   // 空中線支柱とアンテナ線・ピトー管
   b.add(new THREE.CylinderGeometry(0.012, 0.03, 0.75, 5), AME, mat4(0, 0.98, -1.15, -0.25, 0, 0));
   b.between([0, 1.33, -1.25], [0, 1.6, -3.85], 0.006, '#222', 3);
-  b.zcyl(0.012, 0.012, 0.55, 4, '#666', 4.6, -0.18, 1.05);
+  b.zcyl(0.012, 0.012, 0.55, 4, '#666', 4.6, 0.02, 1.0);
   // 主脚収納部の蓋線・翼端灯
   for (const s of [1, -1]) {
     b.sphere(0.05, s > 0 ? '#c03030' : '#30a040', s * 5.98, -0.4 + Math.tan(6 * D) * 5.98, 0.42, 1, 0.6, 1.6, 6);
@@ -248,8 +248,8 @@ export function buildZero({ code = DECAL.AI101, leader = false, bombs = false } 
   const dih = 6 * D;
   for (const s of [1, -1]) {
     const yT = -0.4 + Math.tan(dih) * 4.1;
-    b.decal(DECAL.HINO, 1.15, 1.15, mat4(s * 4.1, yT + 0.1, 0.42, -Math.PI / 2, 0, s * dih));
-    b.decal(DECAL.HINO, 1.15, 1.15, mat4(s * 4.1, yT - 0.07, 0.42, Math.PI / 2, 0, s * dih));
+    b.decal(DECAL.HINO, 1.15, 1.15, mat4(s * 4.1, yT + 0.14, 0.42, -Math.PI / 2, 0, s * dih));
+    b.decal(DECAL.HINO, 1.15, 1.15, mat4(s * 4.1, yT - 0.1, 0.42, Math.PI / 2, 0, s * dih));
     b.decal(DECAL.HINO, 0.86, 0.86, mat4(s * 0.475, 0.04, -2.0, 0, s * Math.PI / 2, 0));
     b.decal(code, 1.0, 1.0, mat4(s * 0.07, 0.95, -4.15, 0, s * Math.PI / 2, 0));
   }
@@ -315,8 +315,8 @@ export function buildP40() {
   pilot(b, 0.6, -0.55, 'us');
   for (const s of [1, -1]) {
     const y = -0.48 + Math.tan(6 * D) * 3.9;
-    if (s > 0) b.decal(DECAL.STAR, 1.25, 1.25, mat4(s * 3.9, y + 0.1, 0.65, -Math.PI / 2, 0, s * 6 * D));
-    else b.decal(DECAL.STAR, 1.25, 1.25, mat4(s * 3.9, y - 0.08, 0.65, Math.PI / 2, 0, s * 6 * D));
+    if (s > 0) b.decal(DECAL.STAR, 1.25, 1.25, mat4(s * 3.9, y + 0.14, 0.65, -Math.PI / 2, 0, s * 6 * D, 1, 1, 1, 'ZYX'));
+    else b.decal(DECAL.STAR, 1.25, 1.25, mat4(s * 3.9, y - 0.1, 0.65, Math.PI / 2, 0, s * 6 * D, 1, 1, 1, 'ZYX'));
   }
   return finishFighter(b, 1.55, 3, 4.6, 0.6, false, OD.top, {
     ail: { x: 4.3, y: -0.48 + Math.tan(6 * D) * 4.3, z: -0.05, w: 1.7, t: 0.05, d: 0.42, dih: 6 * D },
@@ -342,8 +342,8 @@ export function buildF4F() {
   pilot(b, 0.62, -0.25, 'us');
   for (const s of [1, -1]) {
     const y = -0.2 + Math.tan(4 * D) * 4.2;
-    b.decal(DECAL.STAR, 1.3, 1.3, mat4(s * 4.2, y + 0.1, 0.45, -Math.PI / 2, 0, s * 4 * D));
-    b.decal(DECAL.STAR, 1.3, 1.3, mat4(s * 4.2, y - 0.08, 0.45, Math.PI / 2, 0, s * 4 * D));
+    b.decal(DECAL.STAR, 1.3, 1.3, mat4(s * 4.2, y + 0.14, 0.45, -Math.PI / 2, 0, s * 4 * D, 1, 1, 1, 'ZYX'));
+    b.decal(DECAL.STAR, 1.3, 1.3, mat4(s * 4.2, y - 0.1, 0.45, Math.PI / 2, 0, s * 4 * D, 1, 1, 1, 'ZYX'));
     b.decal(DECAL.STAR, 0.95, 0.95, mat4(s * 0.6, 0.05, -1.6, 0, s * Math.PI / 2, 0));
   }
   return finishFighter(b, 1.5, 3, 4.15, 0.62, true, BG.top, {
@@ -384,8 +384,8 @@ export function buildKate({ torpedo = true } = {}) {
   b.add(wingGeometry(finSections(1.7, 1.6, 0.8, -4.6), { mirror: false }), C.top, mat4(0, 0.3, 0, 0, 0, Math.PI / 2));
   for (const s of [1, -1]) {
     const y = -0.45 + Math.tan(6 * D) * 5;
-    b.decal(DECAL.HINO, 1.3, 1.3, mat4(s * 5, y + 0.1, 1.0, -Math.PI / 2, 0, s * 6 * D));
-    b.decal(DECAL.HINO, 1.3, 1.3, mat4(s * 5, y - 0.08, 1.0, Math.PI / 2, 0, s * 6 * D));
+    b.decal(DECAL.HINO, 1.3, 1.3, mat4(s * 5, y + 0.14, 1.0, -Math.PI / 2, 0, s * 6 * D, 1, 1, 1, 'ZYX'));
+    b.decal(DECAL.HINO, 1.3, 1.3, mat4(s * 5, y - 0.1, 1.0, Math.PI / 2, 0, s * 6 * D, 1, 1, 1, 'ZYX'));
     b.decal(DECAL.AI3, 1.1, 1.1, mat4(s * 0.07, 1.0, -4.8, 0, s * Math.PI / 2, 0));
   }
   const g = new THREE.Group();
@@ -414,8 +414,8 @@ export function buildVal() {
     b.box(0.12, 1.0, 0.5, C, s * 1.7, -0.95, 1.4);
     b.sphere(1, C, s * 1.7, -1.45, 1.35, 0.22, 0.42, 0.75, 10);
     const y = -0.45 + Math.tan(6 * D) * 4.6;
-    b.decal(DECAL.HINO, 1.3, 1.3, mat4(s * 4.6, y + 0.1, 0.95, -Math.PI / 2, 0, s * 6 * D));
-    b.decal(DECAL.HINO, 1.3, 1.3, mat4(s * 4.6, y - 0.08, 0.95, Math.PI / 2, 0, s * 6 * D));
+    b.decal(DECAL.HINO, 1.3, 1.3, mat4(s * 4.6, y + 0.14, 0.95, -Math.PI / 2, 0, s * 6 * D, 1, 1, 1, 'ZYX'));
+    b.decal(DECAL.HINO, 1.3, 1.3, mat4(s * 4.6, y - 0.1, 0.95, Math.PI / 2, 0, s * 6 * D, 1, 1, 1, 'ZYX'));
     b.decal(DECAL.AI2, 1.1, 1.1, mat4(s * 0.07, 1.0, -4.7, 0, s * Math.PI / 2, 0));
   }
   const g = new THREE.Group();

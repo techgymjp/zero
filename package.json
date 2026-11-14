@@ -1,0 +1,22 @@
+{
+  "name": "zero",
+  "version": "1.0.0",
+  "private": true,
+  "description": "零戦 真珠湾攻撃 — 3D フライトシューティング（Web / Android）",
+  "scripts": {
+    "build": "node scripts/build-web.js",
+    "build:app": "node scripts/build-web.js --app",
+    "android:sync": "npm run build:app && npx cap sync android",
+    "android:open": "npx cap open android"
+  },
+  "dependencies": {
+    "@capacitor-community/admob": "^8.2.1",
+    "@capacitor/android": "8.5.2",
+    "@capacitor/app": "8.1.2",
+    "@capacitor/core": "8.5.2",
+    "@capacitor/share": "8.0.3"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "8.5.2"
+  }
+}
