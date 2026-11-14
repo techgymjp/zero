@@ -43,7 +43,11 @@ export class PlayerFlight {
     const ac = this.ac, g = this.game, inp = g.input;
     // 入力
     const pitchIn = inp.pitch, rollIn = inp.roll, yawIn = inp.yaw;
-    ac.throttle = clamp(ac.throttle + inp.throttle * dt * 0.6, 0, 1);
+    if (inp.touch) {
+      // スマホ: 「加速」長押しで全開、離すと巡航出力（甲板上では停止）
+      const tgt = inp.touch.boost ? 1 : (this.onGround ? 0 : 0.72);
+      ac.throttle = clamp(ac.throttle + clamp(tgt - ac.throttle, -0.5 * dt, 0.8 * dt), 0, 1);
+    } else ac.throttle = clamp(ac.throttle + inp.throttle * dt * 0.6, 0, 1);
     if (inp.gearToggle) { this.gear = !this.gear; g.message(this.gear ? '脚下げ' : '脚上げ'); }
     if (ac.model.userData.gear) ac.model.userData.gear.visible = this.gear;
     ac.trigger.mg = inp.fireMG; ac.trigger.cannon = inp.fireCannon;

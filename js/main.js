@@ -52,7 +52,6 @@ $('startBtn').addEventListener('click', async () => {
   }
 });
 $('rsAkagi').onclick = () => game.respawn('akagi');
-$('rsKahuku').onclick = () => game.respawn('kahuku');
 $('resumeBtn').onclick = () => { game.state = 'play'; ui.showPause(false); };
 $('muteBtn').onclick = () => { audio.setMuted(!audio.muted); $('muteBtn').textContent = '音: ' + (audio.muted ? '切' : '入'); };
 const ENG = [['普通', 1], ['小', 0.4], ['切', 0], ['大', 1.6]];

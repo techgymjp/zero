@@ -21,7 +21,7 @@ import { DECAL } from './models/aircraft.js';
 
 export const DIFFS = {
   easy: { label: '易', playerDmg: 0.5, aaAcc: 0.6, aaDmg: 0.6, aaRate: 0.7, aiAimErr: 14, aiEvade: 0.35, playerFocus: 1.2, shipHp: 0.65, usCap: 9, capN: 2, launchInterval: 50, scrambleInterval: 70, waveFirst: 200, waveInterval: 110, waveSize: 6, lives: 5 },
-  normal: { label: '並', playerDmg: 0.8, aaAcc: 0.85, aaDmg: 0.85, aaRate: 1, aiAimErr: 9, aiEvade: 0.55, playerFocus: 0.9, shipHp: 1, usCap: 14, capN: 3, launchInterval: 38, scrambleInterval: 50, waveFirst: 240, waveInterval: 120, waveSize: 8, lives: 3 },
+  normal: { label: '並', playerDmg: 0.8, aaAcc: 0.85, aaDmg: 0.85, aaRate: 1, aiAimErr: 9, aiEvade: 0.55, playerFocus: 0.9, shipHp: 1, usCap: 14, capN: 3, launchInterval: 38, scrambleInterval: 50, waveFirst: 240, waveInterval: 120, waveSize: 8, lives: 3, raidQuiet: 25 },
   hard: { label: '難', playerDmg: 1.1, aaAcc: 1.1, aaDmg: 1.1, aaRate: 1.3, aiAimErr: 5, aiEvade: 0.8, playerFocus: 0.7, shipHp: 1.3, usCap: 20, capN: 4, launchInterval: 28, scrambleInterval: 38, waveFirst: 280, waveInterval: 140, waveSize: 4, lives: 2 },
 };
 export const US_TOTAL = 400;
@@ -102,50 +102,39 @@ export class Game {
     this.audio.init();
     this.music.start();
     if (this.isTouch) { this.input.touchUI = new TouchControls(this.input); this.hud.forceCompact = true; this.hud.resize(); }
-    this.spawnPlayer('kahuku');
-    spawnFirstWave(this, this.player.pos.clone(), this.player.fwd.clone());
+    this.spawnPlayer();
+    // 第一次攻撃隊はカフク岬上空から西回りルートで進撃
+    const kp = new THREE.Vector3(KAHUKU_START[0], 3000, KAHUKU_START[1]);
+    const kf = new THREE.Vector3(ROUTE_WEST[0][0] - kp.x, 0, ROUTE_WEST[0][1] - kp.z).normalize();
+    spawnFirstWave(this, kp, kf);
     this.director.initialCAP();
-    setTimeout(() => this.message('目標：真珠湾', 'info'), 1500);
+    setTimeout(() => this.message('赤城より発艦せよ', 'info'), 1000);
     this.lastFrame = performance.now();
     requestAnimationFrame(() => this.loop());
   }
 
-  spawnPlayer(where) {
-    let pos, fwd, speed;
+  // 空母赤城の甲板（艦尾寄り）から発艦
+  spawnPlayer() {
     const opts = { isPlayer: true, name: '小隊長機', modelOpts: { code: DECAL.AI101, leader: true, bombs: true } };
     const ac = new Aircraft(this, 'zero', opts);
     ac.stats = this.stats;
-    if (where === 'kahuku') {
-      pos = new THREE.Vector3(KAHUKU_START[0], 3000, KAHUKU_START[1]);
-      const n = ROUTE_WEST[0];
-      fwd = new THREE.Vector3(n[0] - pos.x, 0, n[1] - pos.z).normalize();
-      speed = 115;
-      ac.setPose(pos, fwd, speed);
-      ac.brain = new PlayerFlight(ac, this);
-    } else {
-      // 赤城の甲板から
-      const ak = this.akagi;
-      pos = ak.localToWorld(new THREE.Vector3(0, ak.carrier.deckY + 1.95, -ak.L * 0.32));
-      fwd = ak.fwd.clone();
-      ac.setPose(pos, fwd, 0);
-      ac.brain = new PlayerFlight(ac, this);
-      ac.brain.gear = true;
-      ac.brain.onGround = { kind: 'deck', ship: ak };
-      ac.brain.groundYaw = Math.atan2(fwd.x, fwd.z);
-      ac.vel.copy(ak.vel);
-      ac.throttle = 0.3;
-    }
+    const ak = this.akagi;
+    const pos = ak.localToWorld(new THREE.Vector3(0, ak.carrier.deckY + 1.95, -ak.L * 0.32));
+    const fwd = ak.fwd.clone();
+    ac.setPose(pos, fwd, 0);
+    ac.brain = new PlayerFlight(ac, this);
+    ac.brain.gear = true;
+    ac.brain.onGround = { kind: 'deck', ship: ak };
+    ac.brain.groundYaw = Math.atan2(fwd.x, fwd.z);
+    ac.vel.copy(ak.vel);
+    ac.throttle = 0.3;
     this.aircraft.push(ac);
     this.player = ac;
     this.camPos = null;
-    // 列機
-    if (this.wingmen) for (const w of this.wingmen) if (w.alive && w.brain) w.brain.leader = ac;
+    // 列機: 生き残りは新しい長機に付き、欠けていれば発艦後に合流
     const alive = (this.wingmen || []).filter(w => w.alive);
-    if (where === 'kahuku' || alive.length === 0) {
-      for (const w of alive) w.remove();
-      this.wingmen = where === 'kahuku' ? spawnWingmen(this, ac) : [];
-      this.pendingWingmen = where !== 'kahuku';
-    }
+    for (const w of alive) if (w.brain) w.brain.leader = ac;
+    if (alive.length < 2) this.pendingWingmen = true;
   }
 
   message(t, k) { this.hud?.message(t, k); }
@@ -183,7 +172,7 @@ export class Game {
       this.stats.score += 200;
     }
   }
-  onTakeoff() {}
+  onTakeoff() { if (this.director) this.director.quietT = Math.max(this.director.quietT, this.diff.raidQuiet - 10); }
   playerCrash(reason) {
     const p = this.player;
     if (!p || !p.alive) return;
@@ -209,7 +198,7 @@ export class Game {
   respawn(where) {
     this.ui.hideRespawn();
     this.state = 'play';
-    this.spawnPlayer(where);
+    this.spawnPlayer();
   }
   finish(win) {
     if (this.state === 'over') return;
@@ -289,7 +278,6 @@ export class Game {
       if (this.timeScale > 1) this.timeScale = this.timeScale === 4 ? 8 : 1;
       else if (!near) this.timeScale = 4;
       else this.message('敵機接近 加速不可', 'bad');
-      if (this.timeScale > 1) this.message(`時間加速 ×${this.timeScale}`);
     }
     if (inp.hit('KeyN')) { this.wingOrder = this.wingOrder === 'free' ? 'cover' : 'free'; this.message(this.wingOrder === 'free' ? '列機：自由戦闘' : '列機：援護', 'info'); }
     if (inp.hit('KeyH')) this.ui.toggleHelp();

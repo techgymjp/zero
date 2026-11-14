@@ -6,17 +6,14 @@ export function isTouchDevice() {
 export class TouchControls {
   constructor(input) {
     this.input = input;
-    input.touch = { active: true, pitch: 0, roll: 0, yaw: 0, mg: false, cannon: false, thr: 0 };
+    input.touch = { active: true, pitch: 0, roll: 0, mg: false, cannon: false, boost: false };
     const root = document.createElement('div');
     root.id = 'touch';
     root.innerHTML = `
       <div id="stickZone"><div id="stickBase"><div id="stickKnob"></div></div><div class="hint">ここをなぞって操縦</div></div>
       <div id="tbtns">
         <div class="col">
-          <button data-hold="thrUp" class="tb small">出力＋</button>
-          <button data-hold="thrDown" class="tb small">出力−</button>
-          <button data-hold="yawL" class="tb small">◁舵</button>
-          <button data-hold="yawR" class="tb small">舵▷</button>
+          <button data-hold="boost" class="tb boost">加速</button>
         </div>
         <div class="col">
           <button data-hold="cannon" class="tb fire2">20mm</button>
@@ -24,15 +21,7 @@ export class TouchControls {
           <button data-key="KeyB" class="tb bomb">爆弾</button>
         </div>
       </div>
-      <div id="ttop">
-        <button data-key="KeyP" class="tb mini">Ⅱ</button>
-        <button data-key="KeyV" class="tb mini">視点</button>
-        <button data-key="KeyM" class="tb mini">地図</button>
-        <button data-key="KeyT" class="tb mini">加速</button>
-        <button data-key="KeyG" class="tb mini">脚</button>
-        <button data-key="KeyL" class="tb mini">着艦</button>
-        <button data-key="KeyN" class="tb mini">列機</button>
-      </div>`;
+      <button data-key="KeyL" class="tb land" id="landBtn">着艦</button>`;
     document.body.appendChild(root);
     this.root = root;
     const T = input.touch;
@@ -86,8 +75,8 @@ export class TouchControls {
   update() {
     const T = this.input.touch, h = this.holds;
     T.mg = h.has('mg'); T.cannon = h.has('cannon');
-    T.thr = (h.has('thrUp') ? 1 : 0) - (h.has('thrDown') ? 1 : 0);
-    T.yaw = (h.has('yawR') ? 1 : 0) - (h.has('yawL') ? 1 : 0);
+    T.boost = h.has('boost');
   }
+  setLand(on) { if (on !== this._land) { this._land = on; this.root.querySelector('#landBtn').style.display = on ? '' : 'none'; } }
   show(on) { this.root.style.display = on ? '' : 'none'; }
 }

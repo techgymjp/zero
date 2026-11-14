@@ -58,8 +58,9 @@ select { font-size: 15px; padding: 3px 8px; background: #222; color: var(--ink);
 .tb.fire2 { background: rgba(200,90,30,0.5); }
 .tb.bomb { background: rgba(60,120,60,0.55); }
 .tb.small { width: 54px; height: 40px; border-radius: 10px; font-size: 12px; }
-#ttop { position: absolute; top: 50px; left: 50%; transform: translateX(-50%); display: flex; gap: 6px; }
 .tb.mini { width: 44px; height: 30px; border-radius: 8px; font-size: 11px; }
-@media (max-height: 420px) { .tb.fire { width: 72px; height: 72px; } .tb { width: 56px; height: 56px; } #ttop { top: 52px; } }
+@media (max-height: 420px) { .tb.fire { width: 72px; height: 72px; } .tb { width: 56px; height: 56px; } }
 .mobile-hint { display: none; font-size: 13px; color: #bdb8a8; }
 @media (pointer: coarse) { .mobile-hint { display: block; } }
+.tb.land { display: none; background: rgba(40,90,160,0.65); position: absolute; right: 50%; bottom: 18px; transform: translateX(50%); width: 96px; height: 44px; border-radius: 12px; font-size: 16px; }
+.tb.boost { width: 76px; height: 76px; background: rgba(200,160,40,0.5); font-size: 15px; }

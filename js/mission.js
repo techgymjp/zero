@@ -101,7 +101,7 @@ export function spawnWingmen(game, leader) {
   });
 }
 
-// 第一次攻撃隊（プレイヤーと同時にカフク岬沖を飛行）
+// 第一次攻撃隊（カフク岬上空から西回りルートで進撃）
 export function spawnFirstWave(game, origin, fwd) {
   const right = new THREE.Vector3().crossVectors(fwd, new THREE.Vector3(0, 1, 0)).normalize();
   const route = ROUTE_WEST.slice(1);
@@ -126,6 +126,7 @@ export class Director {
     this.waveT = game.diff.waveFirst; this.waveN = 0;
     this.spawnT = {};
     this.launchT = 4;
+    this.quietT = 0;
   }
   usFighterCount() { return this.game.aircraft.filter(a => a.alive && a.side === 'us').length; }
 
@@ -173,12 +174,40 @@ export class Director {
       const p = new THREE.Vector3(rw.c[0] - dir.x * rw.len * 0.3, g.terrain.fieldElev[f.id] + 4, rw.c[1] - dir.z * rw.len * 0.3);
       spawnAircraft(g, pk.type, p, dir, 55, (a) => new FighterBrain(a, { role: 'cap', home: rw.c }));
     }
+    // プレイヤー周辺が静かすぎる時は迎撃機を差し向ける
+    const pl = g.player;
+    if (pl && pl.alive && !pl.brain.onGround) {
+      const near = g.aircraft.some(a => a.alive && a.side === 'us' && a.pos.distanceTo(pl.pos) < 7000);
+      this.quietT = near ? 0 : this.quietT + dt;
+      if (this.quietT > D.raidQuiet) { this.quietT = 0; this.raid(pl); }
+    }
     // 攻撃隊の増援
     this.waveT -= dt;
     if (this.waveT <= 0) {
       this.waveT = D.waveInterval;
       this.spawnWave();
     }
+  }
+
+  raid(pl) {
+    const g = this.game;
+    // 米空母の搭載機から差し向ける（総数400機の範囲内）
+    const cv = g.usCarriers.filter(c => !c.sunk && c.airGroup > 0).sort((a, b) => b.airGroup - a.airGroup)[0];
+    if (!cv || this.usFighterCount() >= g.diff.usCap + 4) return;
+    const n = Math.min(cv.airGroup, 2 + Math.floor(rand() * 2));
+    const fwd = pl.fwd.clone().setY(0).normalize();
+    const ang = (rand() - 0.5) * 1.4;
+    const dir = fwd.applyAxisAngle(new THREE.Vector3(0, 1, 0), ang);
+    const overLand = !g.terrain.isWater(pl.pos.x, pl.pos.z);
+    const type = overLand && rand() < 0.6 ? 'p40' : 'f4f';
+    for (let i = 0; i < n; i++) {
+      cv.airGroup--;
+      const p = pl.pos.clone().addScaledVector(dir, 4500 + i * 60).add(new THREE.Vector3((i - 1) * 50, 250 + rand() * 300, 0));
+      p.y = Math.max(p.y, g.terrain.groundAt(p.x, p.z) + 400);
+      const toPl = pl.pos.clone().sub(p).normalize();
+      spawnAircraft(g, type, p, toPl, 120, (a) => { const b = new FighterBrain(a, { role: 'cap', home: [pl.pos.x, pl.pos.z] }); b.target = pl; return b; });
+    }
+    g.message('敵機接近', 'bad');
   }
 
   spawnWave() {

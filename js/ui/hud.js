@@ -148,7 +148,7 @@ export class HUD {
       const p = this.project(_w.copy(s.pos).setY(s.deckY + 20));
       if (!p) continue;
       if (s.side === 'jp') {
-        if (s !== g.akagi) continue;
+        if (s !== g.akagi || d < 1500) continue;
         this.text(`▼ 赤城 ${(d / 1000).toFixed(1)}km`, p[0], p[1] - 10, BLUE, 13, 'center', true);
         continue;
       }
@@ -178,15 +178,16 @@ export class HUD {
 
   drawWarnings() {
     const g = this.game, pl = g.player, fl = pl.brain;
-    if (g.timeScale > 1) this.text(`時間加速 ×${g.timeScale}`, this.W / 2, 100, ORANGE, 16, 'center', true);
     if (fl.stalled) this.text('失 速', this.W / 2, this.H / 2 + 90, RED, 24, 'center', true);
     const gh = g.terrain.groundAt(pl.pos.x, pl.pos.z);
     if (!fl.onGround && pl.vel.y < -5 && (pl.pos.y - gh) / -pl.vel.y < 5) this.text('引き起こせ！', this.W / 2, this.H / 2 + 118, RED, 22, 'center', true);
     if (pl.onFire) this.text('火災発生', this.W / 2, this.H / 2 + 146, RED, 18, 'center', true);
-    const t = this.compact ? '「出力＋」で全開、速度が乗ったらスティックを上へ倒して発艦' : '赤城 甲板上 — 発動機全開(Shift)で発艦、W で引き起こし';
+    const t = this.compact ? '「加速」長押し → スティックを上へで発艦' : 'Shift で全開 → W で引き起こして発艦';
     if (fl.onGround && fl.onGround.kind === 'deck') this.text(g.rearmT > 0 ? `補給中… ${Math.ceil(g.rearmT)}` : t, this.W / 2, this.H / 2 + 64, GREEN, 15, 'center', true);
     const ak = g.akagi;
-    if (ak && !fl.onGround && pl.pos.distanceTo(ak.pos) < 3000 && pl.pos.y < 600) this.text(this.compact ? '「着艦」ボタンで自動着艦' : 'L: 着艦（自動）', this.W / 2, this.H / 2 + 64, GREEN, 15, 'center', true);
+    const canLand = !!ak && !fl.onGround && pl.pos.distanceTo(ak.pos) < 3000 && pl.pos.y < 600;
+    g.input.touchUI?.setLand(canLand);
+    if (canLand && !g.input.touchUI) this.text('L: 着艦（自動）', this.W / 2, this.H / 2 + 64, GREEN, 15, 'center', true);
   }
 
   drawInstruments() {

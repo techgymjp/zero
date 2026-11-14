@@ -63,8 +63,6 @@ export class Input {
       this.touchUI?.update();
       const T = this.touch;
       if (T.pitch || T.roll) { p = T.pitch; r = T.roll; }
-      if (T.yaw) y = T.yaw;
-      if (T.thr) t = T.thr;
       if (T.mg) mg = true;
       if (T.cannon) cn = true;
     }
