@@ -9,7 +9,7 @@ window.Ads = (() => {
       test: {
         interstitial: 'ca-app-pub-3940256099942544/1033173712',
         rewarded: 'ca-app-pub-3940256099942544/5224354917',
-        banner: 'ca-app-pub-3940256099942544/6300978111',
+        banner: '', // バナー広告は使わない（プレイ画面に出さないため完全に無効）
       },
       // 本番の広告ユニット(AdMob の「零戦 真珠湾攻撃」Android)。届いたら入れる。空の種類は本番ビルドでは出さない
       production: {
@@ -22,7 +22,7 @@ window.Ads = (() => {
       test: {
         interstitial: 'ca-app-pub-3940256099942544/4411468910',
         rewarded: 'ca-app-pub-3940256099942544/1712485313',
-        banner: 'ca-app-pub-3940256099942544/2934735716',
+        banner: '', // バナー広告は使わない
       },
       // 本番の広告ユニット(iOS)。iOS 版を作るときに入れる
       production: {
@@ -40,7 +40,7 @@ window.Ads = (() => {
   const testing = window.AD_MODE !== 'production';
   const ids = UNITS[platform][testing ? 'test' : 'production'];
   // 広告ユニット ID がある種類だけ使う(1 つもなければ広告を使わない)
-  const has = (kind) => !!ids[kind];
+  const has = (kind) => kind !== 'banner' && !!ids[kind]; // バナーは常に無効
   if (!has('interstitial') && !has('rewarded') && !has('banner')) AdMob = null;
 
   // ゲーム側から設定する（広告の表示中に音を止める）
@@ -110,10 +110,11 @@ window.Ads = (() => {
       } catch (e) { /* 非対応 */ }
     }
     let rewarded = false;
-    AdMob.addListener('bannerAdLoaded', () => { if (!banner.want || showing) enforceBanner(); });
-    AdMob.addListener('bannerAdSizeChanged', () => { if (!banner.want || showing) enforceBanner(); });
+    AdMob.addListener('bannerAdLoaded', () => enforceBanner());
+    AdMob.addListener('bannerAdSizeChanged', () => enforceBanner());
     // プレイ中は念のため定期的にも確認する
-    setInterval(() => { if (!banner.want && !banner.busy) enforceBanner(); }, 2000);
+    enforceBanner();
+    setInterval(enforceBanner, 2000);
     AdMob.addListener('interstitialAdDismissed', () => finish('inter'));
     AdMob.addListener('interstitialAdFailedToShow', () => finish('inter'));
     AdMob.addListener('onRewardedVideoAdShowed', () => { rewarded = false; });
@@ -185,7 +186,7 @@ window.Ads = (() => {
   }
   // 読み込みが遅れて終わったバナーが、プレイ中に出てしまわないようにする
   function enforceBanner() {
-    if (!AdMob || !has('banner') || (banner.want && !showing)) return;
+    if (!AdMob) return; // バナーは使わないので、何かの拍子に出ていても常に消す
     AdMob.removeBanner().catch(() => {});
     banner.state = 'none';
   }
