@@ -64,4 +64,4 @@ select { font-size: 15px; padding: 3px 8px; background: #222; color: var(--ink);
 @media (pointer: coarse) { .mobile-hint { display: block; } }
 .tb.land { display: none; background: rgba(40,90,160,0.65); position: absolute; right: 50%; bottom: 18px; transform: translateX(50%); width: 96px; height: 44px; border-radius: 12px; font-size: 16px; }
 .tb.boost { width: 76px; height: 76px; background: rgba(200,160,40,0.5); font-size: 15px; }
-.tb.pause { position: absolute; top: 48px; right: 10px; width: 36px; height: 30px; border-radius: 8px; font-size: 13px; background: rgba(20,20,20,0.35); }
+.tb.pause { position: absolute; top: 66px; right: 10px; width: 40px; height: 34px; border-radius: 8px; font-size: 13px; background: rgba(20,20,20,0.35); }

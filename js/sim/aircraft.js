@@ -9,14 +9,14 @@ const _v = new THREE.Vector3(), _w = new THREE.Vector3(), _u = new THREE.Vector3
 const UP = new THREE.Vector3(0, 1, 0);
 
 export const TYPES = {
-  zero: { name: '零戦', side: 'jp', hp: 60, radius: 5.5, maxG: 6.5, cruise: 115, maxSpeed: 148, minSpeed: 45, roll: 3.2,
+  zero: { name: '零戦', side: 'jp', hp: 60, radius: 5.5, maxG: 6.5, cruise: 150, maxSpeed: 185, minSpeed: 45, roll: 3.2,
     guns: [{ ammo: 'mg20', rate: 8.5, pos: [[0.22, 0.74, 3.7], [-0.22, 0.74, 3.7]] }], score: 0 }, // 機銃は20mmのみ（照準線に沿って機首上部から発射）
-  p40: { name: 'P-40', side: 'us', hp: 55, radius: 5.5, maxG: 5.5, cruise: 120, maxSpeed: 155, minSpeed: 50, roll: 2.6,
+  p40: { name: 'P-40', side: 'us', hp: 55, radius: 5.5, maxG: 5.5, cruise: 150, maxSpeed: 178, minSpeed: 50, roll: 2.6,
     guns: [{ ammo: 'mg50', rate: 13, pos: [[0.3, 0.6, 3.0], [-0.3, 0.6, 3.0], [2.6, -0.4, 2.0], [-2.6, -0.4, 2.0]] }], score: 150 },
-  f4f: { name: 'F4F', side: 'us', hp: 65, radius: 5.5, maxG: 5.2, cruise: 115, maxSpeed: 145, minSpeed: 48, roll: 2.4,
+  f4f: { name: 'F4F', side: 'us', hp: 65, radius: 5.5, maxG: 5.2, cruise: 145, maxSpeed: 172, minSpeed: 48, roll: 2.4,
     guns: [{ ammo: 'mg50', rate: 13, pos: [[2.4, -0.15, 1.7], [-2.4, -0.15, 1.7], [2.8, -0.15, 1.5], [-2.8, -0.15, 1.5]] }], score: 150 },
-  kate: { name: '九七艦攻', side: 'jp', hp: 75, radius: 7, maxG: 3.0, cruise: 100, maxSpeed: 115, minSpeed: 45, roll: 1.6, guns: [], score: 0 },
-  val: { name: '九九艦爆', side: 'jp', hp: 75, radius: 7, maxG: 4.5, cruise: 100, maxSpeed: 125, minSpeed: 45, roll: 2.0, guns: [], score: 0 },
+  kate: { name: '九七艦攻', side: 'jp', hp: 120, radius: 7, maxG: 3.0, cruise: 130, maxSpeed: 150, minSpeed: 45, roll: 1.6, guns: [], score: 0 },
+  val: { name: '九九艦爆', side: 'jp', hp: 120, radius: 7, maxG: 4.5, cruise: 130, maxSpeed: 162, minSpeed: 45, roll: 2.0, guns: [], score: 0 },
 };
 
 export function buildModel(type, opts = {}) {

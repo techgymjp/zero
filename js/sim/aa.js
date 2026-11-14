@@ -37,7 +37,7 @@ export class AABattery {
         for (const ac of g.aircraft) {
           if (!ac.alive || ac.side === this.side) continue;
           const d = ac.pos.distanceTo(f.p);
-          if (d < 32) ac.damage(28 * (1 - d / 32) * g.diff.aaDmg, null, true);
+          if (d < 32) ac.damage(28 * (1 - d / 32) * g.diff.aaDmg * (ac.isPlayer ? 1 : 0.3), null, true);
         }
         this.pending.splice(i, 1);
       }

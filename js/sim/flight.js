@@ -6,7 +6,7 @@ const G = 9.81;
 const _v = new THREE.Vector3(), _w = new THREE.Vector3(), _f = new THREE.Vector3(), _q = new THREE.Quaternion(), _e = new THREE.Euler();
 const P = {
   mass: 2410, S: 22.44, CLa: 4.9, CLmax: 1.38, stall: 15.5 * DEG, Cd0: 0.021, K: 0.055,
-  power: 700000, eff: 0.8, Tstatic: 12500, gearDrag: 0.012, gearH: 1.95,
+  power: 1900000, eff: 0.8, Tstatic: 17000, gearDrag: 0.012, gearH: 1.95,
 };
 
 export class PlayerFlight {
@@ -91,7 +91,7 @@ export class PlayerFlight {
     ac.pos.addScaledVector(ac.vel, dt);
 
     // 回転: 入力→目標角速度。高速では舵が重くなる（零戦の特性）
-    const eff = clamp(qd / 3500, 0.08, 1) * (1 - clamp((V - 120) / 70, 0, 0.55));
+    const eff = clamp(qd / 3500, 0.08, 1) * (1 - clamp((V - 165) / 90, 0, 0.45));
     const stallK = this.stalled ? 0.35 : 1;
     const target = new THREE.Vector3(-pitchIn * 1.5 * eff * stallK, -yawIn * 0.45 * eff, rollIn * 3.3 * eff * stallK);
     this.omega.lerp(target, Math.min(1, dt * 7));
@@ -143,6 +143,11 @@ export class PlayerFlight {
     const base = ship ? ship.vel : _w.set(0, 0, 0);
     const rel = _v.copy(ac.vel).sub(base); rel.y = 0;
     let vs = rel.length();
+    // 甲板上では艦に固定（回頭しても滑り落ちない）
+    if (ship) {
+      if (!this.deckLocal || this.deckShip !== ship) { this.deckLocal = ship.toLocal(ac.pos.clone()); this.deckShip = ship; }
+      ac.pos.copy(ship.localToWorld(this.deckLocal.clone()));
+    } else this.deckLocal = null;
     const dir = _f.set(Math.sin(this.groundYaw), 0, Math.cos(this.groundYaw));
     // 前進成分
     let fwdSpeed = rel.dot(dir);
@@ -155,7 +160,8 @@ export class PlayerFlight {
     if (ship) this.groundYaw += (ship._lastH !== undefined ? ship.heading - ship._lastH : 0) * -1;
     this.groundYaw -= yawIn * dt * clamp(0.9 - fwdSpeed * 0.01, 0.2, 0.9) - rollIn * dt * 0.2;
     ac.vel.copy(dir).multiplyScalar(fwdSpeed).add(base);
-    ac.pos.addScaledVector(ac.vel, dt);
+    if (ship) { ac.pos.addScaledVector(dir, fwdSpeed * dt); this.deckLocal = ship.toLocal(ac.pos.clone()); }
+    else ac.pos.addScaledVector(ac.vel, dt);
     ac.pos.y = surf.y + P.gearH;
     // 姿勢（尾輪式）
     const V = fwdSpeed;
@@ -173,13 +179,13 @@ export class PlayerFlight {
     const qd = 0.5 * 1.225 * airV * airV;
     const lift = qd * P.S * P.CLa * this.groundPitch;
     if (lift > this.massTotal() * G * 1.02 && pitchIn > 0.1) {
-      this.onGround = null;
+      this.onGround = null; this.deckLocal = null;
       ac.vel.y = 1.5;
       g.onTakeoff();
       return;
     }
     // 甲板から外れた
-    if (ship && surf.kind !== 'deck') this.onGround = null;
+    if (ship && surf.kind !== 'deck') { this.onGround = null; this.deckLocal = null; }
     if (!ship && (surf.kind !== 'land')) this.onGround = null;
     if (!this.onGround && ship) { /* 艦首から飛び出した */ }
     this.aoa = 0; this.gload = 1; this.stalled = false;

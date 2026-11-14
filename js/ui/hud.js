@@ -107,7 +107,9 @@ export class HUD {
     }
     // 爆撃照準
     const stores = pl.model.userData.stores.filter(s => s.parent);
-    if (stores.length && pl.pos.y - g.terrain.groundAt(pl.pos.x, pl.pos.z) < 3500) {
+    const agl = pl.pos.y - g.terrain.groundAt(pl.pos.x, pl.pos.z);
+    const aiming = !pl.brain.onGround && agl > 150 && agl < 3500 && pl.fwd.y < -0.05 && !(g.akagi && pl.pos.distanceTo(g.akagi.pos) < 3000);
+    if (stores.length && aiming) {
       const ip = predictImpact(pl.pos, pl.vel, g.terrain, new THREE.Vector3());
       if (ip) {
         const sp = this.project(ip);
@@ -153,6 +155,11 @@ export class HUD {
         continue;
       }
       const col = s.sunk ? '#999' : s.isTarget ? '#ffd166' : '#d9a';
+      if (d > 8000) {
+        // 遠方は小さな目印のみ（名前が重ならないように）
+        if (s.isTarget && !s.sunk) { c.strokeStyle = col; c.lineWidth = 1.5; c.beginPath(); c.moveTo(p[0], p[1] - 5); c.lineTo(p[0] + 4, p[1]); c.lineTo(p[0], p[1] + 5); c.lineTo(p[0] - 4, p[1]); c.closePath(); c.stroke(); }
+        continue;
+      }
       if (s.isTarget || d < 4000) {
         this.text(`${s.sunk ? '✕ ' : ''}${s.name}${d > 3000 ? ' ' + (d / 1000).toFixed(1) + 'km' : ''}`, p[0], p[1] - 16, col, s.isTarget ? 13 : 11, 'center', s.isTarget);
         if (!s.sunk) {
@@ -166,13 +173,13 @@ export class HUD {
 
   drawInstrumentsCompact() {
     const g = this.game, c = this.ctx, pl = g.player, fl = pl.brain;
-    const x = 8, y = 12;
-    c.fillStyle = 'rgba(10,12,10,0.25)'; c.fillRect(x - 4, y - 9, 128, 42);
-    this.text(`${Math.round(pl.vel.length() * 3.6)}km/h ${Math.round(pl.pos.y)}m`, x, y, WHITE, 11, 'left', true);
+    const x = 10, y = 16;
+    c.fillStyle = 'rgba(10,12,10,0.3)'; c.fillRect(x - 6, y - 12, 172, 58);
+    this.text(`${Math.round(pl.vel.length() * 3.6)}km/h  ${Math.round(pl.pos.y)}m`, x, y, WHITE, 16, 'left', true);
     const f = clamp(pl.hp / pl.maxHp, 0, 1);
-    c.fillStyle = 'rgba(0,0,0,0.4)'; c.fillRect(x, y + 10, 115, 5);
-    c.fillStyle = f > 0.5 ? '#7ee07e' : f > 0.25 ? '#ffd166' : RED; c.fillRect(x, y + 10, 115 * f, 5);
-    this.text(`残機${'◆'.repeat(Math.max(0, g.lives))}`, x, y + 24, ORANGE, 10);
+    c.fillStyle = 'rgba(0,0,0,0.4)'; c.fillRect(x, y + 13, 155, 7);
+    c.fillStyle = f > 0.5 ? '#7ee07e' : f > 0.25 ? '#ffd166' : RED; c.fillRect(x, y + 13, 155 * f, 7);
+    this.text(`残機 ${'◆'.repeat(Math.max(0, g.lives))}`, x, y + 32, ORANGE, 14, 'left', true);
     this.drawWarnings();
   }
 
@@ -231,10 +238,10 @@ export class HUD {
   drawObjectives() {
     const g = this.game, c = this.ctx, W = this.W;
     if (this.compact) {
-      const x = W - 112, y = 12;
-      c.fillStyle = 'rgba(10,12,10,0.25)'; c.fillRect(x - 5, y - 9, 112, 38);
-      this.text(`戦艦${g.stats.bbSunk}/8 空母${g.stats.cvSunk}/3`, x, y, WHITE, 11, 'left', true);
-      this.text(`米軍機 ${g.usRemaining()}`, x, y + 15, '#ffb0a0', 10);
+      const x = W - 168, y = 16;
+      c.fillStyle = 'rgba(10,12,10,0.3)'; c.fillRect(x - 7, y - 12, 168, 54);
+      this.text(`戦艦 ${g.stats.bbSunk}/8  空母 ${g.stats.cvSunk}/3`, x, y, WHITE, 16, 'left', true);
+      this.text(`米軍機 ${g.usRemaining()}`, x, y + 22, '#ffb0a0', 14, 'left', true);
       return;
     }
     const x = W - 178, y = 14;

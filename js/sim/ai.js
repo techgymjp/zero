@@ -1,6 +1,7 @@
 // AI: 戦闘機・攻撃機
 import * as THREE from 'three';
 import { clamp, rand, randSigned, gauss } from '../util.js';
+import { predictImpact } from './weapons.js';
 
 const _v = new THREE.Vector3(), _w = new THREE.Vector3(), _a = new THREE.Vector3();
 
@@ -47,7 +48,7 @@ export class FighterBrain {
       if (o.isPlayer) score *= g.diff.playerFocus;
       if (o.brain && o.brain.target === this.leader) score *= 0.4; // 長機を狙う敵を優先
       if (o.brain && o.brain.target === ac) score *= 0.6;
-      if (o.type === 'kate' || o.type === 'val') score *= 0.8;
+      if ((o.type === 'kate' || o.type === 'val') && this.ac.side === 'us') score *= 1.6; // 米戦闘機は戦闘機を優先
       if (score < bs) { bs = score; best = o; }
     }
     this.target = best;
@@ -215,6 +216,8 @@ export class BomberBrain {
       for (let d = start + 30; d < start + 750; d += 30) { if (!g.terrain.isWater(tg.pos.x + dx * d, tg.pos.z + dz * d)) { ok = false; break; } }
       if (!ok) continue;
       let diff = Math.abs(((r - cur) + Math.PI * 3) % (Math.PI * 2) - Math.PI);
+      // 艦の真横（舷側）から狙う方位を優先
+      const f = tg.fwd; diff += 2.0 * Math.abs(dx * f.x + dz * f.z);
       if (diff < bd) { bd = diff; best = new THREE.Vector3(dx, 0, dz); }
     }
     return best;
@@ -235,7 +238,7 @@ export class BomberBrain {
       if (dAP < 500 || (onLine && dist > 1300 && dist < 3200)) this.sub = 'run';
       return ac.spec.maxSpeed;
     }
-    const lead = _w.copy(tg.pos).addScaledVector(tg.vel, dist / 22).add(this.offset);
+    const lead = _w.copy(tg.pos).addScaledVector(tg.vel, dist / 22);
     desired.copy(lead).sub(ac.pos); desired.y = 0; desired.normalize();
     const wantAlt = Math.max(gh, 0) + (dist < 2000 ? 28 : 120);
     desired.y = clamp((wantAlt - ac.pos.y) / 250, -0.45, 0.3);
@@ -256,18 +259,23 @@ export class BomberBrain {
     const agl = ac.pos.y - tg.pos.y;
     if (!this.diving) {
       desired.set(tg.pos.x - ac.pos.x, (2800 - ac.pos.y) * 0.05, tg.pos.z - ac.pos.z);
-      if (flat < agl * 0.55) this.diving = true;
+      if (flat < agl * 0.8) this.diving = true;
       return ac.spec.cruise;
     }
     // 急降下（約60度）
-    const aim = _v.copy(tg.pos).addScaledVector(tg.vel, agl / 120).add(this.offset);
+    const aim = _v.copy(tg.pos).addScaledVector(tg.vel, agl / 120);
+    aim.x += this.offset.x * 0.3; aim.z += this.offset.z * 0.3;
+    // 着弾予測点が目標を越えないよう、狙いを手前に補正
+    const ip = predictImpact(ac.pos, ac.vel, g.terrain, new THREE.Vector3());
+    if (ip) { aim.x -= (ip.x - aim.x) * 0.6; aim.z -= (ip.z - aim.z) * 0.6; }
     desired.copy(aim).sub(ac.pos);
-    if (agl < 600) {
+    const onTarget = ip && Math.hypot(ip.x - tg.pos.x, ip.z - tg.pos.z) < Math.max(18, tg.B * 0.6);
+    if ((onTarget && agl < 1500) || agl < 450) {
       const vel = ac.vel.clone();
       g.bombs.drop(ac.pos.clone().add(new THREE.Vector3(0, -1.2, 0)), vel, 'ai', 'jp', ac, ac.quat);
       for (const s of ac.model.userData.stores) s.visible = false;
       this.phase = 'egress';
     }
-    return 115;
+    return 145;
   }
 }

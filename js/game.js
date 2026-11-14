@@ -130,7 +130,7 @@ export class Game {
     ac.brain.onGround = { kind: 'deck', ship: ak };
     ac.brain.groundYaw = Math.atan2(fwd.x, fwd.z);
     ac.vel.copy(ak.vel);
-    ac.throttle = 0.3;
+    ac.throttle = 0;
     this.aircraft.push(ac);
     this.player = ac;
     this.camPos = null;
@@ -260,12 +260,14 @@ export class Game {
     }
     if (this.state === 'play' || this.state === 'dead') {
       this.handleKeys();
-      const steps = Math.ceil(this.timeScale * dt / (1 / 60) - 1e-6);
-      const sdt = this.timeScale * dt / Math.max(1, steps);
+      // ゲーム全体を 1.25 倍速で進行（スピード感）
+      const sim = this.timeScale * 1.25 * dt;
+      const steps = Math.ceil(sim / (1 / 60) - 1e-6);
+      const sdt = sim / Math.max(1, steps);
       for (let i = 0; i < steps; i++) this.step(sdt);
     }
     this.updateCamera(dt);
-    this.fx.streaks.begin(); this.bullets.draw(this.fx.streaks); this.fx.streaks.end();
+    this.fx.streaks.begin(); this.bullets.draw(this.fx.streaks); this.drawWindLines(); this.fx.streaks.end();
     this.water.material.uniforms.uTime.value = this.time;
     this.renderer.render(this.scene, this.camera);
     this.hud.draw(dt);
@@ -326,6 +328,31 @@ export class Game {
     }
   }
 
+  // 機体の周りを流れる風切り線（スピード感）
+  drawWindLines() {
+    const pl = this.player;
+    if (!pl || !pl.alive || this.state === 'pause') return;
+    const v = pl.vel.length();
+    const a = clamp((v - 90) / 80, 0, 1) * 0.35;
+    if (a <= 0.01) return;
+    const dir = pl.vel.clone().normalize();
+    const cam = this.camera.position;
+    if (!this.windPts) this.windPts = [];
+    const spawn = (p, near) => {
+      const side = new THREE.Vector3().crossVectors(dir, new THREE.Vector3(0, 1, 0)).normalize();
+      const up = new THREE.Vector3().crossVectors(side, dir);
+      const r = 4 + Math.random() * 14, th = Math.random() * Math.PI * 2;
+      return p.copy(cam).addScaledVector(dir, (near ? 5 : 30) + Math.random() * 50).addScaledVector(side, Math.cos(th) * r).addScaledVector(up, Math.sin(th) * r);
+    };
+    while (this.windPts.length < 45) this.windPts.push(spawn(new THREE.Vector3(), true));
+    const len = Math.min(0.06, 12 / v);
+    for (const p of this.windPts) {
+      const rel = p.clone().sub(cam);
+      if (rel.dot(dir) < -3 || rel.length() > 90) spawn(p, false);
+      this.fx.streaks.add(p.x, p.y, p.z, p.x - pl.vel.x * len, p.y - pl.vel.y * len, p.z - pl.vel.z * len, 1, 1, 1, a, 0.035);
+    }
+  }
+
   updateCamera(dt) {
     const cam = this.camera;
     const pl = this.player && this.player.alive ? this.player : null;
@@ -343,7 +370,7 @@ export class Game {
       cam.quaternion.copy(q);
       pl.model.userData.prop.visible = true;
     } else {
-      const dist = this.camMode === 'far' ? 45 : 16;
+      const dist = this.camMode === 'far' ? 45 : 13.5;
       const height = this.camMode === 'far' ? 10 : 4.2;
       const back = target.fwd.clone().multiplyScalar(-dist).applyAxisAngle(target.up, this.orbit.yaw);
       const desired = target.pos.clone().add(back).addScaledVector(target.up, height + this.orbit.pitch * dist);
@@ -355,6 +382,15 @@ export class Game {
       cam.position.copy(this.camPos);
       cam.up.lerp(target.up, 1 - Math.exp(-dt * 4)).normalize();
       cam.lookAt(target.pos.clone().addScaledVector(target.fwd, 25));
+    }
+    // 速度に応じて視野を広げ、高速時はわずかに揺らす
+    const v = target.vel.length();
+    const sp = clamp((v - 70) / 110, 0, 1);
+    const fov = 60 + sp * 16;
+    if (Math.abs(cam.fov - fov) > 0.05) { cam.fov += (fov - cam.fov) * Math.min(1, dt * 3); cam.updateProjectionMatrix(); }
+    if (pl && this.camMode !== 'cockpit') {
+      const sh = clamp((v - 120) / 60, 0, 1) * 0.07;
+      cam.position.x += (Math.random() - 0.5) * sh; cam.position.y += (Math.random() - 0.5) * sh;
     }
     this.audio.listener = cam.position;
     updateSunShadow(this.lights.sun, target.pos);
