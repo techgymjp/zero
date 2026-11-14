@@ -148,6 +148,7 @@ export class Game {
     this.aircraft.push(ac);
     this.player = ac;
     this.camPos = null;
+    this.rearmed = true; this.rearmT = null; // 出撃時は満載なので補給しない
     // 列機: 生き残りは新しい長機に付き、欠けていれば発艦後に合流
     const alive = (this.wingmen || []).filter(w => w.alive);
     for (const w of alive) if (w.brain) w.brain.leader = ac;

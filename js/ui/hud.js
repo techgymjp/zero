@@ -190,8 +190,6 @@ export class HUD {
     const gh = g.terrain.groundAt(pl.pos.x, pl.pos.z);
     if (!fl.onGround && pl.vel.y < -5 && (pl.pos.y - gh) / -pl.vel.y < 5) this.text(t('引き起こせ！'), this.W / 2, this.H / 2 + 118, RED, 22, 'center', true);
     if (pl.onFire) this.text(t('火災発生'), this.W / 2, this.H / 2 + 146, RED, 18, 'center', true);
-    const hint = this.compact ? t('「加速」長押し → スティックを上へで発艦') : t('Shift で全開 → W で引き起こして発艦');
-    if (fl.onGround && fl.onGround.kind === 'deck') this.text(g.rearmT > 0 ? t('補給中… {n}', { n: Math.ceil(g.rearmT) }) : hint, this.W / 2, this.H / 2 + 64, GREEN, 15, 'center', true);
     const ak = g.akagi;
     const canLand = !!ak && !fl.onGround && pl.pos.distanceTo(ak.pos) < 3000 && pl.pos.y < 600;
     g.input.touchUI?.setLand(canLand);

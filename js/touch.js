@@ -11,7 +11,7 @@ export class TouchControls {
     const root = document.createElement('div');
     root.id = 'touch';
     root.innerHTML = `
-      <div id="stickZone"><div id="stickBase"><div id="stickKnob"></div></div><div class="hint">${t('ここをなぞって操縦')}</div></div>
+      <div id="stickZone"><div id="stickBase"><div id="stickKnob"></div></div></div>
       <div id="tbtns">
         <div class="col">
           <button data-hold="boost" class="tb boost">${t('加速')}</button>
@@ -59,7 +59,7 @@ export class TouchControls {
       const r = zone.getBoundingClientRect();
       ox = t.clientX; oy = t.clientY;
       base.style.left = (ox - r.left) + 'px'; base.style.top = (oy - r.top) + 'px';
-      base.classList.add('show'); zone.querySelector('.hint').style.display = 'none';
+      base.classList.add('show');
       move(ox, oy);
     }, { passive: false });
     zone.addEventListener('touchmove', (e) => {
