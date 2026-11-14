@@ -94,6 +94,8 @@ export class Ship {
       this.addFire(new THREE.Vector3(0, this.deckY, this.L * 0.25), 3);
       this.addFire(new THREE.Vector3(0, this.deckY, this.L * 0.05), 2.5);
     } else {
+      // 味方 AI 攻撃隊の雷撃・爆撃は難易度設定で弱める（プレイヤーの爆撃が主役になるように）
+      if (owner && !owner.isPlayer && kind !== 'gun') amount *= g.diff.aiShipDmg ?? 1;
       this.hp -= amount;
       if (amount >= 60 && local) {
         local.y = clamp(local.y, this.deckY - 2, this.deckY + 6);
