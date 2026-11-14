@@ -15,7 +15,8 @@ window.Ads = (() => {
       production: {
         interstitial: '',
         rewarded: '',
-        banner: '',
+        // 登録済みのバナー広告ユニット。プレイ画面に出ないよう、バナーは has('banner') で常に無効にしている
+        banner: 'ca-app-pub-6411535997477460/6606085497',
       },
     },
     ios: {
