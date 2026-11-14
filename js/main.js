@@ -15,7 +15,9 @@ const PRIVACY = { ja: 'https://techgym.jp/privacy-policy/', en: 'https://techgym
 
 // 広告の表示中はゲームの音を止める
 Ads.onSuspend = () => { if (audio.ctx) audio.ctx.suspend(); };
-Ads.onResume = () => { if (audio.ctx && document.visibilityState === 'visible') audio.ctx.resume(); };
+// 一時停止中は広告が閉じても音を戻さない
+const paused = () => !!game && game.state === 'pause';
+Ads.onResume = () => { if (audio.ctx && document.visibilityState === 'visible' && !paused()) audio.ctx.resume(); };
 
 const shown = (id) => !$(id).classList.contains('hidden');
 // バナーはタイトル・あそびかた・ポーズ・結果画面だけ（プレイ中は出さない）
@@ -76,13 +78,15 @@ const ui = {
   pauseGame() {
     if (!game || game.state !== 'play') return;
     game.state = 'pause'; ui.showPause(true);
+    // 時間が止まっているので BGM・効果音もすべて止める
+    if (audio.ctx) audio.ctx.suspend();
   },
   // ポーズからの再開は全画面広告のあと
   resumeGame() {
     if (!game || game.state !== 'pause' || busy) return;
     $('pause').classList.add('hidden');
     syncBanner();
-    withInterstitial(() => { game.state = 'play'; game.lastFrame = performance.now(); syncBanner(); });
+    withInterstitial(() => { game.state = 'play'; game.lastFrame = performance.now(); if (audio.ctx) audio.ctx.resume(); syncBanner(); });
   },
   toggleHelp() {
     const opening = !shown('help');
@@ -214,7 +218,7 @@ document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'hidden') {
     if (game && game.state === 'play') ui.pauseGame();
     if (audio.ctx) audio.ctx.suspend();
-  } else if (audio.ctx && !Ads.showing) audio.ctx.resume();
+  } else if (audio.ctx && !Ads.showing && !paused()) audio.ctx.resume();
 });
 
 // 「もう一度」から来たときはタイトルを飛ばして始める（広告は直前に表示済み）
