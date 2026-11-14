@@ -13,7 +13,7 @@ window.Ads = (() => {
       },
       // 本番の広告ユニット(AdMob の「零戦 真珠湾攻撃」Android)。届いたら入れる。空の種類は本番ビルドでは出さない
       production: {
-        interstitial: '',
+        interstitial: 'ca-app-pub-6411535997477460/2405105701',
         rewarded: '',
         // 登録済みのバナー広告ユニット。プレイ画面に出ないよう、バナーは has('banner') で常に無効にしている
         banner: 'ca-app-pub-6411535997477460/6606085497',
