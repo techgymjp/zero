@@ -14,6 +14,8 @@ import { KAHUKU_START, ROUTE_WEST } from './world/geo.js';
 import { HUD } from './ui/hud.js';
 import { Input } from './input.js';
 import { Audio } from './audio.js';
+import { Music } from './music.js';
+import { TouchControls, isTouchDevice } from './touch.js';
 import { clamp, lerp, rand } from './util.js';
 import { DECAL } from './models/aircraft.js';
 
@@ -36,14 +38,16 @@ export class Game {
     this.camMode = 'chase';
     this.input = new Input(); this.input.invert = !!opts.invert;
     this.audio = opts.audio || new Audio();
+    this.music = new Music(this.audio);
+    this.isTouch = isTouchDevice();
   }
 
   async init(progress) {
     const step = async (msg, pct) => { progress(msg, pct); await new Promise(r => setTimeout(r, 30)); };
     const renderer = new THREE.WebGLRenderer({ antialias: true, logarithmicDepthBuffer: true, powerPreference: 'high-performance' });
-    renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5));
+    renderer.setPixelRatio(Math.min(devicePixelRatio, isTouchDevice() ? 1 : 1.5));
     renderer.setSize(innerWidth, innerHeight);
-    renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.shadowMap.enabled = !isTouchDevice(); renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 0.55;
     document.getElementById('view').appendChild(renderer.domElement);
     this.renderer = renderer;
@@ -96,6 +100,8 @@ export class Game {
   start() {
     this.state = 'play';
     this.audio.init();
+    this.music.start();
+    if (this.isTouch) { this.input.touchUI = new TouchControls(this.input); this.hud.forceCompact = true; this.hud.resize(); }
     this.spawnPlayer('kahuku');
     spawnFirstWave(this, this.player.pos.clone(), this.player.fwd.clone());
     this.director.initialCAP();
@@ -251,6 +257,7 @@ export class Game {
     pl.model.remove(pick);
     this.bombs.drop(wp, pl.vel.clone().add(new THREE.Vector3(0, -1, 0)), pick.userData.kind, 'jp', pl, pl.quat);
     this.message(`${pick.userData.kind}kg 爆弾 投下`);
+    this.audio.bombRelease();
   }
 
   // ---- メインループ ----
@@ -293,6 +300,7 @@ export class Game {
     }
     if (inp.hit('KeyN')) { this.wingOrder = this.wingOrder === 'free' ? 'cover' : 'free'; this.message(this.wingOrder === 'free' ? '列機へ: 自由戦闘を許可' : '列機へ: 編隊に戻れ・長機を援護せよ', 'info'); }
     if (inp.hit('KeyH')) this.ui.toggleHelp();
+    if (inp.hit('KeyK')) { const on = this.music.toggle(); this.message(on ? 'BGM 入' : 'BGM 切'); this.ui.syncBgm?.(on); }
     if (this.state !== 'play' || !pl || !pl.alive) return;
     if (inp.hit('KeyB')) this.dropBomb();
     if (inp.hit('KeyL')) this.autoLand();

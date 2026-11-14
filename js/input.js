@@ -60,6 +60,16 @@ export class Input {
       if (yb && !this._gpY) this.pressed.add('KeyV');
       this._gpY = yb;
     }
+    // タッチ操作
+    if (this.touch) {
+      this.touchUI?.update();
+      const T = this.touch;
+      if (T.pitch || T.roll) { p = this.invert ? -T.pitch : T.pitch; r = T.roll; }
+      if (T.yaw) y = T.yaw;
+      if (T.thr) t = T.thr;
+      if (T.mg) mg = true;
+      if (T.cannon) cn = true;
+    }
     // キー入力を滑らかに
     const sm = (cur, tgt, rate) => cur + clamp(tgt - cur, -rate * dt, rate * dt);
     this._sm.p = sm(this._sm.p, p, 4.5); this._sm.r = sm(this._sm.r, r, 6); this._sm.y = sm(this._sm.y, y, 4);

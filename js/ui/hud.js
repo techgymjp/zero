@@ -23,6 +23,7 @@ export class HUD {
     this.dpr = dpr;
     this.canvas.width = innerWidth * dpr; this.canvas.height = innerHeight * dpr;
     this.W = innerWidth; this.H = innerHeight;
+    this.compact = this.forceCompact || innerHeight < 560 || innerWidth < 900;
   }
   message(text, kind = 'normal') {
     this.msgs.unshift({ text, kind, t: kind === 'big' ? 6 : 4.5 });
@@ -128,7 +129,7 @@ export class HUD {
       if (d > 6000) continue;
       const p = this.project(o.pos);
       if (!p) continue;
-      const s = clamp(1800 / d, 5, 16);
+      const s = clamp(1800 / d, 5, this.compact ? 10 : 16);
       if (o.side === 'us') {
         c.strokeStyle = RED; c.lineWidth = 1.5;
         c.strokeRect(p[0] - s, p[1] - s, s * 2, s * 2);
@@ -162,49 +163,58 @@ export class HUD {
     }
   }
 
-  drawInstruments() {
-    const g = this.game, c = this.ctx, pl = g.player, fl = pl.brain, H = this.H;
-    const x = 22, y = H - 190;
-    c.fillStyle = 'rgba(10,12,10,0.45)'; c.fillRect(x - 10, y - 18, 250, 200);
-    const spd = pl.vel.length() * 3.6;
-    const alt = pl.pos.y;
-    this.text(`速度 ${Math.round(spd).toString().padStart(3)} km/h`, x, y, WHITE, 16, 'left', true);
-    this.text(`高度 ${Math.round(alt).toString().padStart(4)} m`, x, y + 22, WHITE, 16, 'left', true);
-    this.text(`昇降 ${(pl.vel.y).toFixed(0)} m/s   G ${fl.gload.toFixed(1)}`, x, y + 44, WHITE, 13);
-    this.text(`発動機 ${Math.round(pl.throttle * 100)}%  脚 ${fl.gear ? '下' : '上'}`, x, y + 64, WHITE, 13);
-    const a = pl.ammo;
-    this.text(`7.7mm  ${a[0]}`, x, y + 88, a[0] ? GREEN : RED, 14);
-    this.text(`20mm   ${a[1]}`, x + 110, y + 88, a[1] ? GREEN : RED, 14);
-    const st = pl.model.userData.stores.filter(s => s.parent);
-    const n250 = st.filter(s => s.userData.kind === 250).length, n60 = st.filter(s => s.userData.kind === 60).length;
-    this.text(`爆弾 250kg×${n250}  60kg×${n60}`, x, y + 110, st.length ? GREEN : '#888', 14);
-    // 機体損傷
+  drawInstrumentsCompact() {
+    const g = this.game, c = this.ctx, pl = g.player, fl = pl.brain;
+    const x = 8, y = 12;
+    c.fillStyle = 'rgba(10,12,10,0.25)'; c.fillRect(x - 4, y - 9, 128, 42);
+    this.text(`${Math.round(pl.vel.length() * 3.6)}km/h ${Math.round(pl.pos.y)}m`, x, y, WHITE, 11, 'left', true);
     const f = clamp(pl.hp / pl.maxHp, 0, 1);
-    this.text('機体', x, y + 134, WHITE, 13);
-    c.fillStyle = 'rgba(0,0,0,0.5)'; c.fillRect(x + 36, y + 128, 180, 10);
-    c.fillStyle = f > 0.5 ? '#7ee07e' : f > 0.25 ? '#ffd166' : RED; c.fillRect(x + 36, y + 128, 180 * f, 10);
-    this.text(`残機 ${'◆'.repeat(Math.max(0, g.lives))}`, x, y + 158, ORANGE, 14);
-    if (g.timeScale > 1) this.text(`時間加速 ×${g.timeScale}`, this.W / 2, 92, ORANGE, 16, 'center', true);
-    // 警告
-    if (fl.stalled) this.text('失 速', this.W / 2, this.H / 2 + 110, RED, 26, 'center', true);
+    c.fillStyle = 'rgba(0,0,0,0.4)'; c.fillRect(x, y + 10, 115, 5);
+    c.fillStyle = f > 0.5 ? '#7ee07e' : f > 0.25 ? '#ffd166' : RED; c.fillRect(x, y + 10, 115 * f, 5);
+    this.text(`残機${'◆'.repeat(Math.max(0, g.lives))}`, x, y + 24, ORANGE, 10);
+    this.drawWarnings();
+  }
+
+  drawWarnings() {
+    const g = this.game, pl = g.player, fl = pl.brain;
+    if (g.timeScale > 1) this.text(`時間加速 ×${g.timeScale}`, this.W / 2, 100, ORANGE, 16, 'center', true);
+    if (fl.stalled) this.text('失 速', this.W / 2, this.H / 2 + 90, RED, 24, 'center', true);
     const gh = g.terrain.groundAt(pl.pos.x, pl.pos.z);
-    if (!fl.onGround && pl.vel.y < -5 && (pl.pos.y - gh) / -pl.vel.y < 5) this.text('引き起こせ！', this.W / 2, this.H / 2 + 140, RED, 24, 'center', true);
-    if (pl.onFire) this.text('火災発生', this.W / 2, this.H / 2 + 170, RED, 20, 'center', true);
-    if (fl.onGround && fl.onGround.kind === 'deck') this.text(g.rearmT > 0 ? `補給中… ${Math.ceil(g.rearmT)}` : '赤城 甲板上 — 発動機全開(Shift)で発艦、S で引き起こし', this.W / 2, this.H / 2 + 80, GREEN, 16, 'center', true);
+    if (!fl.onGround && pl.vel.y < -5 && (pl.pos.y - gh) / -pl.vel.y < 5) this.text('引き起こせ！', this.W / 2, this.H / 2 + 118, RED, 22, 'center', true);
+    if (pl.onFire) this.text('火災発生', this.W / 2, this.H / 2 + 146, RED, 18, 'center', true);
+    const t = this.compact ? '「出力＋」で全開、速度が乗ったらスティックを下へ引いて発艦' : '赤城 甲板上 — 発動機全開(Shift)で発艦、S で引き起こし';
+    if (fl.onGround && fl.onGround.kind === 'deck') this.text(g.rearmT > 0 ? `補給中… ${Math.ceil(g.rearmT)}` : t, this.W / 2, this.H / 2 + 64, GREEN, 15, 'center', true);
     const ak = g.akagi;
-    if (ak && !fl.onGround && pl.pos.distanceTo(ak.pos) < 3000 && pl.pos.y < 600) this.text('L: 着艦（自動）', this.W / 2, this.H / 2 + 80, GREEN, 15, 'center', true);
+    if (ak && !fl.onGround && pl.pos.distanceTo(ak.pos) < 3000 && pl.pos.y < 600) this.text(this.compact ? '「着艦」ボタンで自動着艦' : 'L: 着艦（自動）', this.W / 2, this.H / 2 + 64, GREEN, 15, 'center', true);
+  }
+
+  drawInstruments() {
+    if (this.compact) return this.drawInstrumentsCompact();
+    const g = this.game, c = this.ctx, pl = g.player, fl = pl.brain, H = this.H;
+    const x = 22, y = H - 92;
+    c.fillStyle = 'rgba(10,12,10,0.35)'; c.fillRect(x - 10, y - 18, 230, 100);
+    const spd = pl.vel.length() * 3.6;
+    this.text(`速度 ${Math.round(spd).toString().padStart(3)} km/h`, x, y, WHITE, 16, 'left', true);
+    this.text(`高度 ${Math.round(pl.pos.y).toString().padStart(4)} m`, x, y + 22, WHITE, 16, 'left', true);
+    const f = clamp(pl.hp / pl.maxHp, 0, 1);
+    this.text('機体', x, y + 46, WHITE, 13);
+    c.fillStyle = 'rgba(0,0,0,0.5)'; c.fillRect(x + 36, y + 40, 165, 10);
+    c.fillStyle = f > 0.5 ? '#7ee07e' : f > 0.25 ? '#ffd166' : RED; c.fillRect(x + 36, y + 40, 165 * f, 10);
+    this.text(`残機 ${'◆'.repeat(Math.max(0, g.lives))}`, x, y + 68, ORANGE, 14);
+    this.drawWarnings();
   }
 
   drawCompass() {
     const g = this.game, c = this.ctx, pl = g.player, W = this.W;
     const hdg = (Math.atan2(pl.fwd.x, -pl.fwd.z) * 180 / Math.PI + 360) % 360;
     const cx = W / 2, y = 26;
-    c.fillStyle = 'rgba(10,12,10,0.4)'; c.fillRect(cx - 200, y - 14, 400, 30);
+    const cw = this.compact ? 90 : 200;
+    c.fillStyle = 'rgba(10,12,10,0.4)'; c.fillRect(cx - cw, y - 14, cw * 2, 30);
     const names = { 0: '北', 45: '北東', 90: '東', 135: '南東', 180: '南', 225: '南西', 270: '西', 315: '北西' };
     for (let a = -90; a <= 90; a += 5) {
       const h = Math.round((hdg + a) / 5) * 5;
       const off = (h - hdg) * 2.1;
-      if (Math.abs(off) > 195) continue;
+      if (Math.abs(off) > cw - 5) continue;
       const hh = ((h % 360) + 360) % 360;
       c.strokeStyle = WHITE; c.beginPath(); c.moveTo(cx + off, y + 10); c.lineTo(cx + off, y + (hh % 15 ? 6 : 2)); c.stroke();
       if (names[hh] !== undefined) this.text(names[hh], cx + off, y - 4, hh % 90 ? WHITE : ORANGE, 13, 'center', true);
@@ -213,27 +223,32 @@ export class HUD {
     c.fillStyle = ORANGE; c.beginPath(); c.moveTo(cx, y + 12); c.lineTo(cx - 6, y + 20); c.lineTo(cx + 6, y + 20); c.fill();
     const t = 7 * 3600 + 40 * 60 + g.missionTime;
     const hh = Math.floor(t / 3600), mm = Math.floor(t / 60) % 60;
-    this.text(`現地時間 ${hh}:${String(mm).padStart(2, '0')}  (昭和16年12月7日)`, cx, y + 36, '#ddd', 12, 'center');
+    if (!this.compact) this.text(`現地時間 ${hh}:${String(mm).padStart(2, '0')}  (昭和16年12月7日)`, cx, y + 36, '#ddd', 12, 'center');
   }
 
   drawObjectives() {
     const g = this.game, c = this.ctx, W = this.W;
-    const x = W - 250, y = 14;
-    c.fillStyle = 'rgba(10,12,10,0.45)'; c.fillRect(x - 10, y, 250, 156);
-    this.text('作戦目標', x, y + 14, ORANGE, 15, 'left', true);
+    if (this.compact) {
+      const x = W - 112, y = 12;
+      c.fillStyle = 'rgba(10,12,10,0.25)'; c.fillRect(x - 5, y - 9, 112, 38);
+      this.text(`戦艦${g.stats.bbSunk}/8 空母${g.stats.cvSunk}/3`, x, y, WHITE, 11, 'left', true);
+      this.text(`米軍機 ${g.usRemaining()}`, x, y + 15, '#ffb0a0', 10);
+      return;
+    }
+    const x = W - 178, y = 14;
+    c.fillStyle = 'rgba(10,12,10,0.35)'; c.fillRect(x - 10, y, 174, 118);
     const bb = g.stats.bbSunk, cv = g.stats.cvSunk;
-    this.text(`戦艦撃沈   ${bb} / 8`, x, y + 38, bb >= 8 ? GREEN : WHITE, 15);
-    this.text(`空母撃沈   ${cv} / 3`, x, y + 60, cv >= 3 ? GREEN : WHITE, 15);
-    this.text(`撃墜 ${g.stats.kills}  地上撃破 ${g.stats.ground}`, x, y + 84, '#ddd', 13);
-    this.text(`戦果 ${g.stats.score} 点   ${fmtTime(g.missionTime)}`, x, y + 106, '#ddd', 13);
-    this.text(`米軍機 残存 ${g.usRemaining()} / 400`, x, y + 126, '#ffb0a0', 13);
-    this.text(`列機: ${g.wingOrder === 'free' ? '自由戦闘' : '編隊・援護'} (N)`, x, y + 146, BLUE, 12);
+    this.text(`戦艦撃沈   ${bb} / 8`, x, y + 16, bb >= 8 ? GREEN : WHITE, 15);
+    this.text(`空母撃沈   ${cv} / 3`, x, y + 38, cv >= 3 ? GREEN : WHITE, 15);
+    this.text(`撃墜 ${g.stats.kills}  地上撃破 ${g.stats.ground}`, x, y + 62, '#ddd', 13);
+    this.text(`戦果 ${g.stats.score} 点   ${fmtTime(g.missionTime)}`, x, y + 84, '#ddd', 13);
+    this.text(`米軍機 残存 ${g.usRemaining()} / 400`, x, y + 104, '#ffb0a0', 13);
   }
 
   drawMinimap() {
     const g = this.game, c = this.ctx, W = this.W, H = this.H;
-    const S = Math.min(240, Math.max(160, W * 0.17));
-    const x0 = W - S - 16, y0 = H - S - 16;
+    const S = this.compact ? Math.min(90, H * 0.22) : Math.min(240, Math.max(160, W * 0.17));
+    const x0 = this.compact ? 8 : W - S - 16, y0 = this.compact ? 54 : H - S - 16;
     const pl = g.player || g.lastPlayer;
     const range = this.mapZoom === 0 ? TERRAIN.size : this.mapZoom === 1 ? 30000 : 10000;
     const cx = this.mapZoom === 0 ? TERRAIN.x0 + TERRAIN.size / 2 : (pl ? pl.pos.x : 0);
@@ -245,7 +260,7 @@ export class HUD {
     c.fillStyle = '#1d4660'; c.fillRect(x0, y0, S, S);
     const mm = g.terrain.minimapCanvas, ms = mm.width / TERRAIN.size;
     const a = tx(TERRAIN.x0, TERRAIN.z0);
-    c.globalAlpha = 0.95;
+    c.globalAlpha = this.compact ? 0.7 : 0.95;
     c.drawImage(mm, a[0], a[1], TERRAIN.size * k, TERRAIN.size * k);
     c.globalAlpha = 1;
     // 侵入ルート
@@ -276,22 +291,23 @@ export class HUD {
     }
     c.restore();
     c.strokeStyle = 'rgba(255,255,255,0.6)'; c.strokeRect(x0, y0, S, S);
-    this.text(`地図 (M) ${this.mapZoom === 0 ? '全島' : this.mapZoom === 1 ? '30km' : '10km'}`, x0 + 4, y0 - 9, '#ddd', 11);
+    if (!this.compact) this.text(`地図 (M) ${this.mapZoom === 0 ? '全島' : this.mapZoom === 1 ? '30km' : '10km'}`, x0 + 4, y0 - 9, '#ddd', 11);
     // 赤城の方位
     if (pl && g.akagi) {
       const d = g.akagi.pos.distanceTo(pl.pos);
-      this.text(`赤城まで ${(d / 1000).toFixed(1)}km`, x0 + S, y0 - 9, BLUE, 11, 'right');
+      if (this.compact) this.text(`赤城 ${(d / 1000).toFixed(1)}km`, x0, y0 + S + 10, BLUE, 11);
+      else this.text(`赤城まで ${(d / 1000).toFixed(1)}km`, x0 + S, y0 - 9, BLUE, 11, 'right');
     }
   }
 
   drawMessages(dt) {
-    let y = 120;
+    let y = this.compact ? 104 : 120;
     for (let i = this.msgs.length - 1; i >= 0; i--) { this.msgs[i].t -= dt; if (this.msgs[i].t <= 0) this.msgs.splice(i, 1); }
     for (const m of this.msgs) {
       const a = clamp(m.t, 0, 1);
       this.ctx.globalAlpha = a;
       const col = m.kind === 'big' ? '#ffd166' : m.kind === 'bad' ? RED : m.kind === 'info' ? BLUE : WHITE;
-      this.text(m.text, this.W / 2, y, col, m.kind === 'big' ? 24 : 17, 'center', true);
+      this.text(m.text, this.W / 2, y, col, this.compact ? (m.kind === 'big' ? 16 : 13) : (m.kind === 'big' ? 24 : 17), 'center', true);
       y += m.kind === 'big' ? 34 : 26;
     }
     this.ctx.globalAlpha = 1;

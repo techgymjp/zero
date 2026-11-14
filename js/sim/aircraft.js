@@ -50,6 +50,7 @@ export class Aircraft {
     this.smoke = null; this.onFire = false;
     this.propSpin = 0; this.throttle = 0.8;
     this.brain = null;
+    this.ctrl = { p: 0, r: 0, y: 0 };
   }
 
   setPose(pos, fwd, speed) {
@@ -92,7 +93,13 @@ export class Aircraft {
     const want = acc.add(_v.set(0, G, 0));
     want.addScaledVector(this.fwd, -want.dot(this.fwd)).normalize();
     const k = Math.min(1, s.roll * dt * 1.2);
+    const upOld = _v.copy(this.up);
     this.up.lerp(want, k).normalize();
+    // 舵面表示用の操舵量
+    const rollRate = new THREE.Vector3().crossVectors(upOld, this.up).dot(this.fwd) / Math.max(dt, 1e-4);
+    const sm = Math.min(1, dt * 6);
+    this.ctrl.r += (clamp(rollRate / s.roll, -1, 1) - this.ctrl.r) * sm;
+    this.ctrl.p += (clamp(Math.min(ang, maxTurn * dt) / Math.max(dt, 1e-4) / maxTurn, 0, 1) - this.ctrl.p) * sm;
     this._orient();
     this.vel.copy(this.fwd).multiplyScalar(this.speed);
     this.pos.addScaledVector(this.vel, dt);
@@ -183,6 +190,14 @@ export class Aircraft {
     }
     this.model.position.copy(this.pos);
     this.model.quaternion.copy(this.quat);
+    const cs = this.model.userData.ctrl;
+    if (cs) {
+      let p = this.ctrl.p, r = this.ctrl.r, y = this.ctrl.y;
+      if (this.isPlayer && g.input) { p = g.input.pitch; r = g.input.roll; y = g.input.yaw; }
+      cs.ailL.children[0].rotation.x = -r * 0.35; cs.ailR.children[0].rotation.x = r * 0.35;
+      cs.elL.children[0].rotation.x = cs.elR.children[0].rotation.x = p * 0.4;
+      cs.rud.children[0].rotation.y = y * 0.4;
+    }
     const pr = this.model.userData.prop;
     if (pr) {
       this.propSpin += dt * (40 + this.throttle * 120);

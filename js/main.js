@@ -40,7 +40,7 @@ $('startBtn').addEventListener('click', async () => {
   audio.init(); audio.resume();
   $('loading').classList.remove('hidden');
   try {
-    game = new Game({ difficulty: $('diff').value, invert: $('invert').checked, audio });
+    game = new Game({ difficulty: 'normal', invert: $('invert').checked, audio });
     game.ui = ui;
     window.game = game;
     await game.init((msg, pct) => { $('loadmsg').textContent = msg; $('loadbar').style.width = pct + '%'; });
@@ -55,4 +55,10 @@ $('rsAkagi').onclick = () => game.respawn('akagi');
 $('rsKahuku').onclick = () => game.respawn('kahuku');
 $('resumeBtn').onclick = () => { game.state = 'play'; ui.showPause(false); };
 $('muteBtn').onclick = () => { audio.setMuted(!audio.muted); $('muteBtn').textContent = '音: ' + (audio.muted ? '切' : '入'); };
+const ENG = [['普通', 1], ['小', 0.4], ['切', 0], ['大', 1.6]];
+let engI = 0;
+$('engBtn').onclick = () => { engI = (engI + 1) % ENG.length; audio.setEngineVolume(ENG[engI][1]); $('engBtn').textContent = 'エンジン音: ' + ENG[engI][0]; };
+ui.syncBgm = (on) => { $('bgmBtn').textContent = 'BGM: ' + (on ? '入' : '切') + ' (K)'; };
+$('bgmBtn').onclick = () => ui.syncBgm(game.music.toggle());
 $('helpClose').onclick = () => ui.toggleHelp();
+$('howBtn').onclick = () => ui.toggleHelp();

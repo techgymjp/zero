@@ -19,24 +19,14 @@
     <div class="sub">昭和十六年十二月八日（ハワイ時間 十二月七日）</div>
     <h1>零戦<span>真珠湾攻撃</span></h1>
     <div class="sub2">ZERO — ATTACK ON PEARL HARBOR</div>
-    <div class="brief">
-      <p>貴官は第一航空艦隊・空母<b>赤城</b>戦闘機隊の<b>小隊長</b>として、列機2機を率いて第一次攻撃隊に加わる。</p>
-      <p>攻撃隊はオアフ島北端<b>カフク岬</b>上空に到達。ここから<b>西海岸沿いに南下</b>し、<b>バーバーズ岬</b>から北東へ転じて真珠湾に突入する。</p>
-      <p class="warn">本作の想定：米軍は臨戦態勢にある。対空砲火は即応し、各飛行場と<b>真珠湾南方を哨戒中の米空母3隻</b>から迎撃機が次々と発進する（米軍機 総数400機）。</p>
-      <p><b>勝利条件：戦艦8隻・空母3隻をすべて撃沈せよ。</b>爆弾は空母赤城に着艦すると補給できる。</p>
-    </div>
+    <p class="lead">赤城戦闘機隊の小隊長として、米太平洋艦隊を撃滅せよ。<br><b>勝利条件：戦艦8隻・空母3隻を撃沈</b></p>
     <div class="opts">
-      <label>難易度
-        <select id="diff"><option value="easy">易しい</option><option value="normal" selected>普通</option><option value="hard">難しい</option></select>
-      </label>
       <label><input type="checkbox" id="invert"> 上下操作を反転（W=機首上げ）</label>
     </div>
     <button id="startBtn" class="btn">出撃</button>
     <div id="loading" class="loading hidden"><div class="bar"><div id="loadbar"></div></div><div id="loadmsg"></div></div>
-    <div class="keys">
-      <b>操作</b>：W/S 機首下げ/上げ ・ A/D 横転 ・ Q/E 方向舵 ・ Shift/Ctrl スロットル ・ Space 7.7mm機銃 ・ X 20mm機銃 ・ B 爆弾投下 ・ G 脚 ・ V 視点 ・ T 時間加速 ・ M 地図 ・ N 列機への命令 ・ L 自動着艦 ・ P 一時停止 ・ H ヘルプ<br>
-      マウス：左ボタン 7.7mm ・ 右ボタン 20mm ・ 中ボタン（またはShift+左）ドラッグで視点回転 ／ ゲームパッド対応
-    </div>
+    <button id="howBtn" class="btn sub-btn">遊び方</button>
+    <p class="mobile-hint">スマホは横向きで。画面左側をなぞって操縦、右下のボタンで射撃・爆撃。</p>
   </div>
 </div>
 
@@ -50,23 +40,39 @@
 </div>
 
 <div id="pause" class="screen hidden">
-  <div class="panel small"><h2>一時停止</h2><p>P または Esc で再開</p><button class="btn" id="resumeBtn">再開</button><button class="btn" id="muteBtn">音: 入</button></div>
+  <div class="panel small"><h2>一時停止</h2><p>P または Esc で再開</p><button class="btn" id="resumeBtn">再開</button><button class="btn" id="muteBtn">音: 入</button><button class="btn" id="engBtn">エンジン音: 普通</button><button class="btn" id="bgmBtn">BGM: 入 (K)</button></div>
 </div>
 
 <div id="help" class="screen hidden">
-  <div class="panel">
-    <h2>操作と戦術</h2>
+  <div class="panel help">
+    <h2>遊び方</h2>
+    <h3>作戦</h3>
+    <p>昭和16年12月7日 07:40（現地時間）。貴官は空母<b>赤城</b>戦闘機隊の<b>小隊長</b>として、列機2機を率いて第一次攻撃隊に加わる。攻撃隊はオアフ島北端<b>カフク岬</b>上空から<b>西海岸沿いに南下</b>し、<b>バーバーズ岬</b>で北東へ転じて真珠湾へ突入する（地図の点線）。</p>
+    <p class="warn">本作の想定：米軍は臨戦態勢。対空砲火は即応し、各飛行場と、真珠湾南方を哨戒中の<b>米空母3隻</b>から迎撃機が次々と発進する（米軍機 総数400機）。</p>
+    <p><b>勝利条件：戦艦8隻・空母3隻をすべて撃沈。</b>第二次以降の攻撃隊（九七艦攻・九九艦爆）も援軍として到着する。</p>
+    <h3>操作</h3>
     <ul>
-      <li><b>飛行</b>：W/S（↑/↓）ピッチ、A/D（←/→）ロール、Q/E ヨー、Shift/R スロットル増、Ctrl/F 減</li>
-      <li><b>射撃</b>：Space または左クリックで機首7.7mm機銃、X または右クリックで翼内20mm機銃（携行弾数は各60発）</li>
+      <li><b>飛行</b>：W/S（↑/↓）機首下げ/上げ、A/D（←/→）横転、Q/E 方向舵、Shift・R / Ctrl・F スロットル</li>
+      <li><b>射撃</b>：Space・左クリックで機首7.7mm機銃、X・右クリックで翼内20mm機銃（各60発）</li>
       <li><b>爆撃</b>：B で 250kg → 60kg の順に投下。緑の◇が着弾予測点、赤なら命中コース。急降下で狙うと当てやすい。</li>
-      <li><b>補給</b>：赤城（北方の機動部隊）に着艦すると爆弾・弾薬・損傷が回復。赤城の近く（3km以内・高度600m以下）で L を押すと自動着艦。</li>
-      <li><b>着艦</b>：G で脚を出し、低速で後方から甲板へ。甲板上で停止すると補給開始。Shift で全開、速度が乗ったら S で引き起こして発艦。</li>
-      <li><b>列機</b>：小隊の2・3番機が左右後方に続く。N で「編隊・援護」と「自由戦闘」を切替。</li>
-      <li><b>米軍の増援</b>：各飛行場は駐機中の戦闘機が残っている限り緊急発進させる。地上撃破で敵の発進を断てる。米空母は撃沈するまで艦載機を発艦させ続ける。</li>
-      <li><b>時間加速</b>：T（敵機が近いと解除）。巡航中に使う。</li>
+      <li><b>その他</b>：G 脚、V 視点、中ボタン/Shift+左ドラッグ 視点回転、T 時間加速、M 地図、N 列機への命令、K BGM、P 一時停止、H 遊び方</li>
+      <li><b>スマホ・タブレット</b>（横向き推奨）：画面<b>左半分を指でなぞって操縦</b>（下へ引く=機首上げ、左右=横転）。右下の「7.7mm機銃」「20mm」は押している間射撃、「爆弾」で投下、「出力＋/−」でスロットル、「◁舵/舵▷」で方向舵。上部のボタンで一時停止・視点・地図・時間加速・脚・着艦・列機命令。</li>
+      <li><b>ゲームパッド</b>：左スティック 操縦、右スティック 方向舵、RT/LT 射撃、A 爆弾、Y 視点、LB/RB スロットル</li>
     </ul>
-    <button class="btn" id="helpClose">閉じる (H)</button>
+    <h3>補給と着艦</h3>
+    <ul>
+      <li>爆弾を使い切ったら北方の<b>空母赤城</b>に着艦すると、爆弾・弾薬・損傷が回復する。</li>
+      <li>赤城の近く（3km以内・高度600m以下）で <b>L</b> を押すと自動着艦。手動なら G で脚を出し低速で後方から甲板へ。</li>
+      <li>発艦：Shift で全開、速度が乗ったら S で引き起こす。</li>
+    </ul>
+    <h3>戦術</h3>
+    <ul>
+      <li>各飛行場は駐機中の戦闘機が残っている限り緊急発進させる。地上撃破で敵の発進を断てる。</li>
+      <li>米空母は撃沈するまで艦載機を発艦させ続ける。</li>
+      <li>列機（2・3番機）は左右後方に続く。N で「編隊・援護」と「自由戦闘」を切替。</li>
+      <li>T で時間加速（敵機が近いと解除）。</li>
+    </ul>
+    <button class="btn" id="helpClose">閉じる</button>
   </div>
 </div>
 
