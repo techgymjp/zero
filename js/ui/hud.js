@@ -136,8 +136,14 @@ export class HUD {
       if (!p) continue;
       const s = clamp(1800 / d, 5, this.compact ? 10 : 16);
       if (o.side === 'us') {
-        c.strokeStyle = RED; c.lineWidth = 1.5;
-        c.strokeRect(p[0] - s, p[1] - s, s * 2, s * 2);
+        // 敵機: 四隅のカギ括弧（爆撃照準の赤い◇と見分けやすく）
+        const k = Math.max(3, s * 0.45);
+        c.strokeStyle = RED; c.lineWidth = 1.5; c.beginPath();
+        for (const [sx, sy] of [[-1, -1], [1, -1], [1, 1], [-1, 1]]) {
+          const x0 = p[0] + sx * s, y0 = p[1] + sy * s;
+          c.moveTo(x0 - sx * k, y0); c.lineTo(x0, y0); c.lineTo(x0, y0 - sy * k);
+        }
+        c.stroke();
       } else {
         const ss = Math.min(s, 7);
         c.strokeStyle = o.wingman ? 'rgba(197,231,255,0.8)' : 'rgba(127,198,255,0.6)'; c.lineWidth = 1;

@@ -24,7 +24,7 @@ export class PlayerFlight {
 
   massTotal() {
     let m = P.mass;
-    for (const s of this.ac.model.userData.stores || []) if (s.parent) m += s.userData.kind === 250 ? 250 : 60;
+    for (const s of this.ac.model.userData.stores || []) if (s.parent) m += (s.userData.kind === 250 ? 250 : 60) * 0.45; // 8発搭載でも発艦・操縦性を保つため軽めに扱う
     return m;
   }
 
@@ -84,7 +84,7 @@ export class PlayerFlight {
     const L = qd * P.S * CL;
     const F = new THREE.Vector3().addScaledVector(liftDir, L);
     // 抗力
-    const Cd = P.Cd0 + P.K * CL * CL + (this.gear ? P.gearDrag : 0) + (ac.model.userData.stores?.filter(s => s.parent).length || 0) * 0.002;
+    const Cd = P.Cd0 + P.K * CL * CL + (this.gear ? P.gearDrag : 0) + (ac.model.userData.stores?.filter(s => s.parent).length || 0) * 0.00075;
     F.addScaledVector(velDir, -qd * P.S * Cd);
     // 横力
     const bodyX = new THREE.Vector3(1, 0, 0).applyQuaternion(ac.quat);

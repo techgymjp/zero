@@ -285,11 +285,12 @@ export function buildZero({ code = DECAL.AI101, leader = false, bombs = false } 
   const stores = [];
   if (bombs) {
     const rk = new Builder();
-    rk.box(0.1, 0.34, 0.9, '#3a3a36', 0, -0.62, 0.5);
-    for (const s of [1, -1]) rk.box(0.06, 0.16, 0.5, '#3a3a36', s * 2.7, -0.38, 0.55);
+    // 爆弾8発: 胴体下 250kg×2（前後タンデム）+ 主翼下 60kg×6（左右3発ずつ）
+    rk.box(0.1, 0.34, 2.6, '#3a3a36', 0, -0.62, 0.45);
+    for (const s of [1, -1]) for (const x of [2.1, 2.7, 3.3]) rk.box(0.06, 0.16, 0.5, '#3a3a36', s * x, -0.38, 0.55);
     g.add(rk.build(MAT.parts));
-    const b250 = bombMesh(1.75, 0.2); b250.position.set(0, -0.92, 0.5); b250.userData.kind = 250; g.add(b250); stores.push(b250);
-    for (const s of [1, -1]) { const b60 = bombMesh(1.0, 0.115); b60.position.set(s * 2.7, -0.52, 0.55); b60.userData.kind = 60; g.add(b60); stores.push(b60); }
+    for (const z of [1.4, -0.5]) { const b250 = bombMesh(1.75, 0.2); b250.position.set(0, -0.92, z); b250.userData.kind = 250; g.add(b250); stores.push(b250); }
+    for (const s of [1, -1]) for (const x of [2.1, 2.7, 3.3]) { const b60 = bombMesh(1.0, 0.115); b60.position.set(s * x, -0.52, 0.55); b60.userData.kind = 60; g.add(b60); stores.push(b60); }
   }
   g.userData = { prop, gear, body, stores, propR: 1.45, ctrl };
   return g;

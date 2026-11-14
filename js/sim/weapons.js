@@ -47,7 +47,9 @@ export class Bullets {
         if (!ac.alive || ac.side === b.side) continue;
         const dx = ac.pos.x - b.x, dy = ac.pos.y - b.y, dz = ac.pos.z - b.z;
         if (dx * dx + dy * dy + dz * dz > 3600) continue;
-        if (segSphere(p0, p1, ac.pos, ac.radius) >= 0) {
+        // プレイヤー（列機含まず）の機銃は当たり判定を広げて命中しやすく
+        const hr = b.owner && b.owner.isPlayer ? ac.radius * 1.7 : ac.radius;
+        if (segSphere(p0, p1, ac.pos, hr) >= 0) {
           // AI同士の射撃はAI攻撃機に対して弱める（攻撃隊が目標まで届くように）
           const aiVsAi = !ac.isPlayer && !(b.owner && b.owner.isPlayer) && (ac.type === 'kate' || ac.type === 'val');
           ac.damage(b.a.dmg * (aiVsAi ? 0.4 : 1), b.owner, b.a.explosive);
