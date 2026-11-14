@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>零戦 真珠湾攻撃</title>
+<meta name="description" content="零式艦上戦闘機で真珠湾を攻撃する3Dフライトシューティング（ブラウザゲーム）">
+<link rel="stylesheet" href="css/style.css">
+<script type="importmap">
+{ "imports": { "three": "./vendor/three/three.module.js", "three/addons/": "./vendor/three/addons/" } }
+</script>
+</head>
+<body>
+<div id="view"></div>
+<canvas id="hud"></canvas>
+
+<div id="title" class="screen">
+  <div class="panel title-panel">
+    <div class="sub">昭和十六年十二月八日（ハワイ時間 十二月七日）</div>
+    <h1>零戦<span>真珠湾攻撃</span></h1>
+    <div class="sub2">ZERO — ATTACK ON PEARL HARBOR</div>
+    <div class="brief">
+      <p>貴官は第一航空艦隊・空母<b>赤城</b>戦闘機隊の<b>小隊長</b>として、列機2機を率いて第一次攻撃隊に加わる。</p>
+      <p>攻撃隊はオアフ島北端<b>カフク岬</b>上空に到達。ここから<b>西海岸沿いに南下</b>し、<b>バーバーズ岬</b>から北東へ転じて真珠湾に突入する。</p>
+      <p class="warn">本作の想定：米軍は臨戦態勢にある。対空砲火は即応し、各飛行場と<b>真珠湾南方を哨戒中の米空母3隻</b>から迎撃機が次々と発進する（米軍機 総数400機）。</p>
+      <p><b>勝利条件：戦艦8隻・空母3隻をすべて撃沈せよ。</b>爆弾は空母赤城に着艦すると補給できる。</p>
+    </div>
+    <div class="opts">
+      <label>難易度
+        <select id="diff"><option value="easy">易しい</option><option value="normal" selected>普通</option><option value="hard">難しい</option></select>
+      </label>
+      <label><input type="checkbox" id="invert"> 上下操作を反転（W=機首上げ）</label>
+    </div>
+    <button id="startBtn" class="btn">出撃</button>
+    <div id="loading" class="loading hidden"><div class="bar"><div id="loadbar"></div></div><div id="loadmsg"></div></div>
+    <div class="keys">
+      <b>操作</b>：W/S 機首下げ/上げ ・ A/D 横転 ・ Q/E 方向舵 ・ Shift/Ctrl スロットル ・ Space 7.7mm機銃 ・ X 20mm機銃 ・ B 爆弾投下 ・ G 脚 ・ V 視点 ・ T 時間加速 ・ M 地図 ・ N 列機への命令 ・ L 自動着艦 ・ P 一時停止 ・ H ヘルプ<br>
+      マウス：左ボタン 7.7mm ・ 右ボタン 20mm ・ 中ボタン（またはShift+左）ドラッグで視点回転 ／ ゲームパッド対応
+    </div>
+  </div>
+</div>
+
+<div id="respawn" class="screen hidden">
+  <div class="panel small">
+    <h2>被撃墜</h2>
+    <p id="respawnInfo"></p>
+    <button class="btn" id="rsAkagi">空母赤城から発艦（補給済み）</button>
+    <button class="btn" id="rsKahuku">カフク岬上空から再出撃</button>
+  </div>
+</div>
+
+<div id="pause" class="screen hidden">
+  <div class="panel small"><h2>一時停止</h2><p>P または Esc で再開</p><button class="btn" id="resumeBtn">再開</button><button class="btn" id="muteBtn">音: 入</button></div>
+</div>
+
+<div id="help" class="screen hidden">
+  <div class="panel">
+    <h2>操作と戦術</h2>
+    <ul>
+      <li><b>飛行</b>：W/S（↑/↓）ピッチ、A/D（←/→）ロール、Q/E ヨー、Shift/R スロットル増、Ctrl/F 減</li>
+      <li><b>射撃</b>：Space または左クリックで機首7.7mm機銃、X または右クリックで翼内20mm機銃（携行弾数は各60発）</li>
+      <li><b>爆撃</b>：B で 250kg → 60kg の順に投下。緑の◇が着弾予測点、赤なら命中コース。急降下で狙うと当てやすい。</li>
+      <li><b>補給</b>：赤城（北方の機動部隊）に着艦すると爆弾・弾薬・損傷が回復。赤城の近く（3km以内・高度600m以下）で L を押すと自動着艦。</li>
+      <li><b>着艦</b>：G で脚を出し、低速で後方から甲板へ。甲板上で停止すると補給開始。Shift で全開、速度が乗ったら S で引き起こして発艦。</li>
+      <li><b>列機</b>：小隊の2・3番機が左右後方に続く。N で「編隊・援護」と「自由戦闘」を切替。</li>
+      <li><b>米軍の増援</b>：各飛行場は駐機中の戦闘機が残っている限り緊急発進させる。地上撃破で敵の発進を断てる。米空母は撃沈するまで艦載機を発艦させ続ける。</li>
+      <li><b>時間加速</b>：T（敵機が近いと解除）。巡航中に使う。</li>
+    </ul>
+    <button class="btn" id="helpClose">閉じる (H)</button>
+  </div>
+</div>
+
+<div id="result" class="screen hidden">
+  <div class="panel">
+    <h2 id="resTitle"></h2>
+    <div id="resBody"></div>
+    <button class="btn" onclick="location.reload()">もう一度</button>
+  </div>
+</div>
+
+<script type="module" src="js/main.js"></script>
+</body>
+</html>
