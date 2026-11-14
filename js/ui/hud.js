@@ -25,6 +25,7 @@ export class HUD {
     this.canvas.width = innerWidth * dpr; this.canvas.height = innerHeight * dpr;
     this.W = innerWidth; this.H = innerHeight;
     this.compact = this.forceCompact || innerHeight < 560 || innerWidth < 900;
+    this.portrait = innerWidth < 600; // 縦向き: 方位の目盛りを2段目に下ろし、上段の枠を詰める
   }
   message(text, kind = 'normal') {
     if (this.msgs.length && this.msgs[0].text === text) { this.msgs[0].t = kind === 'big' ? 3.5 : 2.5; return; }
@@ -167,9 +168,9 @@ export class HUD {
 
   drawInstrumentsCompact() {
     const g = this.game, c = this.ctx, pl = g.player, fl = pl.brain;
-    const x = 10, y = 16;
-    c.fillStyle = 'rgba(10,12,10,0.3)'; c.fillRect(x - 6, y - 12, 172, 46);
-    this.text(`${Math.round(pl.vel.length() * 3.6)}km/h  ${Math.round(pl.pos.y)}m`, x, y, WHITE, 16, 'left', true);
+    const x = 10, y = 16, pw = this.portrait ? 140 : 172;
+    c.fillStyle = 'rgba(10,12,10,0.3)'; c.fillRect(x - 6, y - 12, pw, 46);
+    this.text(`${Math.round(pl.vel.length() * 3.6)}km/h ${Math.round(pl.pos.y)}m`, x, y, WHITE, this.portrait ? 15 : 16, 'left', true);
     this.text(t('残機 {l}', { l: '◆'.repeat(Math.max(0, g.lives)) }), x, y + 21, ORANGE, 14, 'left', true);
     this.drawWarnings();
   }
@@ -202,8 +203,8 @@ export class HUD {
     const g = this.game, c = this.ctx, pl = g.player, W = this.W;
     const hdg = (Math.atan2(pl.fwd.x, -pl.fwd.z) * 180 / Math.PI + 360) % 360;
     const k = this.compact ? 1.4 : 1;          // スマホでは大きく
-    const cx = W / 2, y = this.compact ? 30 : 26;
-    const cw = this.compact ? 130 : 200;
+    const cx = W / 2, y = this.portrait ? 82 : this.compact ? 30 : 26;
+    const cw = this.portrait ? Math.min(130, W / 2 - 60) : this.compact ? 130 : 200;
     const sc = this.compact ? 2.6 : 2.1;       // 1度あたりの幅
     c.fillStyle = 'rgba(10,12,10,0.4)'; c.fillRect(cx - cw, y - 14 * k, cw * 2, 30 * k);
     const names = { 0: '北', 45: '北東', 90: '東', 135: '南東', 180: '南', 225: '南西', 270: '西', 315: '北西' };
@@ -227,10 +228,11 @@ export class HUD {
   drawObjectives() {
     const g = this.game, c = this.ctx, W = this.W;
     if (this.compact) {
-      const x = W - 212, y = 20;
-      c.fillStyle = 'rgba(10,12,10,0.3)'; c.fillRect(x - 9, y - 15, 212, 66);
-      this.text(t('戦艦 {a}/8  空母 {b}/3', { a: g.stats.bbSunk, b: g.stats.cvSunk }), x, y, WHITE, 20, 'left', true);
-      this.text(t('米軍機 {n}', { n: g.usRemaining() }), x, y + 28, '#ffb0a0', 19, 'left', true);
+      const pw = this.portrait ? 178 : 212, f1 = this.portrait ? 17 : 20, f2 = this.portrait ? 16 : 19;
+      const x = W - pw, y = this.portrait ? 18 : 20;
+      c.fillStyle = 'rgba(10,12,10,0.3)'; c.fillRect(x - 9, y - 15, pw, this.portrait ? 54 : 66);
+      this.text(t('戦艦 {a}/8  空母 {b}/3', { a: g.stats.bbSunk, b: g.stats.cvSunk }), x, y, WHITE, f1, 'left', true);
+      this.text(t('米軍機 {n}', { n: g.usRemaining() }), x, y + (this.portrait ? 23 : 28), '#ffb0a0', f2, 'left', true);
       return;
     }
     const x = W - 178, y = 14;
@@ -245,9 +247,9 @@ export class HUD {
 
   drawMinimap() {
     const g = this.game, c = this.ctx, W = this.W, H = this.H;
-    const S = this.compact ? Math.min(180, H * 0.42) : Math.min(240, Math.max(160, W * 0.17));
+    const S = this.portrait ? Math.min(150, W * 0.33) : this.compact ? Math.min(180, H * 0.42) : Math.min(240, Math.max(160, W * 0.17));
     // スマホ: 左上（速度パネルの直下）、PC: 右下
-    const x0 = this.compact ? 10 : W - S - 16, y0 = this.compact ? 68 : H - S - 16;
+    const x0 = this.compact ? 10 : W - S - 16, y0 = this.portrait ? 130 : this.compact ? 68 : H - S - 16;
     const pl = g.player || g.lastPlayer;
     const range = this.mapZoom === 0 ? TERRAIN.size : this.mapZoom === 1 ? 25000 : 12000;
     const cx = this.mapZoom === 0 ? TERRAIN.x0 + TERRAIN.size / 2 : (pl ? pl.pos.x : 0);
@@ -303,18 +305,20 @@ export class HUD {
   }
 
   drawMessages(dt) {
-    let y = this.compact ? 104 : 120;
+    let y = this.portrait ? 145 : this.compact ? 104 : 120;
+    // 縦向きは地図（左）の右側の空きに表示
+    const mx = this.portrait ? (this.mapRect ? (this.mapRect.x + this.mapRect.w + this.W) / 2 : this.W / 2) : this.W / 2;
     for (let i = this.msgs.length - 1; i >= 0; i--) { this.msgs[i].t -= dt; if (this.msgs[i].t <= 0) this.msgs.splice(i, 1); }
     for (const m of this.msgs) {
       const a = clamp(m.t, 0, 1);
       this.ctx.globalAlpha = a;
       const col = m.kind === 'big' ? '#ffe08a' : m.kind === 'bad' ? '#ff7a6a' : m.kind === 'info' ? '#a8dcff' : '#ffffff';
-      const size = this.compact ? (m.kind === 'big' ? 18 : 15) : (m.kind === 'big' ? 26 : 20);
+      const size = this.portrait ? (m.kind === 'big' ? 16 : 14) : this.compact ? (m.kind === 'big' ? 18 : 15) : (m.kind === 'big' ? 26 : 20);
       const c = this.ctx;
       c.font = `900 ${size}px "Hiragino Sans","Noto Sans JP","Yu Gothic","Meiryo",sans-serif`;
       c.textAlign = 'center'; c.textBaseline = 'middle';
-      c.lineJoin = 'round'; c.lineWidth = 5; c.strokeStyle = 'rgba(0,0,0,0.85)'; c.strokeText(m.text, this.W / 2, y);
-      c.fillStyle = col; c.fillText(m.text, this.W / 2, y);
+      c.lineJoin = 'round'; c.lineWidth = 5; c.strokeStyle = 'rgba(0,0,0,0.85)'; c.strokeText(m.text, mx, y);
+      c.fillStyle = col; c.fillText(m.text, mx, y);
       y += size + 12;
     }
     this.ctx.globalAlpha = 1;

@@ -72,7 +72,7 @@ const HTML_EN = {
   lead: 'You lead Akagi\'s fighter section. Destroy the US Pacific Fleet.<br><b>Win: sink 8 battleships and 3 carriers</b>',
   sub: 'December 8, 1941 (Japan time) — December 7 in Hawaii',
   start: 'SORTIE', how: 'HOW TO PLAY', privacy: 'Privacy policy', adSettings: 'Ad settings', toTitle: 'Back to title', share: 'Share',
-  mobile: 'On phones, play in landscape. Drag the left side to fly; buttons at lower right to fire and bomb.',
+  mobile: 'Portrait or landscape. Drag the left side to fly; buttons at lower right to fire and bomb.',
   shotdown: 'Shot down', respawn: 'Sortie again from Akagi', paused: 'Paused', pauseHint: 'Press P or Esc to resume', resume: 'Resume', again: 'Play again',
   help: `<h2>How to play</h2>
     <h3>Mission</h3>
@@ -85,7 +85,7 @@ const HTML_EN = {
       <li><b>Gun</b>: Space or click fires the 20 mm cannon</li>
       <li><b>Bombs</b>: B drops 250 kg then 60 kg bombs. A red ◇ appears when a bomb would hit a battleship or carrier — release then. Dive to aim.</li>
       <li><b>Other</b>: G gear, V camera, middle-drag / Shift+drag to look around, T time warp, M map zoom, N wingman orders, K music, P pause, H help</li>
-      <li><b>Phone / tablet</b> (landscape): <b>drag the left half to fly</b> (up = climb, down = dive, left/right = roll). Hold <b>GUN</b> to fire, <b>BOMB</b> to drop, hold <b>BOOST</b> for full power. A <b>Land</b> button appears near Akagi. Ⅱ at the top right pauses.</li>
+      <li><b>Phone / tablet</b> (portrait or landscape): <b>drag the left half to fly</b> (up = climb, down = dive, left/right = roll). Hold <b>GUN</b> to fire, <b>BOMB</b> to drop, hold <b>BOOST</b> for full power. A <b>Land</b> button appears near Akagi. Ⅱ at the top right pauses.</li>
       <li><b>Gamepad</b>: left stick to fly, right stick rudder, RT/LT gun, A bomb, Y camera, LB/RB throttle</li>
     </ul>
     <h3>Rearming and landing</h3>

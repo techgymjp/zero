@@ -83,3 +83,15 @@ body.app .screen { padding-bottom: 64px; }
   .rank { font-size: 18px; margin: 2px 0; }
 }
 #mapTap { position: absolute; pointer-events: auto; touch-action: none; }
+/* 背の低い横向き画面（スマホ横持ち）: タイトル画面を詰めて「出撃」が最初から見えるように */
+@media (max-height: 450px) and (orientation: landscape) {
+  #title .panel { padding: 8px 16px; }
+  #title .sub, #title .sub2 { display: none; }
+  #title h1 { font-size: 30px; margin: 0; }
+  #title h1 span { font-size: 0.6em; margin-top: 0; letter-spacing: 0.2em; }
+  #title .langsw { margin: 4px 0 0; }
+  #title .lead { font-size: 13px; line-height: 1.5; margin: 4px 0 2px; }
+  #title .btn { font-size: 15px; padding: 6px 22px; margin: 3px; }
+  #title .appinfo { margin-top: 4px; }
+  #title .mobile-hint { margin: 2px 0 0; font-size: 12px; }
+}
