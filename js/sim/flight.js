@@ -50,6 +50,13 @@ export class PlayerFlight {
       ac.throttle = clamp(ac.throttle + clamp(tgt - ac.throttle, -0.5 * dt, 0.8 * dt), 0, 1);
     } else ac.throttle = clamp(ac.throttle + inp.throttle * dt * 0.6, 0, 1);
     if (inp.gearToggle) { this.gear = !this.gear; g.message(t(this.gear ? '脚下げ' : '脚上げ')); }
+    // 脚の自動操作: 離陸して上昇したら格納、低空・低速で降下中（着艦進入）なら出す
+    if (!this.onGround) {
+      const agl = ac.pos.y - Math.max(0, g.terrain.groundAt(ac.pos.x, ac.pos.z));
+      const kmh = ac.vel.length() * 3.6;
+      if (this.gear && agl > 40 && kmh > 200 && ac.vel.y > -2) { this.gear = false; this.autoGear = true; }
+      else if (!this.gear && agl < 80 && kmh < 230 && ac.vel.y < 0) { this.gear = true; this.autoGear = true; }
+    }
     if (ac.model.userData.gear) ac.model.userData.gear.visible = this.gear;
     ac.trigger.mg = inp.fireMG; ac.trigger.cannon = inp.fireCannon;
 
