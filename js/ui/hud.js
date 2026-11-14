@@ -227,10 +227,10 @@ export class HUD {
   drawObjectives() {
     const g = this.game, c = this.ctx, W = this.W;
     if (this.compact) {
-      const x = W - 168, y = 16;
-      c.fillStyle = 'rgba(10,12,10,0.3)'; c.fillRect(x - 7, y - 12, 168, 54);
-      this.text(t('戦艦 {a}/8  空母 {b}/3', { a: g.stats.bbSunk, b: g.stats.cvSunk }), x, y, WHITE, 16, 'left', true);
-      this.text(t('米軍機 {n}', { n: g.usRemaining() }), x, y + 22, '#ffb0a0', 14, 'left', true);
+      const x = W - 212, y = 20;
+      c.fillStyle = 'rgba(10,12,10,0.3)'; c.fillRect(x - 9, y - 15, 212, 66);
+      this.text(t('戦艦 {a}/8  空母 {b}/3', { a: g.stats.bbSunk, b: g.stats.cvSunk }), x, y, WHITE, 20, 'left', true);
+      this.text(t('米軍機 {n}', { n: g.usRemaining() }), x, y + 28, '#ffb0a0', 19, 'left', true);
       return;
     }
     const x = W - 178, y = 14;
