@@ -1,3 +1,4 @@
+import { t } from './i18n.js';
 // スマホ・タブレット用タッチ操作
 export function isTouchDevice() {
   return ('ontouchstart' in window) || navigator.maxTouchPoints > 0 || matchMedia('(pointer: coarse)').matches;
@@ -10,17 +11,17 @@ export class TouchControls {
     const root = document.createElement('div');
     root.id = 'touch';
     root.innerHTML = `
-      <div id="stickZone"><div id="stickBase"><div id="stickKnob"></div></div><div class="hint">ここをなぞって操縦</div></div>
+      <div id="stickZone"><div id="stickBase"><div id="stickKnob"></div></div><div class="hint">${t('ここをなぞって操縦')}</div></div>
       <div id="tbtns">
         <div class="col">
-          <button data-hold="boost" class="tb boost">加速</button>
+          <button data-hold="boost" class="tb boost">${t('加速')}</button>
         </div>
         <div class="col">
-          <button data-hold="mg" class="tb fire">機銃</button>
-          <button data-key="KeyB" class="tb bomb">爆弾</button>
+          <button data-hold="mg" class="tb fire">${t('機銃')}</button>
+          <button data-key="KeyB" class="tb bomb">${t('爆弾')}</button>
         </div>
       </div>
-      <button data-key="KeyL" class="tb land" id="landBtn">着艦</button>
+      <button data-key="KeyL" class="tb land" id="landBtn">${t('着艦') === '着艦' ? '着艦' : 'Land'}</button>
       <button data-key="KeyP" class="tb pause" aria-label="一時停止">Ⅱ</button>`;
     document.body.appendChild(root);
     this.root = root;

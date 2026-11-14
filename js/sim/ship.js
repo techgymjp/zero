@@ -1,5 +1,6 @@
 // 艦艇エンティティ
 import * as THREE from 'three';
+import { t, shortName } from '../i18n.js';
 import { segAABB, rand, randSigned, clamp } from '../util.js';
 import { AABattery } from './aa.js';
 
@@ -88,7 +89,7 @@ export class Ship {
     if (this.special === 'arizona' && kind === 'bomb' && bombKind === 250 && local && local.z > this.L * 0.1 && rand() < 0.45) {
       const p = this.localToWorld(new THREE.Vector3(0, 10, this.L * 0.25));
       g.fx.megaExplosion(p); g.audio.explosion(p, 3);
-      g.message(`${this.name.replace(/^戦艦/, '')} 誘爆！`, 'big');
+      g.message(t('{n} 誘爆！', { n: shortName(this.name) }), 'big');
       this.hp = 0;
       this.addFire(new THREE.Vector3(0, this.deckY, this.L * 0.25), 3);
       this.addFire(new THREE.Vector3(0, this.deckY, this.L * 0.05), 2.5);

@@ -16,31 +16,32 @@
 
 <div id="title" class="screen">
   <div class="panel title-panel">
-    <div class="sub">昭和十六年十二月八日（ハワイ時間 十二月七日）</div>
+    <div class="sub" data-i18n="sub">昭和十六年十二月八日（ハワイ時間 十二月七日）</div>
     <h1>零戦<span>真珠湾攻撃</span></h1>
     <div class="sub2">ZERO — ATTACK ON PEARL HARBOR</div>
-    <p class="lead">赤城戦闘機隊の小隊長として、米太平洋艦隊を撃滅せよ。<br><b>勝利条件：戦艦8隻・空母3隻を撃沈</b></p>
-    <button id="startBtn" class="btn">出撃</button>
+    <div class="langsw"><button data-lang="ja">日本語</button><button data-lang="en">English</button></div>
+    <p class="lead" data-i18n="lead">赤城戦闘機隊の小隊長として、米太平洋艦隊を撃滅せよ。<br><b>勝利条件：戦艦8隻・空母3隻を撃沈</b></p>
+    <button id="startBtn" class="btn" data-i18n="start">出撃</button>
     <div id="loading" class="loading hidden"><div class="bar"><div id="loadbar"></div></div><div id="loadmsg"></div></div>
-    <button id="howBtn" class="btn sub-btn">遊び方</button>
-    <p class="mobile-hint">スマホは横向きで。画面左側をなぞって操縦、右下のボタンで射撃・爆撃。</p>
+    <button id="howBtn" class="btn sub-btn" data-i18n="how">遊び方</button>
+    <p class="mobile-hint" data-i18n="mobile">スマホは横向きで。画面左側をなぞって操縦、右下のボタンで射撃・爆撃。</p>
   </div>
 </div>
 
 <div id="respawn" class="screen hidden">
   <div class="panel small">
-    <h2>被撃墜</h2>
+    <h2 data-i18n="shotdown">被撃墜</h2>
     <p id="respawnInfo"></p>
-    <button class="btn" id="rsAkagi">空母赤城から再出撃</button>
+    <button class="btn" id="rsAkagi" data-i18n="respawn">空母赤城から再出撃</button>
   </div>
 </div>
 
 <div id="pause" class="screen hidden">
-  <div class="panel small"><h2>一時停止</h2><p>P または Esc で再開</p><button class="btn" id="resumeBtn">再開</button><button class="btn" id="muteBtn">音: 入</button><button class="btn" id="engBtn">エンジン音: 普通</button><button class="btn" id="bgmBtn">BGM: 入 (K)</button></div>
+  <div class="panel small"><h2 data-i18n="paused">一時停止</h2><p data-i18n="pauseHint">P または Esc で再開</p><button class="btn" id="resumeBtn" data-i18n="resume">再開</button><button class="btn" id="muteBtn">音: 入</button><button class="btn" id="engBtn">エンジン音: 普通</button><button class="btn" id="bgmBtn">BGM: 入 (K)</button></div>
 </div>
 
 <div id="help" class="screen hidden">
-  <div class="panel help">
+  <div class="panel help" data-i18n="help">
     <h2>遊び方</h2>
     <h3>作戦</h3>
     <p>昭和16年12月7日 07:40（現地時間）。貴官は空母<b>赤城</b>戦闘機隊の<b>小隊長</b>。赤城の甲板から発艦し、列機2機を率いて真珠湾へ向かう。第一次攻撃隊はオアフ島北端<b>カフク岬</b>上空から<b>西海岸沿いに南下</b>し、<b>バーバーズ岬</b>で北東へ転じて真珠湾へ突入する（地図の点線）。</p>
@@ -76,7 +77,7 @@
   <div class="panel">
     <h2 id="resTitle"></h2>
     <div id="resBody"></div>
-    <button class="btn" onclick="location.reload()">もう一度</button>
+    <button class="btn" onclick="location.reload()" data-i18n="again">もう一度</button>
   </div>
 </div>
 

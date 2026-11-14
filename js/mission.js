@@ -1,5 +1,6 @@
 // 作戦: 世界の構築・敵味方の配置・増援
 import * as THREE from 'three';
+import { t } from './i18n.js';
 import { buildBattleship, buildCarrier, buildCruiser, buildDestroyer, buildAux, buildKongo, BB_SPECS } from './models/ships.js';
 import { Ship } from './sim/ship.js';
 import { Aircraft } from './sim/aircraft.js';
@@ -207,7 +208,7 @@ export class Director {
       const toPl = pl.pos.clone().sub(p).normalize();
       spawnAircraft(g, type, p, toPl, 120, (a) => { const b = new FighterBrain(a, { role: 'cap', home: [pl.pos.x, pl.pos.z] }); b.target = pl; return b; });
     }
-    g.message('敵機接近', 'bad');
+    g.message(t('敵機接近'), 'bad');
   }
 
   spawnWave() {
@@ -215,7 +216,7 @@ export class Director {
     this.waveN++;
     const pref = this.waveN % 2 === 0 ? 'CV' : 'BB';
     const name = this.waveN === 1 ? '第二次攻撃隊' : `第${this.waveN + 1}次攻撃隊`;
-    g.message('攻撃隊 増援', 'info');
+    g.message(t('攻撃隊 増援'), 'info');
     const origin = new THREE.Vector3(BARBERS[0] + 2000, 2600, BARBERS[1] + 1000);
     const target = pref === 'CV' ? new THREE.Vector3(US_TF.center[0], 0, US_TF.center[1]) : new THREE.Vector3(0, 0, 0);
     const fwd = target.clone().sub(origin).setY(0).normalize();

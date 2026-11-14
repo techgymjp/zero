@@ -1,5 +1,6 @@
 // プレイヤー機の飛行力学（零戦二一型を基準）
 import * as THREE from 'three';
+import { t } from '../i18n.js';
 import { clamp, lerp, DEG } from '../util.js';
 
 const G = 9.81;
@@ -48,7 +49,7 @@ export class PlayerFlight {
       const tgt = inp.touch.boost ? 1 : (this.onGround ? 0 : 0.72);
       ac.throttle = clamp(ac.throttle + clamp(tgt - ac.throttle, -0.5 * dt, 0.8 * dt), 0, 1);
     } else ac.throttle = clamp(ac.throttle + inp.throttle * dt * 0.6, 0, 1);
-    if (inp.gearToggle) { this.gear = !this.gear; g.message(this.gear ? '脚下げ' : '脚上げ'); }
+    if (inp.gearToggle) { this.gear = !this.gear; g.message(t(this.gear ? '脚下げ' : '脚上げ')); }
     if (ac.model.userData.gear) ac.model.userData.gear.visible = this.gear;
     ac.trigger.mg = inp.fireMG; ac.trigger.cannon = inp.fireCannon;
 
@@ -130,7 +131,7 @@ export class PlayerFlight {
         ac.pos.y = surf.y + P.gearH;
         g.onTouchdown(surf, this.arrest);
       } else if (h < 0.4) {
-        g.playerCrash(surf.kind === 'water' ? '海面に墜落' : surf.kind === 'deck' ? '着艦失敗' : '地面に激突');
+        g.playerCrash(t(surf.kind === 'water' ? '海面に墜落' : surf.kind === 'deck' ? '着艦失敗' : '地面に激突'));
       }
     }
   }

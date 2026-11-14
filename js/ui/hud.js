@@ -1,5 +1,6 @@
 // ヘッドアップ表示・ミニマップ
 import * as THREE from 'three';
+import { t, nm } from '../i18n.js';
 import { TERRAIN, ROUTE_WEST, KAHUKU_START, LANDMARKS } from '../world/geo.js';
 import { predictImpact } from '../sim/weapons.js';
 import { clamp, fmtTime } from '../util.js';
@@ -118,7 +119,7 @@ export class HUD {
           for (const s of g.ships) if (s.side === 'us' && !s.sunk && s.distanceToHull(ip) < 4) onShip = true;
           c.strokeStyle = onShip ? RED : GREEN; c.lineWidth = 2;
           c.beginPath(); c.moveTo(sp[0], sp[1] - 10); c.lineTo(sp[0] + 10, sp[1]); c.lineTo(sp[0], sp[1] + 10); c.lineTo(sp[0] - 10, sp[1]); c.closePath(); c.stroke();
-          this.text(onShip ? '命中コース' : '着弾点', sp[0] + 14, sp[1], onShip ? RED : GREEN, 12);
+          this.text(onShip ? t('命中コース') : t('着弾点'), sp[0] + 14, sp[1], onShip ? RED : GREEN, 12);
         }
       }
     }
@@ -136,11 +137,11 @@ export class HUD {
       if (o.side === 'us') {
         c.strokeStyle = RED; c.lineWidth = 1.5;
         c.strokeRect(p[0] - s, p[1] - s, s * 2, s * 2);
-        if (d < 2500) this.text(`${o.name} ${(d / 1000).toFixed(1)}km`, p[0] + s + 4, p[1] - s, RED, 11);
+        if (d < 2500) this.text(`${nm(o.name)} ${(d / 1000).toFixed(1)}km`, p[0] + s + 4, p[1] - s, RED, 11);
       } else {
         c.strokeStyle = o.wingman ? '#c5e7ff' : BLUE; c.lineWidth = 1;
         c.beginPath(); c.moveTo(p[0], p[1] - s); c.lineTo(p[0] + s, p[1] + s); c.lineTo(p[0] - s, p[1] + s); c.closePath(); c.stroke();
-        if (o.wingman && d < 3000) this.text(o.name, p[0] + s + 4, p[1], BLUE, 11);
+        if (o.wingman && d < 3000) this.text(nm(o.name), p[0] + s + 4, p[1], BLUE, 11);
       }
     }
     for (const s of g.ships) {
@@ -151,7 +152,7 @@ export class HUD {
       if (!p) continue;
       if (s.side === 'jp') {
         if (s !== g.akagi || d < 1500) continue;
-        this.text(`▼ 赤城 ${(d / 1000).toFixed(1)}km`, p[0], p[1] - 10, BLUE, 13, 'center', true);
+        this.text(t('▼ 赤城 {d}km', { d: (d / 1000).toFixed(1) }), p[0], p[1] - 10, BLUE, 13, 'center', true);
         continue;
       }
       const col = s.sunk ? '#999' : s.isTarget ? '#ffd166' : '#d9a';
@@ -161,7 +162,7 @@ export class HUD {
         continue;
       }
       if (s.isTarget || d < 4000) {
-        this.text(`${s.sunk ? '✕ ' : ''}${s.name}${d > 3000 ? ' ' + (d / 1000).toFixed(1) + 'km' : ''}`, p[0], p[1] - 16, col, s.isTarget ? 13 : 11, 'center', s.isTarget);
+        this.text(`${s.sunk ? '✕ ' : ''}${nm(s.name)}${d > 3000 ? ' ' + (d / 1000).toFixed(1) + 'km' : ''}`, p[0], p[1] - 16, col, s.isTarget ? 13 : 11, 'center', s.isTarget);
         if (!s.sunk) {
           const w = 60, f = Math.max(0, s.hp / s.maxHp);
           c.fillStyle = 'rgba(0,0,0,0.5)'; c.fillRect(p[0] - w / 2, p[1] - 6, w, 5);
@@ -179,22 +180,22 @@ export class HUD {
     const f = clamp(pl.hp / pl.maxHp, 0, 1);
     c.fillStyle = 'rgba(0,0,0,0.4)'; c.fillRect(x, y + 13, 155, 7);
     c.fillStyle = f > 0.5 ? '#7ee07e' : f > 0.25 ? '#ffd166' : RED; c.fillRect(x, y + 13, 155 * f, 7);
-    this.text(`残機 ${'◆'.repeat(Math.max(0, g.lives))}`, x, y + 32, ORANGE, 14, 'left', true);
+    this.text(t('残機 {l}', { l: '◆'.repeat(Math.max(0, g.lives)) }), x, y + 32, ORANGE, 14, 'left', true);
     this.drawWarnings();
   }
 
   drawWarnings() {
     const g = this.game, pl = g.player, fl = pl.brain;
-    if (fl.stalled) this.text('失 速', this.W / 2, this.H / 2 + 90, RED, 24, 'center', true);
+    if (fl.stalled) this.text(t('失 速'), this.W / 2, this.H / 2 + 90, RED, 24, 'center', true);
     const gh = g.terrain.groundAt(pl.pos.x, pl.pos.z);
-    if (!fl.onGround && pl.vel.y < -5 && (pl.pos.y - gh) / -pl.vel.y < 5) this.text('引き起こせ！', this.W / 2, this.H / 2 + 118, RED, 22, 'center', true);
-    if (pl.onFire) this.text('火災発生', this.W / 2, this.H / 2 + 146, RED, 18, 'center', true);
-    const t = this.compact ? '「加速」長押し → スティックを上へで発艦' : 'Shift で全開 → W で引き起こして発艦';
-    if (fl.onGround && fl.onGround.kind === 'deck') this.text(g.rearmT > 0 ? `補給中… ${Math.ceil(g.rearmT)}` : t, this.W / 2, this.H / 2 + 64, GREEN, 15, 'center', true);
+    if (!fl.onGround && pl.vel.y < -5 && (pl.pos.y - gh) / -pl.vel.y < 5) this.text(t('引き起こせ！'), this.W / 2, this.H / 2 + 118, RED, 22, 'center', true);
+    if (pl.onFire) this.text(t('火災発生'), this.W / 2, this.H / 2 + 146, RED, 18, 'center', true);
+    const hint = this.compact ? t('「加速」長押し → スティックを上へで発艦') : t('Shift で全開 → W で引き起こして発艦');
+    if (fl.onGround && fl.onGround.kind === 'deck') this.text(g.rearmT > 0 ? t('補給中… {n}', { n: Math.ceil(g.rearmT) }) : hint, this.W / 2, this.H / 2 + 64, GREEN, 15, 'center', true);
     const ak = g.akagi;
     const canLand = !!ak && !fl.onGround && pl.pos.distanceTo(ak.pos) < 3000 && pl.pos.y < 600;
     g.input.touchUI?.setLand(canLand);
-    if (canLand && !g.input.touchUI) this.text('L: 着艦（自動）', this.W / 2, this.H / 2 + 64, GREEN, 15, 'center', true);
+    if (canLand && !g.input.touchUI) this.text(t('L: 着艦（自動）'), this.W / 2, this.H / 2 + 64, GREEN, 15, 'center', true);
   }
 
   drawInstruments() {
@@ -203,13 +204,13 @@ export class HUD {
     const x = 22, y = H - 92;
     c.fillStyle = 'rgba(10,12,10,0.35)'; c.fillRect(x - 10, y - 18, 230, 100);
     const spd = pl.vel.length() * 3.6;
-    this.text(`速度 ${Math.round(spd).toString().padStart(3)} km/h`, x, y, WHITE, 16, 'left', true);
-    this.text(`高度 ${Math.round(pl.pos.y).toString().padStart(4)} m`, x, y + 22, WHITE, 16, 'left', true);
+    this.text(t('速度 {v} km/h', { v: Math.round(spd).toString().padStart(3) }), x, y, WHITE, 16, 'left', true);
+    this.text(t('高度 {v} m', { v: Math.round(pl.pos.y).toString().padStart(4) }), x, y + 22, WHITE, 16, 'left', true);
     const f = clamp(pl.hp / pl.maxHp, 0, 1);
-    this.text('機体', x, y + 46, WHITE, 13);
+    this.text(t('機体'), x, y + 46, WHITE, 13);
     c.fillStyle = 'rgba(0,0,0,0.5)'; c.fillRect(x + 36, y + 40, 165, 10);
     c.fillStyle = f > 0.5 ? '#7ee07e' : f > 0.25 ? '#ffd166' : RED; c.fillRect(x + 36, y + 40, 165 * f, 10);
-    this.text(`残機 ${'◆'.repeat(Math.max(0, g.lives))}`, x, y + 68, ORANGE, 14);
+    this.text(t('残機 {l}', { l: '◆'.repeat(Math.max(0, g.lives)) }), x, y + 68, ORANGE, 14);
     this.drawWarnings();
   }
 
@@ -226,13 +227,13 @@ export class HUD {
       if (Math.abs(off) > cw - 5) continue;
       const hh = ((h % 360) + 360) % 360;
       c.strokeStyle = WHITE; c.beginPath(); c.moveTo(cx + off, y + 10); c.lineTo(cx + off, y + (hh % 15 ? 6 : 2)); c.stroke();
-      if (names[hh] !== undefined) this.text(names[hh], cx + off, y - 4, hh % 90 ? WHITE : ORANGE, 13, 'center', true);
+      if (names[hh] !== undefined) this.text(t(names[hh]), cx + off, y - 4, hh % 90 ? WHITE : ORANGE, 13, 'center', true);
       else if (hh % 30 === 0) this.text(String(hh), cx + off, y - 4, '#ccc', 11, 'center');
     }
     c.fillStyle = ORANGE; c.beginPath(); c.moveTo(cx, y + 12); c.lineTo(cx - 6, y + 20); c.lineTo(cx + 6, y + 20); c.fill();
-    const t = 7 * 3600 + 40 * 60 + g.missionTime;
-    const hh = Math.floor(t / 3600), mm = Math.floor(t / 60) % 60;
-    if (!this.compact) this.text(`現地時間 ${hh}:${String(mm).padStart(2, '0')}  (昭和16年12月7日)`, cx, y + 36, '#ddd', 12, 'center');
+    const tm = 7 * 3600 + 40 * 60 + g.missionTime;
+    const hh = Math.floor(tm / 3600), mm = Math.floor(tm / 60) % 60;
+    if (!this.compact) this.text(t('現地時間 {t}  (昭和16年12月7日)', { t: `${hh}:${String(mm).padStart(2, '0')}` }), cx, y + 36, '#ddd', 12, 'center');
   }
 
   drawObjectives() {
@@ -240,18 +241,18 @@ export class HUD {
     if (this.compact) {
       const x = W - 168, y = 16;
       c.fillStyle = 'rgba(10,12,10,0.3)'; c.fillRect(x - 7, y - 12, 168, 54);
-      this.text(`戦艦 ${g.stats.bbSunk}/8  空母 ${g.stats.cvSunk}/3`, x, y, WHITE, 16, 'left', true);
-      this.text(`米軍機 ${g.usRemaining()}`, x, y + 22, '#ffb0a0', 14, 'left', true);
+      this.text(t('戦艦 {a}/8  空母 {b}/3', { a: g.stats.bbSunk, b: g.stats.cvSunk }), x, y, WHITE, 16, 'left', true);
+      this.text(t('米軍機 {n}', { n: g.usRemaining() }), x, y + 22, '#ffb0a0', 14, 'left', true);
       return;
     }
     const x = W - 178, y = 14;
     c.fillStyle = 'rgba(10,12,10,0.35)'; c.fillRect(x - 10, y, 174, 118);
     const bb = g.stats.bbSunk, cv = g.stats.cvSunk;
-    this.text(`戦艦撃沈   ${bb} / 8`, x, y + 16, bb >= 8 ? GREEN : WHITE, 15);
-    this.text(`空母撃沈   ${cv} / 3`, x, y + 38, cv >= 3 ? GREEN : WHITE, 15);
-    this.text(`撃墜 ${g.stats.kills}  地上撃破 ${g.stats.ground}`, x, y + 62, '#ddd', 13);
-    this.text(`戦果 ${g.stats.score} 点   ${fmtTime(g.missionTime)}`, x, y + 84, '#ddd', 13);
-    this.text(`米軍機 残存 ${g.usRemaining()} / 400`, x, y + 104, '#ffb0a0', 13);
+    this.text(t('戦艦撃沈   {n} / 8', { n: bb }), x, y + 16, bb >= 8 ? GREEN : WHITE, 15);
+    this.text(t('空母撃沈   {n} / 3', { n: cv }), x, y + 38, cv >= 3 ? GREEN : WHITE, 15);
+    this.text(t('撃墜 {k}  地上撃破 {g}', { k: g.stats.kills, g: g.stats.ground }), x, y + 62, '#ddd', 13);
+    this.text(t('戦果 {s} 点   {t}', { s: g.stats.score, t: fmtTime(g.missionTime) }), x, y + 84, '#ddd', 13);
+    this.text(t('米軍機 残存 {n} / 400', { n: g.usRemaining() }), x, y + 104, '#ffb0a0', 13);
   }
 
   drawMinimap() {
@@ -276,7 +277,7 @@ export class HUD {
     c.strokeStyle = 'rgba(255,220,120,0.8)'; c.setLineDash([4, 4]); c.lineWidth = 1.5;
     c.beginPath(); [KAHUKU_START, ...ROUTE_WEST].forEach((p, i) => { const q = tx(p[0], p[1]); i ? c.lineTo(q[0], q[1]) : c.moveTo(q[0], q[1]); });
     const q0 = tx(0, 0); c.lineTo(q0[0], q0[1]); c.stroke(); c.setLineDash([]);
-    if (this.mapZoom !== 2) for (const l of LANDMARKS) { const q = tx(l.p[0], l.p[1]); this.text(l.name, q[0], q[1], 'rgba(255,255,255,0.7)', 10, 'center'); }
+    if (this.mapZoom !== 2) for (const l of LANDMARKS) { const q = tx(l.p[0], l.p[1]); this.text(nm(l.name), q[0], q[1], 'rgba(255,255,255,0.7)', 10, 'center'); }
     for (const s of g.ships) {
       if (s.removed) continue;
       const q = tx(s.pos.x, s.pos.z);
@@ -300,12 +301,12 @@ export class HUD {
     }
     c.restore();
     c.strokeStyle = 'rgba(255,255,255,0.6)'; c.strokeRect(x0, y0, S, S);
-    if (!this.compact) this.text(`地図 (M) ${this.mapZoom === 0 ? '全島' : this.mapZoom === 1 ? '30km' : '10km'}`, x0 + 4, y0 - 9, '#ddd', 11);
+    if (!this.compact) this.text(t('地図 (M) {z}', { z: this.mapZoom === 0 ? t('全島') : this.mapZoom === 1 ? '30km' : '10km' }), x0 + 4, y0 - 9, '#ddd', 11);
     // 赤城の方位
     if (pl && g.akagi) {
       const d = g.akagi.pos.distanceTo(pl.pos);
-      if (this.compact) this.text(`赤城 ${(d / 1000).toFixed(1)}km`, x0 + 2, y0 - 9, BLUE, 12);
-      else this.text(`赤城まで ${(d / 1000).toFixed(1)}km`, x0 + S, y0 - 9, BLUE, 11, 'right');
+      if (this.compact) this.text(t('赤城 {d}km', { d: (d / 1000).toFixed(1) }), x0 + 2, y0 - 9, BLUE, 12);
+      else this.text(t('赤城まで {d}km', { d: (d / 1000).toFixed(1) }), x0 + S, y0 - 9, BLUE, 11, 'right');
     }
   }
 

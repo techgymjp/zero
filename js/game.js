@@ -1,5 +1,6 @@
 // ゲーム本体
 import * as THREE from 'three';
+import { t, nm, shortName } from './i18n.js';
 import { Terrain } from './world/terrain.js';
 import { buildSky, buildLights, buildWater, updateSunShadow, cloudTexture, cloudLayout, FOG_COLOR } from './world/environment.js';
 import { staticBillboards } from './fx/particles.js';
@@ -59,22 +60,22 @@ export class Game {
       renderer.setSize(innerWidth, innerHeight);
       this.camera.aspect = innerWidth / innerHeight; this.camera.updateProjectionMatrix();
     });
-    await step('空と海を生成中…', 5);
+    await step(t('空と海を生成中…'), 5);
     buildSky(scene, renderer);
     this.lights = buildLights(scene);
     this.water = buildWater(); scene.add(this.water);
-    await step('オアフ島の地形を生成中…', 15);
+    await step(t('オアフ島の地形を生成中…'), 15);
     this.terrain = new Terrain();
     scene.add(this.terrain.mesh);
-    await step('雲を生成中…', 45);
+    await step(t('雲を生成中…'), 45);
     this.clouds = staticBillboards(cloudLayout(), cloudTexture(), [1, 1, 1, 0.8]);
     scene.add(this.clouds.mesh);
     this.fx = new Effects(scene);
     initMaterials();
-    await step('艦艇を建造中…', 55);
+    await step(t('艦艇を建造中…'), 55);
     this.bullets = new Bullets(this); this.bombs = new Bombs(this); this.torpedoes = new Torpedoes(this);
     setupShips(this);
-    await step('飛行場を構築中…', 75);
+    await step(t('飛行場を構築中…'), 75);
     this.ground = new Ground(this);
     this.hud = new HUD(this);
     this.director = new Director(this);
@@ -84,13 +85,13 @@ export class Game {
     const cvTotal = Math.max(30, US_TOTAL - parked - capTotal);
     this.usCarriers.forEach((cv, i) => { cv.airGroup = Math.floor(cvTotal / 3) + (i < cvTotal % 3 ? 1 : 0); });
     this.usLost = 0;
-    await step('音声を準備中…', 85);
+    await step(t('音声を準備中…'), 85);
     this.audio.init();
     await Promise.all([this.audio.prepare(), this.music.prerender()]);
-    await step('攻撃隊 発進準備…', 95);
+    await step(t('攻撃隊 発進準備…'), 95);
     // シェーダーを事前コンパイル
     renderer.compile(scene, this.camera);
-    progress('準備完了', 100);
+    progress(t('準備完了'), 100);
   }
 
   usRemaining() {
@@ -111,7 +112,7 @@ export class Game {
     const kf = new THREE.Vector3(ROUTE_WEST[0][0] - kp.x, 0, ROUTE_WEST[0][1] - kp.z).normalize();
     spawnFirstWave(this, kp, kf);
     this.director.initialCAP();
-    setTimeout(() => this.message('赤城より発艦せよ', 'info'), 1000);
+    setTimeout(() => this.message(t('赤城より発艦せよ'), 'info'), 1000);
     this.lastFrame = performance.now();
     requestAnimationFrame(() => this.loop());
   }
@@ -148,9 +149,9 @@ export class Game {
       this.usLost++;
       if (attacker && attacker.isPlayer) {
         this.stats.kills++; this.stats.score += ac.spec.score;
-        this.message(`${ac.name} 撃墜`, 'normal'); this.audio.beep();
+        this.message(t('{n} 撃墜', { n: nm(ac.name) }), 'normal'); this.audio.beep();
       }
-    } else if (ac.wingman) this.message(`${ac.name} 被撃墜`, 'bad');
+    } else if (ac.wingman) this.message(t('{n} 被撃墜', { n: nm(ac.name) }), 'bad');
     if (ac.isPlayer) this.onPlayerDown();
   }
   onPlayerHit(d) { this.hud.hitFlash = Math.min(0.5, this.hud.hitFlash + d * 0.02); this.audio.hit(); }
@@ -160,7 +161,7 @@ export class Game {
     if (s.cls === 'CV') this.stats.cvSunk++;
     if (s.isTarget) this.stats.score += byP ? (s.cls === 'CV' ? 1500 : 1200) : 300;
     else if (byP) this.stats.score += 300;
-    this.message(`${s.name.replace(/^(戦艦|空母)/, '')} 撃沈！`, 'big');
+    this.message(t('{n} 撃沈！', { n: shortName(s.name) }), 'big');
     if (this.stats.bbSunk >= 8 && this.stats.cvSunk >= 3 && this.state === 'play') setTimeout(() => this.finish(true), 4000);
   }
   onGroundDestroyed(t, owner) {
@@ -171,7 +172,7 @@ export class Game {
   }
   onTouchdown(surf, arrest) {
     if (surf.kind === 'deck') {
-      this.message('着艦', 'info');
+      this.message(t('着艦'), 'info');
       this.stats.score += 200;
     }
   }
@@ -219,7 +220,7 @@ export class Game {
     const fl = pl.brain;
     fl.gear = true; fl.onGround = { kind: 'deck', ship: ak }; fl.groundYaw = Math.atan2(ak.fwd.x, ak.fwd.z); fl.arrest = false;
     pl.throttle = 0;
-    this.message('着艦', 'info');
+    this.message(t('着艦'), 'info');
   }
 
   rearm() {
@@ -229,14 +230,14 @@ export class Game {
     if (pl.smoke) { pl.smoke.dead = true; pl.smoke = null; }
     pl.ammo = pl.spec.guns.map(g => (g.ammo === 'mg20' ? 250 : 400) * g.pos.length);
     for (const s of pl.model.userData.stores) if (!s.parent) pl.model.add(s);
-    this.message('補給完了', 'info');
+    this.message(t('補給完了'), 'info');
     this.pendingWingmen = true;
   }
 
   dropBomb() {
     const pl = this.player;
     const st = pl.model.userData.stores.filter(s => s.parent);
-    if (!st.length) { this.message('爆弾なし（赤城で補給）', 'bad'); return; }
+    if (!st.length) { this.message(t('爆弾なし（赤城で補給）'), 'bad'); return; }
     const pick = st.find(s => s.userData.kind === 250) || st[0];
     pl.model.position.copy(pl.pos); pl.model.quaternion.copy(pl.quat); pl.model.updateMatrixWorld(true);
     const wp = pick.getWorldPosition(new THREE.Vector3());
@@ -282,15 +283,15 @@ export class Game {
       const near = this.aircraft.some(a => a.alive && a.side === 'us' && pl && a.pos.distanceTo(pl.pos) < 4000);
       if (this.timeScale > 1) this.timeScale = this.timeScale === 4 ? 8 : 1;
       else if (!near) this.timeScale = 4;
-      else this.message('敵機接近 加速不可', 'bad');
+      else this.message(t('敵機接近 加速不可'), 'bad');
     }
-    if (inp.hit('KeyN')) { this.wingOrder = this.wingOrder === 'free' ? 'cover' : 'free'; this.message(this.wingOrder === 'free' ? '列機：自由戦闘' : '列機：援護', 'info'); }
+    if (inp.hit('KeyN')) { this.wingOrder = this.wingOrder === 'free' ? 'cover' : 'free'; this.message(t(this.wingOrder === 'free' ? '列機：自由戦闘' : '列機：援護'), 'info'); }
     if (inp.hit('KeyH')) this.ui.toggleHelp();
-    if (inp.hit('KeyK')) { const on = this.music.toggle(); this.message(on ? 'BGM 入' : 'BGM 切'); this.ui.syncBgm?.(on); }
+    if (inp.hit('KeyK')) { const on = this.music.toggle(); this.message(t(on ? 'BGM 入' : 'BGM 切')); this.ui.syncBgm?.(on); }
     if (this.state !== 'play' || !pl || !pl.alive) return;
     if (inp.hit('KeyB')) this.dropBomb();
     if (inp.hit('KeyL')) this.autoLand();
-    if (this.timeScale > 1 && this.aircraft.some(a => a.alive && a.side === 'us' && a.pos.distanceTo(pl.pos) < 3000)) { this.timeScale = 1; this.message('敵機接近', 'bad'); }
+    if (this.timeScale > 1 && this.aircraft.some(a => a.alive && a.side === 'us' && a.pos.distanceTo(pl.pos) < 3000)) { this.timeScale = 1; this.message(t('敵機接近'), 'bad'); }
   }
 
   step(dt) {

@@ -65,3 +65,6 @@ select { font-size: 15px; padding: 3px 8px; background: #222; color: var(--ink);
 .tb.land { display: none; background: rgba(40,90,160,0.65); position: absolute; right: 50%; bottom: 18px; transform: translateX(50%); width: 96px; height: 44px; border-radius: 12px; font-size: 16px; }
 .tb.boost { width: 76px; height: 76px; background: rgba(200,160,40,0.5); font-size: 15px; }
 .tb.pause { position: absolute; top: 66px; right: 10px; width: 40px; height: 34px; border-radius: 8px; font-size: 13px; background: rgba(20,20,20,0.35); }
+.langsw { display: flex; justify-content: center; gap: 6px; margin: 10px 0 0; }
+.langsw button { font-family: inherit; background: transparent; color: #bdb8a8; border: 1px solid #666; padding: 4px 12px; cursor: pointer; font-size: 13px; }
+.langsw button.active { color: #fff; border-color: var(--gold); background: rgba(217,180,90,0.2); }
