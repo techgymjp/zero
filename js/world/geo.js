@@ -120,7 +120,8 @@ export const TOWNS = [
 ];
 
 // 機動部隊・米空母部隊の位置
-export const KIDO_BUTAI = { center: [-6000, -46000], radius: 3500, speed: 9 };
+// 機動部隊（赤城）は真珠湾沖（バーバーズ岬の南西、真珠湾から約20km）を周回
+export const KIDO_BUTAI = { center: [-17000, 13500], radius: 3000, speed: 9 };
 export const US_TF = { center: [5000, 21500], radius: 6000, speed: 13 };
 
 export const LANDMARKS = [

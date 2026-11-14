@@ -76,7 +76,7 @@ const HTML_EN = {
   shotdown: 'Shot down', respawn: 'Sortie again from Akagi', paused: 'Paused', pauseHint: 'Press P or Esc to resume', resume: 'Resume', again: 'Play again',
   help: `<h2>How to play</h2>
     <h3>Mission</h3>
-    <p>December 7, 1941, 07:40 local time. You are a <b>section leader</b> of the carrier <b>Akagi</b>'s fighter unit. Take off from Akagi's deck and lead your two wingmen to Pearl Harbor. The first wave flies from over <b>Kahuku Point</b>, down the <b>west coast</b>, turns northeast at <b>Barbers Point</b> and strikes the harbor (the yellow dotted line on the map is a suggested route from Akagi).</p>
+    <p>December 7, 1941, 07:40 local time. You are a <b>section leader</b> of the carrier <b>Akagi</b>'s fighter unit. Take off from Akagi's deck and lead your two wingmen to Pearl Harbor. The first wave flies from over <b>Kahuku Point</b>, down the <b>west coast</b>, turns northeast at <b>Barbers Point</b> and strikes the harbor (the yellow dotted line on the map points from Akagi to Pearl Harbor).</p>
     <p class="warn">In this game the US forces are on alert: anti-aircraft fire is ready, and interceptors keep taking off from every airfield and from <b>three US carriers</b> patrolling south of Pearl Harbor (400 US aircraft in total).</p>
     <p><b>Victory: sink all 8 battleships and 3 carriers.</b> Further strike waves (B5N Kates and D3A Vals) arrive as reinforcements.</p>
     <h3>Controls</h3>
@@ -90,7 +90,7 @@ const HTML_EN = {
     </ul>
     <h3>Rearming and landing</h3>
     <ul>
-      <li>When out of bombs, land on <b>Akagi</b> (north of Oahu) to restore bombs, ammo and damage.</li>
+      <li>When out of bombs, land on <b>Akagi</b> (off Pearl Harbor to the southwest) to restore bombs, ammo and damage.</li>
       <li>Near Akagi (within 3 km, below 600 m) press <b>L</b> to land automatically. To land manually, lower the gear (G) and approach slowly from astern.</li>
       <li>Take-off: full power, then pull up (W / stick up) once you have speed. Your wingmen join after take-off.</li>
     </ul>

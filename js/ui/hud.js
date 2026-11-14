@@ -250,7 +250,7 @@ export class HUD {
     const pl = g.player || g.lastPlayer;
     const range = this.mapZoom === 0 ? TERRAIN.size : this.mapZoom === 1 ? 25000 : 12000;
     const cx = this.mapZoom === 0 ? TERRAIN.x0 + TERRAIN.size / 2 : (pl ? pl.pos.x : 0);
-    const cz = this.mapZoom === 0 ? -6500 : (pl ? pl.pos.z : 0); // 全島表示は北の赤城から南の米空母まで入れる
+    const cz = this.mapZoom === 0 ? -2000 : (pl ? pl.pos.z : 0); // 全島表示は島全体と南の米空母まで入れる
     const k = S / range;
     const tx = (x, z) => [x0 + S / 2 + (x - cx) * k, y0 + S / 2 + (z - cz) * k];
     this.mapRect = { x: x0, y: y0, w: S, h: S };
@@ -264,10 +264,10 @@ export class HUD {
     c.globalAlpha = 1;
     // 侵入ルート
     c.strokeStyle = 'rgba(255,220,120,0.8)'; c.setLineDash([4, 4]); c.lineWidth = 1.5;
-    // 進軍ルートの目安: 赤城の現在地 → カフク岬 → 西海岸 → バーバーズ岬 → 真珠湾
+    // 進軍ルートの目安: 赤城の現在地 → 真珠湾
     const start = g.akagi ? [g.akagi.pos.x, g.akagi.pos.z] : KAHUKU_START;
-    c.beginPath(); [start, KAHUKU_START, ...ROUTE_WEST].forEach((p, i) => { const q = tx(p[0], p[1]); i ? c.lineTo(q[0], q[1]) : c.moveTo(q[0], q[1]); });
-    const q0 = tx(0, 0); c.lineTo(q0[0], q0[1]); c.stroke(); c.setLineDash([]);
+    c.beginPath(); { const a = tx(start[0], start[1]), q0 = tx(0, 0); c.moveTo(a[0], a[1]); c.lineTo(q0[0], q0[1]); }
+    c.stroke(); c.setLineDash([]);
     if (this.mapZoom !== 2) for (const l of LANDMARKS) { const q = tx(l.p[0], l.p[1]); this.text(nm(l.name), q[0], q[1], 'rgba(255,255,255,0.7)', 10, 'center'); }
     for (const s of g.ships) {
       if (s.removed) continue;
