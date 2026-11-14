@@ -167,12 +167,9 @@ export class HUD {
   drawInstrumentsCompact() {
     const g = this.game, c = this.ctx, pl = g.player, fl = pl.brain;
     const x = 10, y = 16;
-    c.fillStyle = 'rgba(10,12,10,0.3)'; c.fillRect(x - 6, y - 12, 172, 58);
+    c.fillStyle = 'rgba(10,12,10,0.3)'; c.fillRect(x - 6, y - 12, 172, 46);
     this.text(`${Math.round(pl.vel.length() * 3.6)}km/h  ${Math.round(pl.pos.y)}m`, x, y, WHITE, 16, 'left', true);
-    const f = clamp(pl.hp / pl.maxHp, 0, 1);
-    c.fillStyle = 'rgba(0,0,0,0.4)'; c.fillRect(x, y + 13, 155, 7);
-    c.fillStyle = f > 0.5 ? '#7ee07e' : f > 0.25 ? '#ffd166' : RED; c.fillRect(x, y + 13, 155 * f, 7);
-    this.text(t('残機 {l}', { l: '◆'.repeat(Math.max(0, g.lives)) }), x, y + 32, ORANGE, 14, 'left', true);
+    this.text(t('残機 {l}', { l: '◆'.repeat(Math.max(0, g.lives)) }), x, y + 21, ORANGE, 14, 'left', true);
     this.drawWarnings();
   }
 
@@ -191,16 +188,12 @@ export class HUD {
   drawInstruments() {
     if (this.compact) return this.drawInstrumentsCompact();
     const g = this.game, c = this.ctx, pl = g.player, fl = pl.brain, H = this.H;
-    const x = 22, y = H - 92;
-    c.fillStyle = 'rgba(10,12,10,0.35)'; c.fillRect(x - 10, y - 18, 230, 100);
+    const x = 22, y = H - 72;
+    c.fillStyle = 'rgba(10,12,10,0.35)'; c.fillRect(x - 10, y - 18, 230, 78);
     const spd = pl.vel.length() * 3.6;
     this.text(t('速度 {v} km/h', { v: Math.round(spd).toString().padStart(3) }), x, y, WHITE, 16, 'left', true);
     this.text(t('高度 {v} m', { v: Math.round(pl.pos.y).toString().padStart(4) }), x, y + 22, WHITE, 16, 'left', true);
-    const f = clamp(pl.hp / pl.maxHp, 0, 1);
-    this.text(t('機体'), x, y + 46, WHITE, 13);
-    c.fillStyle = 'rgba(0,0,0,0.5)'; c.fillRect(x + 36, y + 40, 165, 10);
-    c.fillStyle = f > 0.5 ? '#7ee07e' : f > 0.25 ? '#ffd166' : RED; c.fillRect(x + 36, y + 40, 165 * f, 10);
-    this.text(t('残機 {l}', { l: '◆'.repeat(Math.max(0, g.lives)) }), x, y + 68, ORANGE, 14);
+    this.text(t('残機 {l}', { l: '◆'.repeat(Math.max(0, g.lives)) }), x, y + 46, ORANGE, 14);
     this.drawWarnings();
   }
 
