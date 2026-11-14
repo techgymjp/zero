@@ -348,6 +348,9 @@ export class Game {
           this.wingmen = spawnWingmen(this, pl);
         }
       }
+      // 加速ボタン（スマホ）またはスロットル増（PC）を押している間
+      const inp = this.input;
+      this.audio.setBoost(!!(inp.touch ? inp.touch.boost : inp.throttle > 0));
       this.audio.setEngine(pl.throttle, pl.vel.length(), true);
     }
   }

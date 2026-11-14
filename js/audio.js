@@ -34,6 +34,21 @@ const RECIPES = {
     const g = c.createGain(); g.gain.setValueAtTime(0.0001, 0); g.gain.exponentialRampToValueAtTime(0.5, 0.6); g.gain.exponentialRampToValueAtTime(0.001, 3.5);
     o.connect(g); g.connect(out); o.start(0); o.stop(3.6);
   } },
+  // 加速: エンジンが吹け上がる「ブオォーン」
+  boost: { dur: 1.4, fn: (c, out, noise) => {
+    const o = c.createOscillator(); o.type = 'sawtooth';
+    o.frequency.setValueAtTime(70, 0); o.frequency.exponentialRampToValueAtTime(170, 0.9);
+    const o2 = c.createOscillator(); o2.type = 'square';
+    o2.frequency.setValueAtTime(35, 0); o2.frequency.exponentialRampToValueAtTime(85, 0.9);
+    const lfo = c.createOscillator(); lfo.frequency.setValueAtTime(18, 0); lfo.frequency.linearRampToValueAtTime(42, 0.9);
+    const am = c.createGain(); am.gain.value = 0.6; const dep = c.createGain(); dep.gain.value = 0.4; lfo.connect(dep); dep.connect(am.gain);
+    const f = c.createBiquadFilter(); f.type = 'lowpass'; f.frequency.setValueAtTime(300, 0); f.frequency.exponentialRampToValueAtTime(1800, 0.7);
+    const g = c.createGain(); g.gain.setValueAtTime(0.001, 0); g.gain.exponentialRampToValueAtTime(0.9, 0.15); g.gain.setValueAtTime(0.9, 0.8); g.gain.exponentialRampToValueAtTime(0.001, 1.35);
+    const g2 = c.createGain(); g2.gain.value = 0.5;
+    o.connect(f); o2.connect(g2); g2.connect(f); f.connect(am); am.connect(g); g.connect(out);
+    for (const x of [o, o2, lfo]) { x.start(0); x.stop(1.4); }
+    burst(c, out, noise, 0.05, 1.1, 'bandpass', 1200, 0.6, 0.35); // 風のうなり
+  } },
   beep: { dur: 0.14, fn: (c, out) => {
     const o = c.createOscillator(); o.type = 'square'; o.frequency.value = 1200;
     const g = c.createGain(); g.gain.setValueAtTime(0.4, 0); g.gain.exponentialRampToValueAtTime(0.001, 0.12);
@@ -114,8 +129,14 @@ export class Audio {
     const mf = c.createBiquadFilter(); mf.type = 'bandpass'; mf.frequency.value = 700; mf.Q.value = 0.7;
     const mg = c.createGain(); mg.gain.value = 0.25; depth.connect(mg.gain);
     mn.connect(mf); mf.connect(mg); mg.connect(e);
-    ns.start(); lfo.start(); hum.start(); hum2.start(); buzz.start(); mn.start();
-    this.engine = { gain: e, tone, lfo, hum, hum2, nlp, buzz, bf, mf };
+    // 加速中のうなり（押している間だけ大きくなる）
+    const roar = c.createOscillator(); roar.type = 'sawtooth'; roar.frequency.value = 150;
+    const rf = c.createBiquadFilter(); rf.type = 'bandpass'; rf.frequency.value = 900; rf.Q.value = 0.9;
+    const ram = c.createGain(); ram.gain.value = 0.5; depth.connect(ram.gain);
+    const rg = c.createGain(); rg.gain.value = 0;
+    roar.connect(rf); rf.connect(ram); ram.connect(rg); rg.connect(this.master);
+    ns.start(); lfo.start(); hum.start(); hum2.start(); buzz.start(); mn.start(); roar.start();
+    this.engine = { gain: e, tone, lfo, hum, hum2, nlp, buzz, bf, mf, roar, rf, rg };
     // 風切り音
     const ws = c.createBufferSource(); ws.buffer = this.noise; ws.loop = true;
     const wf = c.createBiquadFilter(); wf.type = 'bandpass'; wf.frequency.value = 700; wf.Q.value = 0.5;
@@ -128,6 +149,12 @@ export class Audio {
   setMuted(m) { this.muted = m; if (this.master) this.master.gain.value = m ? 0 : 0.55; }
   resume() { if (this.ctx && this.ctx.state === 'suspended') this.ctx.resume(); }
   setEngineVolume(v) { this.engineVol = v; }
+  // 加速ボタン: 押した瞬間に吹け上がり音、押している間はうなりを重ねる
+  setBoost(on) {
+    if (on && !this.boosting) { this.play('boost', 0.9 * Math.max(0.6, this.engineVol)); this._engLast = 0; }
+    if (!on && this.boosting) this._engLast = 0;
+    this.boosting = on;
+  }
 
   setEngine(throttle, speed, on = true) {
     if (!this.ctx) return;
@@ -146,6 +173,9 @@ export class Audio {
     E.bf.frequency.setTargetAtTime(350 + rpm * 350, t, 0.2);
     E.mf.frequency.setTargetAtTime(500 + rpm * 500, t, 0.2);
     E.gain.gain.setTargetAtTime(on ? (0.22 + throttle * 0.22) * this.engineVol : 0, t, 0.25);
+    E.roar.frequency.setTargetAtTime(110 + rpm * 90, t, 0.2);
+    E.rf.frequency.setTargetAtTime(700 + rpm * 500, t, 0.2);
+    E.rg.gain.setTargetAtTime(on && this.boosting ? 0.22 * Math.max(0.5, this.engineVol) : 0, t, this.boosting ? 0.12 : 0.35);
     this.wind.gain.setTargetAtTime(on ? Math.min(0.12, (speed / 160) ** 2 * 0.1) : 0, t, 0.3);
   }
 
