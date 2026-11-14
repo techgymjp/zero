@@ -303,7 +303,7 @@ export class Game {
   handleKeys() {
     const inp = this.input, pl = this.player;
     if (inp.hit('KeyV')) { this.camMode = { chase: 'cockpit', cockpit: 'far', far: 'chase' }[this.camMode]; }
-    if (inp.hit('KeyM')) this.hud.mapZoom = (this.hud.mapZoom + 2) % 3; // 12km → 25km → 全島
+    if (inp.hit('KeyM')) this.hud.mapZoom = this.hud.mapZoom === 1 ? 2 : 1; // 25km ⇔ 12km
     if (inp.hit('KeyT')) {
       const near = this.aircraft.some(a => a.alive && a.side === 'us' && pl && a.pos.distanceTo(pl.pos) < 4000);
       if (this.timeScale > 1) this.timeScale = this.timeScale === 4 ? 8 : 1;

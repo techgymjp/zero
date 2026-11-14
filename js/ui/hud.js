@@ -292,7 +292,7 @@ export class HUD {
     }
     c.restore();
     c.strokeStyle = 'rgba(255,255,255,0.6)'; c.strokeRect(x0, y0, S, S);
-    if (!this.compact) this.text(t('地図 (M) {z}', { z: this.mapZoom === 0 ? t('全島') : this.mapZoom === 1 ? '25km' : '12km' }), x0 + 4, y0 - 9, '#ddd', 11);
+    if (!this.compact) this.text(t('地図 (M) {z}', { z: this.mapZoom === 1 ? '25km' : '12km' }), x0 + 4, y0 - 9, '#ddd', 11);
     // 赤城の方位
     if (pl && g.akagi) {
       const d = g.akagi.pos.distanceTo(pl.pos);
