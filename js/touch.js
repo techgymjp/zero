@@ -14,11 +14,11 @@ export class TouchControls {
       <div id="stickZone"><div id="stickBase"><div id="stickKnob"></div></div></div>
       <div id="tbtns">
         <div class="col">
-          <button data-hold="boost" class="tb boost">${t('加速')}</button>
+          <button data-key="KeyB" class="tb bomb">${t('爆弾')}</button>
         </div>
         <div class="col">
           <button data-hold="mg" class="tb fire">${t('機銃')}</button>
-          <button data-key="KeyB" class="tb bomb">${t('爆弾')}</button>
+          <button data-hold="boost" class="tb boost">${t('加速')}</button>
         </div>
       </div>
       <button data-key="KeyL" class="tb land" id="landBtn">${t('着艦') === '着艦' ? '着艦' : 'Land'}</button>
