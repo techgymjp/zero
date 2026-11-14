@@ -14,7 +14,7 @@ export class TouchControls {
       <div id="stickZone"><div id="stickBase"><div id="stickKnob"></div></div></div>
       <div id="tbtns">
         <div class="col">
-          <button data-key="KeyB" class="tb bomb">${t('爆弾')}</button>
+          <button data-key="KeyB" class="tb bomb"><span>${t('爆弾')}</span><small class="cnt" id="bombCnt"></small></button>
         </div>
         <div class="col">
           <button data-hold="mg" class="tb fire">${t('機銃')}</button>
@@ -91,6 +91,10 @@ export class TouchControls {
     const T = this.input.touch, h = this.holds;
     T.mg = h.has('mg');
     T.boost = h.has('boost');
+  }
+  // 爆弾・機銃弾の残り（0 になったらボタンを暗くする）
+  setCounts(bombs) {
+    if (bombs !== this._b) { this._b = bombs; const e = this.root.querySelector('#bombCnt'); e.textContent = '×' + bombs; e.parentNode.classList.toggle('empty', bombs === 0); }
   }
   setLand(on) { if (on !== this._land) { this._land = on; this.root.querySelector('#landBtn').style.display = on ? '' : 'none'; } }
   show(on) { this.root.style.display = on ? '' : 'none'; }

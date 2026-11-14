@@ -98,3 +98,5 @@ body.app .screen { padding-bottom: 64px; }
 /* タッチ操作の端末ではキーの説明を隠し、PC ではタッチの説明を隠す */
 body.touch .pc-only { display: none !important; }
 body:not(.touch) .touch-only { display: none !important; }
+.tb .cnt { display: block; font-size: 12px; opacity: 0.9; margin-top: 1px; }
+.tb.empty { filter: grayscale(1) brightness(0.55); }

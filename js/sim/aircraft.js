@@ -146,7 +146,7 @@ export class Aircraft {
         this.gunAcc[i] -= 1;
         for (const lp of gun.pos) {
           if (this.ammo[i] <= 0) break;
-          this.ammo[i]--;
+          if (!this.isPlayer) this.ammo[i]--; // プレイヤーの機銃弾は無限
           const wp = _v.set(lp[0], lp[1], lp[2]).applyQuaternion(this.quat).add(this.pos);
           // 照準線上 300m に収束
           const conv = _w.copy(this.pos).addScaledVector(this.fwd, 300).addScaledVector(this.up, 0.6);

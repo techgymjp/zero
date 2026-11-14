@@ -175,8 +175,44 @@ export class HUD {
     this.drawWarnings();
   }
 
+  // 爆弾・機銃弾の残り（ボタン表示）と、使い切ったときの表示・赤城への帰還矢印
+  drawSupply() {
+    const g = this.game, pl = g.player, fl = pl.brain, c = this.ctx;
+    const bombs = pl.model.userData.stores.filter(s => s.parent).length;
+    g.input.touchUI?.setCounts(bombs);
+    const noBomb = bombs === 0;
+    // 使い切った瞬間に大きく知らせる（機銃弾は無限）
+    if (noBomb && !this._noBomb) g.message(t('爆弾切れ — 赤城へ帰還せよ'), 'big');
+    this._noBomb = noBomb;
+    if (!this.compact) this.text(t('爆弾 {b}', { b: bombs }), 22, this.H - 96, bombs ? GREEN : RED, 14, 'left', true);
+    if (!noBomb || fl.onGround || !g.akagi) return;
+    // 常時表示
+    const label = t('爆弾切れ');
+    const blink = 0.55 + 0.45 * Math.sin(performance.now() / 180);
+    const ty = this.H - (this.portrait ? 150 : 30); // 画面の下中央（矢印と重ならない位置）
+    c.globalAlpha = 0.6 + 0.4 * blink;
+    this.text(label, this.W / 2, ty, RED, this.compact ? 18 : 20, 'center', true);
+    // 赤城の方向を指す矢印（照準の周り）
+    const ak = g.akagi;
+    const bearing = Math.atan2(ak.pos.x - pl.pos.x, -(ak.pos.z - pl.pos.z));
+    const hdg = Math.atan2(pl.fwd.x, -pl.fwd.z);
+    const rel = bearing - hdg;
+    const cx = this.W / 2, cy = this.H / 2, r = this.compact ? 78 : 95;
+    const ax = cx + Math.sin(rel) * r, ay = cy - Math.cos(rel) * r;
+    c.save(); c.translate(ax, ay); c.rotate(rel);
+    c.fillStyle = `rgba(110,200,255,${0.5 + 0.5 * blink})`; c.strokeStyle = 'rgba(0,0,0,0.8)'; c.lineWidth = 3;
+    const k = this.compact ? 1 : 1.2;
+    c.beginPath(); c.moveTo(0, -22 * k); c.lineTo(16 * k, 6 * k); c.lineTo(6 * k, 6 * k); c.lineTo(6 * k, 20 * k); c.lineTo(-6 * k, 20 * k); c.lineTo(-6 * k, 6 * k); c.lineTo(-16 * k, 6 * k); c.closePath();
+    c.stroke(); c.fill();
+    c.restore();
+    const d = ak.pos.distanceTo(pl.pos);
+    this.text(t('赤城 {d}km', { d: (d / 1000).toFixed(1) }), ax + Math.sin(rel) * 34, ay - Math.cos(rel) * 34, '#a8dcff', 14, 'center', true);
+    c.globalAlpha = 1;
+  }
+
   drawWarnings() {
     const g = this.game, pl = g.player, fl = pl.brain;
+    this.drawSupply();
     if (fl.stalled) this.text(t('失 速'), this.W / 2, this.H / 2 + 90, RED, 24, 'center', true);
     const gh = g.terrain.groundAt(pl.pos.x, pl.pos.z);
     if (!fl.onGround && pl.vel.y < -5 && (pl.pos.y - gh) / -pl.vel.y < 5) this.text(t('引き起こせ！'), this.W / 2, this.H / 2 + 118, RED, 22, 'center', true);

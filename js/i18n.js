@@ -41,6 +41,7 @@ const EN = {
   '広告を見てその場で復活': 'Watch an ad to respawn here', 'あと {n} 回 ・ {s} 秒': '{n} left · {s}s', 'その場で復活': 'Respawns (ad)',
   'コンティニュー？': 'Continue?', '撃墜された': 'Shot down', '『零戦 真珠湾攻撃』で戦艦 {bb}/8・空母 {cv}/3 を撃沈！ 戦果 {s} 点': 'Sank {bb}/8 battleships and {cv}/3 carriers in "Zero: Attack on Pearl Harbor"! Score {s}',
   'コピーしました': 'Copied',
+  '爆弾切れ — 赤城へ帰還せよ': 'Out of bombs — return to Akagi', '機銃弾切れ — 赤城へ帰還せよ': 'Out of ammo — return to Akagi', '爆弾・機銃弾切れ': 'OUT OF BOMBS & AMMO', '爆弾切れ': 'OUT OF BOMBS', '機銃弾切れ': 'OUT OF AMMO', '爆弾 {b}': 'Bombs {b}',
   '機銃': 'GUN', '加速': 'BOOST', '爆弾': 'BOMB', 'ここをなぞって操縦': 'Drag here to fly',
 };
 export function t(key, vars) {
