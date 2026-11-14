@@ -14,7 +14,7 @@ export class HUD {
     this.canvas = document.getElementById('hud');
     this.ctx = this.canvas.getContext('2d');
     this.msgs = [];
-    this.mapZoom = 2;
+    this.mapZoom = 1; // 最初は 25km 表示（出撃直後からオアフ島が見える）
     this.hitFlash = 0;
     this.resize();
     addEventListener('resize', () => this.resize());

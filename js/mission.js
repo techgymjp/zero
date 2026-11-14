@@ -73,7 +73,16 @@ export function setupShips(game) {
   for (const [ox, oz] of [[2300, 1100], [-2300, 1100], [2400, -1600], [-2400, -1600]]) add({ name: '駆逐艦', cls: 'DD', side: 'us', hp: 120, model: buildDestroyer({ funnels: 2 }), mover: tf(ox, oz), aa: aaDD, x: 0, z: 0 });
 
   // ---- 第一航空艦隊（機動部隊）----
-  const kb = (ox, oz) => circleMover(KIDO_BUTAI.center, KIDO_BUTAI.radius, KIDO_BUTAI.speed, 1.0, ox, oz);
+  // 機動部隊: 真珠湾へ艦首を向けて前進（艦首方向と地図の点線がそろう）
+  const kd = KIDO_BUTAI, dl = Math.hypot(kd.center[0], kd.center[1]);
+  const dir = [kd.center[0] / dl, kd.center[1] / dl];           // 真珠湾 → 機動部隊 の向き
+  const kbH = Math.atan2(-dir[0], dir[1]);                       // 艦首は真珠湾へ
+  const kb = (ox, oz) => (t) => {
+    const dist = Math.max(kd.stopDist, kd.startDist - kd.speed * t);
+    const ax = dir[0] * dist, az = dir[1] * dist;
+    const fx = Math.sin(kbH), fz = -Math.cos(kbH), sx = Math.cos(kbH), sz = Math.sin(kbH);
+    return { x: ax + fx * oz + sx * ox, z: az + fz * oz + sz * ox, h: kbH };
+  };
   const mk = (name, kind, ox, oz) => { const m = buildCarrier(kind); return add({ name, cls: 'CV', side: 'jp', hp: 9999, model: m, mover: kb(ox, oz), x: 0, z: 0, carrier: { deckW: m.deckW, deckL: m.deckL, deckZ: m.deckZ, deckY: m.deckY } }); };
   game.akagi = mk('空母赤城', 'akagi', 0, 0);
   mk('空母加賀', 'kaga', -1800, -400);
