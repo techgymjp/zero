@@ -22,7 +22,8 @@ export class TouchControls {
         </div>
       </div>
       <button data-key="KeyL" class="tb land" id="landBtn">${t('着艦') === '着艦' ? '着艦' : 'Land'}</button>
-      <button data-key="KeyP" class="tb pause" aria-label="一時停止">Ⅱ</button>`;
+      <button data-key="KeyP" class="tb pause" aria-label="一時停止">Ⅱ</button>
+      <div id="mapTap"></div>`;
     document.body.appendChild(root);
     this.root = root;
     const T = input.touch;
@@ -75,8 +76,18 @@ export class TouchControls {
       }
     };
     zone.addEventListener('touchend', end); zone.addEventListener('touchcancel', end);
+    // 地図の上をタップしたら縮尺を切り替える
+    const mapTap = root.querySelector('#mapTap');
+    mapTap.addEventListener('touchstart', (e) => { e.preventDefault(); e.stopPropagation(); input.pressed.add('KeyM'); }, { passive: false });
+    this.mapTap = mapTap;
   }
   update() {
+    // 地図のタップ領域を HUD の地図に合わせる
+    const m = this.hud && this.hud.mapRect;
+    if (m && this.mapTap && (this._mx !== m.x || this._my !== m.y || this._ms !== m.w)) {
+      this._mx = m.x; this._my = m.y; this._ms = m.w;
+      Object.assign(this.mapTap.style, { left: m.x + 'px', top: m.y + 'px', width: m.w + 'px', height: m.h + 'px' });
+    }
     const T = this.input.touch, h = this.holds;
     T.mg = h.has('mg');
     T.boost = h.has('boost');

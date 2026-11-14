@@ -82,3 +82,4 @@ body.app .screen { padding-bottom: 64px; }
   #resBody { font-size: 13px; line-height: 1.5; margin-bottom: 6px; }
   .rank { font-size: 18px; margin: 2px 0; }
 }
+#mapTap { position: absolute; pointer-events: auto; touch-action: none; }

@@ -246,7 +246,8 @@ export class HUD {
   drawMinimap() {
     const g = this.game, c = this.ctx, W = this.W, H = this.H;
     const S = this.compact ? Math.min(180, H * 0.42) : Math.min(240, Math.max(160, W * 0.17));
-    const x0 = this.compact ? 10 : W - S - 16, y0 = H - S - (this.compact ? 10 : 16);
+    // スマホ: 左上（速度パネルの直下）、PC: 右下
+    const x0 = this.compact ? 10 : W - S - 16, y0 = this.compact ? 68 : H - S - 16;
     const pl = g.player || g.lastPlayer;
     const range = this.mapZoom === 0 ? TERRAIN.size : this.mapZoom === 1 ? 25000 : 12000;
     const cx = this.mapZoom === 0 ? TERRAIN.x0 + TERRAIN.size / 2 : (pl ? pl.pos.x : 0);
