@@ -116,7 +116,7 @@ export class HUD {
         const sp = this.project(ip);
         if (sp) {
           let onShip = false;
-          for (const s of g.ships) if (s.side === 'us' && s.isTarget && !s.sunk && s.distanceToHull(ip) < 4) onShip = true;
+          for (const s of g.ships) if (s.side === 'us' && s.isTarget && !s.sunk && s.distanceToHull(ip) < 5) onShip = true;
           if (!onShip) return; // 命中コースのときだけ表示
           c.strokeStyle = RED; c.lineWidth = 2.5;
           c.beginPath(); c.moveTo(sp[0], sp[1] - 10); c.lineTo(sp[0] + 10, sp[1]); c.lineTo(sp[0], sp[1] + 10); c.lineTo(sp[0] - 10, sp[1]); c.closePath(); c.stroke();
@@ -165,10 +165,9 @@ export class HUD {
         c.beginPath(); c.moveTo(p[0] - 5, p[1] - 8); c.lineTo(p[0] + 5, p[1] - 8); c.lineTo(p[0], p[1]); c.closePath(); c.fill();
         continue;
       }
-      // 攻撃目標（戦艦・空母）: 小さな◇（艦の少し上）
-      const q = 5;
-      c.strokeStyle = s.cls === 'CV' ? 'rgba(255,170,80,0.9)' : 'rgba(255,209,102,0.9)';
-      c.beginPath(); c.moveTo(p[0], p[1] - q - 6); c.lineTo(p[0] + q, p[1] - 6); c.lineTo(p[0], p[1] + q - 6); c.lineTo(p[0] - q, p[1] - 6); c.closePath(); c.stroke();
+      // 攻撃目標（戦艦・空母）: 艦の上に黄色い▽（◇は爆撃照準専用）
+      c.strokeStyle = 'rgba(255,209,102,0.95)'; c.lineWidth = 2;
+      c.beginPath(); c.moveTo(p[0] - 6, p[1] - 14); c.lineTo(p[0] + 6, p[1] - 14); c.lineTo(p[0], p[1] - 4); c.closePath(); c.stroke();
     }
   }
 

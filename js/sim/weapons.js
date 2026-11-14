@@ -102,7 +102,7 @@ export class Bombs {
 
   drop(pos, vel, kind, side, owner, quat) {
     const g = this.game;
-    const spec = kind === 250 ? { len: 1.75, r: 0.2, dmg: 450, blast: 28 } : kind === 60 ? { len: 1.0, r: 0.115, dmg: 120, blast: 14 } : { len: 1.75, r: 0.2, dmg: 220, blast: 24 };
+    const spec = kind === 250 ? { len: 1.75, r: 0.2, dmg: 450, blast: 28 } : kind === 60 ? { len: 1.0, r: 0.115, dmg: 290, blast: 14 } : { len: 1.75, r: 0.2, dmg: 220, blast: 24 };
     const mesh = bombMesh(spec.len, spec.r);
     mesh.position.copy(pos);
     if (quat) mesh.quaternion.copy(quat);
@@ -130,7 +130,7 @@ export class Bombs {
         if (s.side === b.side || s.sunk) continue;
         const dx = s.pos.x - b.pos.x, dz = s.pos.z - b.pos.z;
         if (dx * dx + dz * dz > (s.L * 0.5 + 30) ** 2) continue;
-        if (s.hitSegment(p0, b.pos, 1.5)) {
+        if (s.hitSegment(p0, b.pos, 4)) { // 赤い◇が出ていれば確実に当たるよう余裕を持たせる
           const local = s.toLocal(b.pos.clone());
           s.damage(b.dmg, b.pos.clone(), b.owner, 'bomb', b.kind, local);
           g.fx.explosion(b.pos, b.kind === 60 ? 2.2 : 3.6);
@@ -153,7 +153,7 @@ export class Bombs {
           } else {
             g.fx.explosion(b.pos, b.kind === 60 ? 2.0 : 3.2);
           }
-          g.ground.blast(b.pos, b.blast, b.dmg * 0.6, b.owner);
+          g.ground.blast(b.pos, b.blast, (b.kind === 60 ? 120 : b.dmg) * 0.6, b.owner);
           g.audio.explosion(b.pos, 1.0);
           done = true;
         }

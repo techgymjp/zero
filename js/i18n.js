@@ -84,10 +84,12 @@ const HTML_EN = {
     <ul>
       <li class="touch-only"><b>Flying</b>: <b>drag on the left side of the screen</b> (up = climb, down = dive, left/right = roll).</li>
       <li class="touch-only"><b>Buttons</b>: hold <b>GUN</b> to fire, <b>BOMB</b> to drop, hold <b>BOOST</b> for full power (release for cruise). A <b>Land</b> button appears near Akagi (within 3 km, below 600 m). Tap the map to change its scale; Ⅱ at the top right pauses.</li>
-      <li class="touch-only"><b>Bombing</b>: a red ◇ appears when a bomb would hit a battleship or carrier — press BOMB then. Dive to aim.</li>
+      <li class="touch-only"><b>Bombing</b>: the yellow ▽ marks battleships and carriers. Dive at one and press BOMB when the red ◇ appears. Two hits sink any ship (8 bombs).</li>
+      <li class="touch-only"><b>Dogfight</b>: red brackets mark enemy planes. Fire away with GUN (unlimited ammo).</li>
       <li class="pc-only"><b>Flight</b>: W/S (↑/↓) climb/dive, A/D (←/→) roll, Q/E rudder, Shift·R / Ctrl·F throttle</li>
       <li class="pc-only"><b>Gun</b>: Space or click fires the 20 mm cannon</li>
-      <li class="pc-only"><b>Bombs</b>: B drops 250 kg then 60 kg bombs. A red ◇ appears when a bomb would hit a battleship or carrier — release then. Dive to aim.</li>
+      <li class="pc-only"><b>Bombs</b>: the yellow ▽ marks battleships and carriers. Dive at one and press B when the red ◇ appears. Two hits sink any ship (8 bombs).</li>
+      <li class="pc-only"><b>Dogfight</b>: red brackets mark enemy planes. Fire away with the gun (unlimited ammo).</li>
       <li class="pc-only"><b>Other</b>: G gear, V camera, middle-drag / Shift+drag to look around, T time warp, M map zoom, N wingman orders, K music, P pause, H help</li>
       <li class="pc-only"><b>Gamepad</b>: left stick to fly, right stick rudder, RT/LT gun, A bomb, Y camera, LB/RB throttle</li>
     </ul>
