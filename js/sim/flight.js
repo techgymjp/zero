@@ -6,8 +6,8 @@ import { clamp, lerp, DEG } from '../util.js';
 const G = 9.81;
 const _v = new THREE.Vector3(), _w = new THREE.Vector3(), _f = new THREE.Vector3(), _q = new THREE.Quaternion(), _e = new THREE.Euler();
 const P = {
-  mass: 2410, S: 22.44, CLa: 4.9, CLmax: 1.38, stall: 15.5 * DEG, Cd0: 0.021, K: 0.055,
-  power: 1900000, eff: 0.8, Tstatic: 17000, gearDrag: 0.012, gearH: 1.95,
+  mass: 2410, S: 22.44, CLa: 4.9, CLmax: 1.38, stall: 15.5 * DEG, Cd0: 0.016, K: 0.055,
+  power: 4300000, eff: 0.8, Tstatic: 20000, gearDrag: 0.012, gearH: 1.95,
 };
 
 export class PlayerFlight {
@@ -92,7 +92,7 @@ export class PlayerFlight {
     ac.pos.addScaledVector(ac.vel, dt);
 
     // 回転: 入力→目標角速度。高速では舵が重くなる（零戦の特性）
-    const eff = clamp(qd / 3500, 0.08, 1) * (1 - clamp((V - 165) / 90, 0, 0.45));
+    const eff = clamp(qd / 3500, 0.08, 1) * (1 - clamp((V - 200) / 120, 0, 0.35));
     const stallK = this.stalled ? 0.35 : 1;
     const target = new THREE.Vector3(-pitchIn * 1.5 * eff * stallK, -yawIn * 0.45 * eff, rollIn * 2.4 * eff * stallK);
     this.omega.lerp(target, Math.min(1, dt * 7));
