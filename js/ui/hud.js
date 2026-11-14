@@ -103,7 +103,6 @@ export class HUD {
         c.strokeStyle = RED; c.lineWidth = 2;
         c.beginPath(); c.arc(lp[0], lp[1], 8, 0, Math.PI * 2); c.stroke();
         c.beginPath(); c.moveTo(lp[0] - 14, lp[1]); c.lineTo(lp[0] - 9, lp[1]); c.moveTo(lp[0] + 9, lp[1]); c.lineTo(lp[0] + 14, lp[1]); c.stroke();
-        this.text(`${Math.round(d)}m`, lp[0] + 16, lp[1] + 12, RED, 12);
       }
     }
     // 爆撃照準
@@ -119,12 +118,12 @@ export class HUD {
           for (const s of g.ships) if (s.side === 'us' && !s.sunk && s.distanceToHull(ip) < 4) onShip = true;
           c.strokeStyle = onShip ? RED : GREEN; c.lineWidth = 2;
           c.beginPath(); c.moveTo(sp[0], sp[1] - 10); c.lineTo(sp[0] + 10, sp[1]); c.lineTo(sp[0], sp[1] + 10); c.lineTo(sp[0] - 10, sp[1]); c.closePath(); c.stroke();
-          this.text(onShip ? t('命中コース') : t('着弾点'), sp[0] + 14, sp[1], onShip ? RED : GREEN, 12);
         }
       }
     }
   }
 
+  // 目標の印（文字は出さない: 敵や艦が文字に隠れないように）
   drawMarkers() {
     const g = this.game, c = this.ctx, pl = g.player;
     for (const o of g.aircraft) {
@@ -137,38 +136,31 @@ export class HUD {
       if (o.side === 'us') {
         c.strokeStyle = RED; c.lineWidth = 1.5;
         c.strokeRect(p[0] - s, p[1] - s, s * 2, s * 2);
-        if (d < 2500) this.text(`${nm(o.name)} ${(d / 1000).toFixed(1)}km`, p[0] + s + 4, p[1] - s, RED, 11);
       } else {
-        c.strokeStyle = o.wingman ? '#c5e7ff' : BLUE; c.lineWidth = 1;
-        c.beginPath(); c.moveTo(p[0], p[1] - s); c.lineTo(p[0] + s, p[1] + s); c.lineTo(p[0] - s, p[1] + s); c.closePath(); c.stroke();
-        if (o.wingman && d < 3000) this.text(nm(o.name), p[0] + s + 4, p[1], BLUE, 11);
+        const ss = Math.min(s, 7);
+        c.strokeStyle = o.wingman ? 'rgba(197,231,255,0.8)' : 'rgba(127,198,255,0.6)'; c.lineWidth = 1;
+        c.beginPath(); c.moveTo(p[0], p[1] - ss); c.lineTo(p[0] + ss, p[1] + ss); c.lineTo(p[0] - ss, p[1] + ss); c.closePath(); c.stroke();
       }
     }
     for (const s of g.ships) {
+      if (s.removed || s.sunk) continue;
+      const isAkagi = s === g.akagi;
+      if (!isAkagi && !(s.side === 'us' && s.isTarget)) continue;
       const d = s.pos.distanceTo(pl.pos);
-      if (s.side === 'us' && !s.isTarget && d > 5000) continue;
-      if (d > 30000 || s.removed) continue;
-      const p = this.project(_w.copy(s.pos).setY(s.deckY + 20));
+      if (d > 30000 || (isAkagi && d < 1500)) continue;
+      const p = this.project(_w.copy(s.pos).setY(s.deckY + 25));
       if (!p) continue;
-      if (s.side === 'jp') {
-        if (s !== g.akagi || d < 1500) continue;
-        this.text(t('▼ 赤城 {d}km', { d: (d / 1000).toFixed(1) }), p[0], p[1] - 10, BLUE, 13, 'center', true);
+      c.lineWidth = 1.5;
+      if (isAkagi) {
+        // 赤城: 小さな青い▼
+        c.fillStyle = 'rgba(127,198,255,0.85)';
+        c.beginPath(); c.moveTo(p[0] - 5, p[1] - 8); c.lineTo(p[0] + 5, p[1] - 8); c.lineTo(p[0], p[1]); c.closePath(); c.fill();
         continue;
       }
-      const col = s.sunk ? '#999' : s.isTarget ? '#ffd166' : '#d9a';
-      if (d > 8000) {
-        // 遠方は小さな目印のみ（名前が重ならないように）
-        if (s.isTarget && !s.sunk) { c.strokeStyle = col; c.lineWidth = 1.5; c.beginPath(); c.moveTo(p[0], p[1] - 5); c.lineTo(p[0] + 4, p[1]); c.lineTo(p[0], p[1] + 5); c.lineTo(p[0] - 4, p[1]); c.closePath(); c.stroke(); }
-        continue;
-      }
-      if (s.isTarget || d < 4000) {
-        this.text(`${s.sunk ? '✕ ' : ''}${nm(s.name)}${d > 3000 ? ' ' + (d / 1000).toFixed(1) + 'km' : ''}`, p[0], p[1] - 16, col, s.isTarget ? 13 : 11, 'center', s.isTarget);
-        if (!s.sunk) {
-          const w = 60, f = Math.max(0, s.hp / s.maxHp);
-          c.fillStyle = 'rgba(0,0,0,0.5)'; c.fillRect(p[0] - w / 2, p[1] - 6, w, 5);
-          c.fillStyle = f > 0.5 ? '#7ee07e' : f > 0.25 ? '#ffd166' : RED; c.fillRect(p[0] - w / 2, p[1] - 6, w * f, 5);
-        }
-      }
+      // 攻撃目標（戦艦・空母）: 小さな◇（艦の少し上）
+      const q = 5;
+      c.strokeStyle = s.cls === 'CV' ? 'rgba(255,170,80,0.9)' : 'rgba(255,209,102,0.9)';
+      c.beginPath(); c.moveTo(p[0], p[1] - q - 6); c.lineTo(p[0] + q, p[1] - 6); c.lineTo(p[0], p[1] + q - 6); c.lineTo(p[0] - q, p[1] - 6); c.closePath(); c.stroke();
     }
   }
 
