@@ -168,14 +168,21 @@ $('againBtn').onclick = () => withInterstitial(() => {
   try { sessionStorage.setItem('zero.autostart', '1'); } catch (e) {}
   location.reload();
 });
+// シェアで紹介するページ
+const SHARE_URL = 'https://techgym.jp/column/claude-code-game-zero/';
 $('shareBtn').onclick = async () => {
   const r = ui.lastScore || { bb: 0, cv: 0, s: 0 };
   const text = t('『零戦 真珠湾攻撃』で戦艦 {bb}/8・空母 {cv}/3 を撃沈！ 戦果 {s} 点', { bb: r.bb, cv: r.cv, s: r.s })
     + (r.revives ? ` (${t('その場で復活')} ${r.revives})` : '');
+  const url = SHARE_URL;
   try {
-    if (isApp && cap.Plugins.Share) await cap.Plugins.Share.share({ text });
-    else if (navigator.share) await navigator.share({ text });
-    else { await navigator.clipboard.writeText(text); game?.message(t('コピーしました'), 'info'); }
+    if (isApp && cap.Plugins.Share) await cap.Plugins.Share.share({ text, url });
+    else if (navigator.share) await navigator.share({ text, url });
+    else {
+      await navigator.clipboard.writeText(text + '\n' + url);
+      // 結果画面ではメッセージ欄が見えないので、ボタン自体に表示
+      const b = $('shareBtn'), orig = b.textContent; b.textContent = t('コピーしました'); setTimeout(() => { b.textContent = orig; }, 2000);
+    }
   } catch (e) { /* キャンセル */ }
 };
 
