@@ -246,6 +246,7 @@ export class Game {
     const st = pl.model.userData.stores.filter(s => s.parent);
     if (!st.length) { this.message('爆弾なし — 赤城に着艦して補給せよ', 'bad'); return; }
     const pick = st.find(s => s.userData.kind === 250) || st[0];
+    pl.model.position.copy(pl.pos); pl.model.quaternion.copy(pl.quat); pl.model.updateMatrixWorld(true);
     const wp = pick.getWorldPosition(new THREE.Vector3());
     pl.model.remove(pick);
     this.bombs.drop(wp, pl.vel.clone().add(new THREE.Vector3(0, -1, 0)), pick.userData.kind, 'jp', pl, pl.quat);
