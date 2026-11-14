@@ -23,7 +23,7 @@ import { DECAL } from './models/aircraft.js';
 export const DIFFS = {
   easy: { label: '易', playerDmg: 0.5, aaAcc: 0.6, aaDmg: 0.6, aaRate: 0.7, aiAimErr: 14, aiEvade: 0.35, playerFocus: 1.2, shipHp: 0.65, usCap: 9, capN: 2, launchInterval: 50, scrambleInterval: 70, waveFirst: 200, waveInterval: 110, waveSize: 6, lives: 5 },
   // 上手い人でクリア率 10% 前後になるよう、ボットのシミュレーションで調整した値
-  normal: { label: '並', playerDmg: 0.45, aaAcc: 0.85, aaDmg: 0.6, aaRate: 1, aiAimErr: 14, aiEvade: 0.55, playerFocus: 0.9, shipHp: 0.85, usCap: 11, capN: 3, launchInterval: 38, scrambleInterval: 50, waveFirst: 240, waveInterval: 120, waveSize: 8, lives: 3, raidQuiet: 45, aiShipDmg: 0.5 },
+  normal: { label: '並', playerDmg: 0.35, aaAcc: 0.85, aaDmg: 0.45, aaRate: 1, aiAimErr: 14, aiEvade: 0.55, playerFocus: 0.9, shipHp: 0.85, usCap: 11, capN: 3, launchInterval: 38, scrambleInterval: 50, waveFirst: 240, waveInterval: 120, waveSize: 8, lives: 3, raidQuiet: 45, aiShipDmg: 0.2 },
   hard: { label: '難', playerDmg: 1.1, aaAcc: 1.1, aaDmg: 1.1, aaRate: 1.3, aiAimErr: 5, aiEvade: 0.8, playerFocus: 0.7, shipHp: 1.3, usCap: 20, capN: 4, launchInterval: 28, scrambleInterval: 38, waveFirst: 280, waveInterval: 140, waveSize: 4, lives: 2 },
 };
 export const US_TOTAL = 400;
