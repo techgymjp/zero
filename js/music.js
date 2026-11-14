@@ -69,7 +69,7 @@ export class Music {
     this.audio = audio;
     this.playing = false;
     this.bpm = 116;
-    this.volume = 0.5;
+    this.volume = 0.38;
     this.buffer = null;
   }
 

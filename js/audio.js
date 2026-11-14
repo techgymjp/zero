@@ -104,8 +104,18 @@ export class Audio {
     const hg = c.createGain(); hg.gain.value = 0.18; hum.connect(hg); hg.connect(tone);
     const hum2 = c.createOscillator(); hum2.type = 'triangle'; hum2.frequency.value = 66;
     const hg2 = c.createGain(); hg2.gain.value = 0.05; hum2.connect(hg2); hg2.connect(tone);
-    ns.start(); lfo.start(); hum.start(); hum2.start();
-    this.engine = { gain: e, tone, lfo, hum, hum2, nlp };
+    // スマホのスピーカーでも聞こえる中音域（点火の「ブルルル」）
+    const buzz = c.createOscillator(); buzz.type = 'sawtooth'; buzz.frequency.value = 110;
+    const bf = c.createBiquadFilter(); bf.type = 'bandpass'; bf.frequency.value = 450; bf.Q.value = 0.8;
+    const bam = c.createGain(); bam.gain.value = 0.5; depth.connect(bam.gain);
+    const bg = c.createGain(); bg.gain.value = 0.35;
+    buzz.connect(bf); bf.connect(bam); bam.connect(bg); bg.connect(e);
+    const mn = c.createBufferSource(); mn.buffer = this.noise; mn.loop = true;
+    const mf = c.createBiquadFilter(); mf.type = 'bandpass'; mf.frequency.value = 700; mf.Q.value = 0.7;
+    const mg = c.createGain(); mg.gain.value = 0.25; depth.connect(mg.gain);
+    mn.connect(mf); mf.connect(mg); mg.connect(e);
+    ns.start(); lfo.start(); hum.start(); hum2.start(); buzz.start(); mn.start();
+    this.engine = { gain: e, tone, lfo, hum, hum2, nlp, buzz, bf, mf };
     // 風切り音
     const ws = c.createBufferSource(); ws.buffer = this.noise; ws.loop = true;
     const wf = c.createBiquadFilter(); wf.type = 'bandpass'; wf.frequency.value = 700; wf.Q.value = 0.5;
@@ -132,7 +142,10 @@ export class Audio {
     E.hum2.frequency.setTargetAtTime(51 + rpm * 33, t, 0.15);
     E.nlp.frequency.setTargetAtTime(160 + rpm * 160, t, 0.2);
     E.tone.frequency.setTargetAtTime(240 + rpm * 260, t, 0.2);
-    E.gain.gain.setTargetAtTime(on ? (0.10 + throttle * 0.10) * this.engineVol : 0, t, 0.25);
+    E.buzz.frequency.setTargetAtTime(80 + rpm * 70, t, 0.15);
+    E.bf.frequency.setTargetAtTime(350 + rpm * 350, t, 0.2);
+    E.mf.frequency.setTargetAtTime(500 + rpm * 500, t, 0.2);
+    E.gain.gain.setTargetAtTime(on ? (0.22 + throttle * 0.22) * this.engineVol : 0, t, 0.25);
     this.wind.gain.setTargetAtTime(on ? Math.min(0.12, (speed / 160) ** 2 * 0.1) : 0, t, 0.3);
   }
 

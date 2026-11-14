@@ -68,7 +68,7 @@ export class Input {
     }
     // キー入力を滑らかに
     const sm = (cur, tgt, rate) => cur + clamp(tgt - cur, -rate * dt, rate * dt);
-    this._sm.p = sm(this._sm.p, p, 4.5); this._sm.r = sm(this._sm.r, r, 6); this._sm.y = sm(this._sm.y, y, 4);
+    this._sm.p = sm(this._sm.p, p, 4.5); this._sm.r = sm(this._sm.r, r, 3.5); this._sm.y = sm(this._sm.y, y, 4);
     this.pitch = this._sm.p; this.roll = this._sm.r; this.yaw = this._sm.y; this.throttle = t;
     this.fireMG = mg; this.fireCannon = cn;
     this.gearToggle = this.hit('KeyG');

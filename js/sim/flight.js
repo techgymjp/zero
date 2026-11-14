@@ -94,7 +94,7 @@ export class PlayerFlight {
     // 回転: 入力→目標角速度。高速では舵が重くなる（零戦の特性）
     const eff = clamp(qd / 3500, 0.08, 1) * (1 - clamp((V - 165) / 90, 0, 0.45));
     const stallK = this.stalled ? 0.35 : 1;
-    const target = new THREE.Vector3(-pitchIn * 1.5 * eff * stallK, -yawIn * 0.45 * eff, rollIn * 3.3 * eff * stallK);
+    const target = new THREE.Vector3(-pitchIn * 1.5 * eff * stallK, -yawIn * 0.45 * eff, rollIn * 2.4 * eff * stallK);
     this.omega.lerp(target, Math.min(1, dt * 7));
     // 安定性（機首を速度方向へ）
     const vbn = vb.normalize();
