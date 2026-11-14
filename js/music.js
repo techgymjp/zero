@@ -63,6 +63,8 @@ function table(harm) {
 const SAW = table(Array.from({ length: 14 }, (_, k) => [k + 1, 1 / (k + 1)]));
 const SAW_DARK = table(Array.from({ length: 6 }, (_, k) => [k + 1, 1 / ((k + 1) ** 1.6)]));
 const TRI = table([[1, 1], [3, 1 / 9], [5, 1 / 25], [2, 0.3]]);
+// トランペット: 倍音が多く、中高音（1〜2kHz 付近）が張り出した明るい音
+const TRUMPET = table([[1, 1], [2, 0.95], [3, 0.85], [4, 0.75], [5, 0.62], [6, 0.5], [7, 0.4], [8, 0.32], [9, 0.25], [10, 0.19], [11, 0.15], [12, 0.11], [13, 0.08], [14, 0.06], [15, 0.045], [16, 0.035]]);
 
 export class Music {
   constructor(audio) {
@@ -131,6 +133,33 @@ export class Music {
       L[i0 + k] += lp * e * gl; R[i0 + k] += lp * e * gr;
     }
   }
+  // トランペットの1音: 立ち上がりで明るさが一瞬開き、音程を少し下からしゃくり上げ、息の音が混ざる
+  trumpet(f, t, dur, amp, { pan = 0, vib = 0 } = {}) {
+    const i0 = Math.floor(t * SR), rel = 0.07, n = Math.floor((dur + rel) * SR);
+    const L = this.L, R = this.R;
+    const gl = amp * (1 - pan) * 0.7, gr = amp * (1 + pan) * 0.7;
+    let ph = 0, lp1 = 0, lp2 = 0, nz = 0;
+    const nd = dur * SR, na = 0.025 * SR, nr = rel * SR;
+    for (let k = 0; k < n && i0 + k < L.length; k++) {
+      const ts = k / SR;
+      const scoop = 1 - 0.025 * Math.exp(-ts / 0.035);
+      const vb = vib && ts > 0.22 ? 1 + vib * Math.sin(2 * Math.PI * 5.8 * ts) : 1;
+      ph += f * scoop * vb * TL / SR; if (ph >= TL) ph -= TL;
+      const ip = ph | 0, fr = ph - ip;
+      const x = TRUMPET[ip] + (TRUMPET[ip + 1] - TRUMPET[ip]) * fr;
+      // 明るさ（カットオフ）: 発音直後に開き、少し落ち着く
+      const bright = 3.2 + 4.5 * Math.exp(-ts / 0.07);
+      const a = 1 - Math.exp(-2 * Math.PI * Math.min(f * bright, SR * 0.45) / SR);
+      lp1 += (x - lp1) * a; lp2 += (lp1 - lp2) * a;
+      // 息の音（発音の瞬間）
+      nz += (this.rnd() - nz) * 0.35;
+      const breath = nz * 0.25 * Math.exp(-ts / 0.03);
+      let e = k < na ? k / na : k < nd ? 1 - 0.12 * Math.min(1, (k - na) / (0.15 * SR)) : (1 - 0.12) * (1 - (k - nd) / nr);
+      const v = (lp2 + breath) * e;
+      L[i0 + k] += v * gl; R[i0 + k] += v * gr;
+    }
+  }
+
   noiseHit(t, dur, amp, { hp = 0, bp = 0, pan = 0 } = {}) {
     const i0 = Math.floor(t * SR), n = Math.floor(dur * SR);
     let lp1 = 0, lp2 = 0, prev = 0;
@@ -177,11 +206,13 @@ export class Music {
     for (const [n, d] of bar.m) {
       if (n) {
         const dur = d * beat * 0.92;
-        this.voice(SAW, mtof(n), t, dur, bar.soft ? 0.09 : 0.12, { cutoff: bar.soft ? 3 : 4.5, vib: dur > 0.6 ? 0.004 : 0, att: 0.03 });
-        this.voice(SAW, mtof(n) * 1.004, t, dur, bar.soft ? 0.05 : 0.07, { cutoff: 3.5, vib: dur > 0.6 ? 0.004 : 0, att: 0.03, pan: 0.1 });
+        // 1番トランペット（旋律）と、わずかにずらした重ね（合奏の厚み）
+        this.trumpet(mtof(n), t, dur, bar.soft ? 0.11 : 0.15, { vib: dur > 0.6 ? 0.005 : 0, pan: 0.05 });
+        this.trumpet(mtof(n) * 1.003, t + 0.006, dur, bar.soft ? 0.05 : 0.07, { vib: dur > 0.6 ? 0.004 : 0, pan: 0.25 });
         const root = bar.c[0] % 12;
         let h = n - 3; for (let k = 0; k < 4; k++) { const iv = ((h - root) % 12 + 12) % 12; if (bar.c[1].includes(iv)) break; h--; }
-        this.voice(SAW_DARK, mtof(h), t, dur, bar.soft ? 0.05 : 0.07, { cutoff: 3, att: 0.03, pan: -0.35 });
+        // 2番トランペット（3度下のハーモニー）
+        this.trumpet(mtof(h), t, dur, bar.soft ? 0.06 : 0.08, { vib: dur > 0.6 ? 0.004 : 0, pan: -0.35 });
       }
       t += d * beat;
     }

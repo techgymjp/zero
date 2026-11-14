@@ -105,7 +105,7 @@ export class Game {
     this.state = 'play';
     this.audio.init();
     this.music.start();
-    if (this.isTouch) { this.input.touchUI = new TouchControls(this.input); this.hud.forceCompact = true; this.hud.resize(); }
+    if (this.isTouch) { this.input.touchUI = new TouchControls(this.input); this.input.touchUI.hud = this.hud; this.hud.forceCompact = true; this.hud.resize(); }
     this.spawnPlayer();
     // 第一次攻撃隊はカフク岬上空から西回りルートで進撃
     const kp = new THREE.Vector3(KAHUKU_START[0], 3000, KAHUKU_START[1]);
@@ -301,7 +301,7 @@ export class Game {
   handleKeys() {
     const inp = this.input, pl = this.player;
     if (inp.hit('KeyV')) { this.camMode = { chase: 'cockpit', cockpit: 'far', far: 'chase' }[this.camMode]; }
-    if (inp.hit('KeyM')) this.hud.mapZoom = (this.hud.mapZoom + 1) % 3;
+    if (inp.hit('KeyM')) this.hud.mapZoom = (this.hud.mapZoom + 2) % 3; // 12km → 25km → 全島
     if (inp.hit('KeyT')) {
       const near = this.aircraft.some(a => a.alive && a.side === 'us' && pl && a.pos.distanceTo(pl.pos) < 4000);
       if (this.timeScale > 1) this.timeScale = this.timeScale === 4 ? 8 : 1;

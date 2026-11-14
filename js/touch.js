@@ -44,7 +44,7 @@ export class TouchControls {
     // 仮想スティック
     const zone = root.querySelector('#stickZone'), base = root.querySelector('#stickBase'), knob = root.querySelector('#stickKnob');
     const R = 70;
-    let id = null, ox = 0, oy = 0;
+    let id = null, ox = 0, oy = 0, t0 = 0, moved = 0;
     const move = (x, y) => {
       let dx = (x - ox) / R, dy = (y - oy) / R;
       const l = Math.hypot(dx, dy); if (l > 1) { dx /= l; dy /= l; }
@@ -57,17 +57,20 @@ export class TouchControls {
       if (id !== null) return;
       const t = e.changedTouches[0]; id = t.identifier;
       const r = zone.getBoundingClientRect();
-      ox = t.clientX; oy = t.clientY;
+      ox = t.clientX; oy = t.clientY; t0 = e.timeStamp; moved = 0;
       base.style.left = (ox - r.left) + 'px'; base.style.top = (oy - r.top) + 'px';
       base.classList.add('show');
       move(ox, oy);
     }, { passive: false });
     zone.addEventListener('touchmove', (e) => {
       e.preventDefault();
-      for (const t of e.changedTouches) if (t.identifier === id) move(t.clientX, t.clientY);
+      for (const t of e.changedTouches) if (t.identifier === id) { moved = Math.max(moved, Math.hypot(t.clientX - ox, t.clientY - oy)); move(t.clientX, t.clientY); }
     }, { passive: false });
     const end = (e) => {
       for (const t of e.changedTouches) if (t.identifier === id) {
+        // 地図を軽くタップしたら縮尺を切り替える
+        const m = this.hud && this.hud.mapRect;
+        if (m && e.timeStamp - t0 < 350 && moved < 12 && ox >= m.x && ox <= m.x + m.w && oy >= m.y && oy <= m.y + m.h) input.pressed.add('KeyM');
         id = null; T.pitch = T.roll = 0; knob.style.transform = ''; base.classList.remove('show');
       }
     };

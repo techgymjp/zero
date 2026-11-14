@@ -14,7 +14,7 @@ export class HUD {
     this.canvas = document.getElementById('hud');
     this.ctx = this.canvas.getContext('2d');
     this.msgs = [];
-    this.mapZoom = 1;
+    this.mapZoom = 2;
     this.hitFlash = 0;
     this.resize();
     addEventListener('resize', () => this.resize());
@@ -258,11 +258,12 @@ export class HUD {
     const S = this.compact ? Math.min(180, H * 0.42) : Math.min(240, Math.max(160, W * 0.17));
     const x0 = this.compact ? 10 : W - S - 16, y0 = H - S - (this.compact ? 10 : 16);
     const pl = g.player || g.lastPlayer;
-    const range = this.mapZoom === 0 ? TERRAIN.size : this.mapZoom === 1 ? 30000 : 10000;
+    const range = this.mapZoom === 0 ? TERRAIN.size : this.mapZoom === 1 ? 25000 : 12000;
     const cx = this.mapZoom === 0 ? TERRAIN.x0 + TERRAIN.size / 2 : (pl ? pl.pos.x : 0);
     const cz = this.mapZoom === 0 ? TERRAIN.z0 + TERRAIN.size / 2 + 5000 : (pl ? pl.pos.z : 0);
     const k = S / range;
     const tx = (x, z) => [x0 + S / 2 + (x - cx) * k, y0 + S / 2 + (z - cz) * k];
+    this.mapRect = { x: x0, y: y0, w: S, h: S };
     c.save();
     c.beginPath(); c.rect(x0, y0, S, S); c.clip();
     c.fillStyle = '#1d4660'; c.fillRect(x0, y0, S, S);
@@ -299,7 +300,7 @@ export class HUD {
     }
     c.restore();
     c.strokeStyle = 'rgba(255,255,255,0.6)'; c.strokeRect(x0, y0, S, S);
-    if (!this.compact) this.text(t('地図 (M) {z}', { z: this.mapZoom === 0 ? t('全島') : this.mapZoom === 1 ? '30km' : '10km' }), x0 + 4, y0 - 9, '#ddd', 11);
+    if (!this.compact) this.text(t('地図 (M) {z}', { z: this.mapZoom === 0 ? t('全島') : this.mapZoom === 1 ? '25km' : '12km' }), x0 + 4, y0 - 9, '#ddd', 11);
     // 赤城の方位
     if (pl && g.akagi) {
       const d = g.akagi.pos.distanceTo(pl.pos);
