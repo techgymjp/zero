@@ -6,7 +6,7 @@ export function isTouchDevice() {
 export class TouchControls {
   constructor(input) {
     this.input = input;
-    input.touch = { active: true, pitch: 0, roll: 0, mg: false, cannon: false, boost: false };
+    input.touch = { active: true, pitch: 0, roll: 0, mg: false, boost: false };
     const root = document.createElement('div');
     root.id = 'touch';
     root.innerHTML = `
@@ -16,12 +16,12 @@ export class TouchControls {
           <button data-hold="boost" class="tb boost">加速</button>
         </div>
         <div class="col">
-          <button data-hold="cannon" class="tb fire2">20mm</button>
-          <button data-hold="mg" class="tb fire">7.7mm<br>機銃</button>
+          <button data-hold="mg" class="tb fire">機銃</button>
           <button data-key="KeyB" class="tb bomb">爆弾</button>
         </div>
       </div>
-      <button data-key="KeyL" class="tb land" id="landBtn">着艦</button>`;
+      <button data-key="KeyL" class="tb land" id="landBtn">着艦</button>
+      <button data-key="KeyP" class="tb pause" aria-label="一時停止">Ⅱ</button>`;
     document.body.appendChild(root);
     this.root = root;
     const T = input.touch;
@@ -74,7 +74,7 @@ export class TouchControls {
   }
   update() {
     const T = this.input.touch, h = this.holds;
-    T.mg = h.has('mg'); T.cannon = h.has('cannon');
+    T.mg = h.has('mg');
     T.boost = h.has('boost');
   }
   setLand(on) { if (on !== this._land) { this._land = on; this.root.querySelector('#landBtn').style.display = on ? '' : 'none'; } }

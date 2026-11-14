@@ -9,7 +9,7 @@ const _a = new THREE.Vector3(), _b = new THREE.Vector3(), _m = new THREE.Matrix4
 // 弾種
 export const AMMO = {
   mg77: { dmg: 1.6, shipDmg: 0.15, speed: 750, color: [1.0, 0.75, 0.3], width: 0.22, tracerEvery: 2, ground: 1 },
-  mg20: { dmg: 13, shipDmg: 1.5, speed: 600, color: [1.0, 0.55, 0.2], width: 0.4, tracerEvery: 1, ground: 6, explosive: true },
+  mg20: { dmg: 13, shipDmg: 1.5, speed: 650, color: [1.0, 0.7, 0.3], width: 0.28, tracerEvery: 1, ground: 6, explosive: true },
   mg50: { dmg: 3.2, shipDmg: 0.2, speed: 870, color: [1.0, 0.35, 0.2], width: 0.25, tracerEvery: 2, ground: 1 },
   aa: { dmg: 4, shipDmg: 0, speed: 800, color: [1.0, 0.3, 0.15], width: 0.35, tracerEvery: 1, ground: 0 },
 };
@@ -86,7 +86,7 @@ export class Bullets {
 
   draw(streaks) {
     for (const b of this.list) {
-      const c = b.a.color, k = 0.03;
+      const c = b.a.color, k = 0.022;
       streaks.add(b.x - b.vx * k, b.y - b.vy * k, b.z - b.vz * k, b.x, b.y, b.z, c[0] * 2, c[1] * 2, c[2] * 2, 0.95, b.a.width);
     }
   }

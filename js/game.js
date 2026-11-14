@@ -84,7 +84,10 @@ export class Game {
     const cvTotal = Math.max(30, US_TOTAL - parked - capTotal);
     this.usCarriers.forEach((cv, i) => { cv.airGroup = Math.floor(cvTotal / 3) + (i < cvTotal % 3 ? 1 : 0); });
     this.usLost = 0;
-    await step('攻撃隊 発進準備…', 90);
+    await step('音声を準備中…', 85);
+    this.audio.init();
+    await Promise.all([this.audio.prepare(), this.music.prerender()]);
+    await step('攻撃隊 発進準備…', 95);
     // シェーダーを事前コンパイル
     renderer.compile(scene, this.camera);
     progress('準備完了', 100);
@@ -145,7 +148,7 @@ export class Game {
       this.usLost++;
       if (attacker && attacker.isPlayer) {
         this.stats.kills++; this.stats.score += ac.spec.score;
-        this.message(`${ac.name} 撃墜`, 'normal'); this.audio.beep(1200, 0.1);
+        this.message(`${ac.name} 撃墜`, 'normal'); this.audio.beep();
       }
     } else if (ac.wingman) this.message(`${ac.name} 被撃墜`, 'bad');
     if (ac.isPlayer) this.onPlayerDown();
@@ -224,7 +227,7 @@ export class Game {
     // 爆弾・弾薬・機体修理
     pl.hp = pl.maxHp; pl.onFire = false;
     if (pl.smoke) { pl.smoke.dead = true; pl.smoke = null; }
-    pl.ammo = pl.spec.guns.map(g => (g.ammo === 'mg20' ? 60 : 680) * g.pos.length);
+    pl.ammo = pl.spec.guns.map(g => (g.ammo === 'mg20' ? 250 : 400) * g.pos.length);
     for (const s of pl.model.userData.stores) if (!s.parent) pl.model.add(s);
     this.message('補給完了', 'info');
     this.pendingWingmen = true;

@@ -10,7 +10,7 @@ const UP = new THREE.Vector3(0, 1, 0);
 
 export const TYPES = {
   zero: { name: '零戦', side: 'jp', hp: 60, radius: 5.5, maxG: 6.5, cruise: 115, maxSpeed: 148, minSpeed: 45, roll: 3.2,
-    guns: [{ ammo: 'mg77', rate: 15, pos: [[0.18, 0.7, 3.6], [-0.18, 0.7, 3.6]] }, { ammo: 'mg20', rate: 8.5, pos: [[2.3, -0.28, 2.3], [-2.3, -0.28, 2.3]] }], score: 0 },
+    guns: [{ ammo: 'mg20', rate: 8.5, pos: [[0.22, 0.74, 3.7], [-0.22, 0.74, 3.7]] }], score: 0 }, // 機銃は20mmのみ（照準線に沿って機首上部から発射）
   p40: { name: 'P-40', side: 'us', hp: 55, radius: 5.5, maxG: 5.5, cruise: 120, maxSpeed: 155, minSpeed: 50, roll: 2.6,
     guns: [{ ammo: 'mg50', rate: 13, pos: [[0.3, 0.6, 3.0], [-0.3, 0.6, 3.0], [2.6, -0.4, 2.0], [-2.6, -0.4, 2.0]] }], score: 150 },
   f4f: { name: 'F4F', side: 'us', hp: 65, radius: 5.5, maxG: 5.2, cruise: 115, maxSpeed: 145, minSpeed: 48, roll: 2.4,
@@ -45,7 +45,7 @@ export class Aircraft {
     this.name = opts.name || this.spec.name;
     this.trigger = { mg: false, cannon: false };
     this.gunAcc = this.spec.guns.map(() => 0);
-    this.ammo = this.spec.guns.map(g => (g.ammo === 'mg20' ? 60 : g.ammo === 'mg77' ? 680 : 400) * g.pos.length);
+    this.ammo = this.spec.guns.map(g => (g.ammo === 'mg20' ? 250 : 400) * g.pos.length);
     this.lastAttacker = null;
     this.smoke = null; this.onFire = false;
     this.propSpin = 0; this.throttle = 0.8;
@@ -138,7 +138,7 @@ export class Aircraft {
   fireGuns(dt) {
     const g = this.game;
     this.spec.guns.forEach((gun, i) => {
-      const on = gun.ammo === 'mg20' ? this.trigger.cannon : this.trigger.mg;
+      const on = this.trigger.mg;
       if (!on || this.ammo[i] <= 0) { this.gunAcc[i] = Math.min(this.gunAcc[i], 0.99); return; }
       this.gunAcc[i] += dt * gun.rate;
       const a = AMMO[gun.ammo];
@@ -148,12 +148,12 @@ export class Aircraft {
           if (this.ammo[i] <= 0) break;
           this.ammo[i]--;
           const wp = _v.set(lp[0], lp[1], lp[2]).applyQuaternion(this.quat).add(this.pos);
-          // 収束点 250m
-          const conv = _w.copy(this.pos).addScaledVector(this.fwd, 250).addScaledVector(this.up, 0.6);
+          // 照準線上 300m に収束
+          const conv = _w.copy(this.pos).addScaledVector(this.fwd, 300).addScaledVector(this.up, 0.6);
           const dir = _u.copy(conv).sub(wp).normalize();
           const vel = dir.multiplyScalar(a.speed).add(this.vel);
           g.bullets.fire(wp, vel, this.side, gun.ammo, this, this.isPlayer ? 0.0025 : 0.006);
-          if (rand() < 0.5) g.fx.muzzle(wp, gun.ammo === 'mg20' ? 1.5 : 1);
+          if (rand() < 0.5) g.fx.muzzle(wp, 1);
         }
         if (this.isPlayer || this.pos.distanceTo(g.camera.position) < 800) g.audio.gun(gun.ammo, this.pos, this.isPlayer);
       }

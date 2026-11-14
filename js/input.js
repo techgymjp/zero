@@ -37,8 +37,9 @@ export class Input {
     let r = k(['KeyD', 'ArrowRight'], ['KeyA', 'ArrowLeft']);
     let y = k(['KeyE'], ['KeyQ']);
     let t = k(['ShiftLeft', 'ShiftRight', 'KeyR', 'Equal'], ['ControlLeft', 'ControlRight', 'KeyF', 'Minus']);
-    let mg = this.down('Space') || this.mouseBtn[0] && !this.drag.active;
-    let cn = this.down('KeyX', 'KeyC') || this.mouseBtn[2];
+    // 機銃（20mm）: Space・X・左右クリック
+    let mg = this.down('Space', 'KeyX', 'KeyC') || (this.mouseBtn[0] && !this.drag.active) || this.mouseBtn[2];
+    let cn = false;
     // ゲームパッド
     const gp = navigator.getGamepads ? [...navigator.getGamepads()].find(Boolean) : null;
     this.gpBomb = false;
@@ -50,7 +51,7 @@ export class Input {
       if (rx) y = rx;
       if (gp.buttons[5]?.pressed) t = 1; if (gp.buttons[4]?.pressed) t = -1;
       if (gp.buttons[7]?.value > 0.3) mg = true;
-      if (gp.buttons[6]?.value > 0.3) cn = true;
+      if (gp.buttons[6]?.value > 0.3) mg = true;
       const a = !!gp.buttons[0]?.pressed;
       if (a && !this._gpA) this.pressed.add('KeyB');
       this._gpA = a;
@@ -64,7 +65,6 @@ export class Input {
       const T = this.touch;
       if (T.pitch || T.roll) { p = T.pitch; r = T.roll; }
       if (T.mg) mg = true;
-      if (T.cannon) cn = true;
     }
     // キー入力を滑らかに
     const sm = (cur, tgt, rate) => cur + clamp(tgt - cur, -rate * dt, rate * dt);
