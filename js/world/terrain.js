@@ -93,6 +93,7 @@ export class Terrain {
   constructor() {
     this.coast = buildCoast();
     this._buildMasks();
+    this._buildOsmRaster();
     this._buildHeights();
     this._buildTextures();
     this._buildMesh();
@@ -114,6 +115,64 @@ export class Terrain {
     this.blurA = boxBlur(this.landMask, MASK, MASK, 4);
     this.blurB = boxBlur(this.landMask, MASK, MASK, 22);
     this.maskCanvas = c;
+  }
+
+  // OSM の水域を 4m/px で持つ（詳細範囲）。建物の配置などに使う
+  _buildOsmRaster() {
+    const R = 2500, k = R / DETAIL.size;
+    const c = document.createElement('canvas'); c.width = c.height = R;
+    const ctx = c.getContext('2d', { willReadFrequently: true });
+    const tx = (x, z) => [(x - DETAIL.x0) * k, (z - DETAIL.z0) * k];
+    ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, R, R);
+    ctx.fillStyle = '#000'; pathOsmWater(ctx, tx); ctx.fill('evenodd');
+    const d = ctx.getImageData(0, 0, R, R).data;
+    this.osmLandRaster = new Uint8Array(R * R);
+    for (let i = 0; i < R * R; i++) this.osmLandRaster[i] = d[i * 4] > 127 ? 1 : 0;
+    this.osmRes = R;
+  }
+  // OSM 上で陸か（詳細範囲外は粗いマスク）
+  isLandFine(x, z) {
+    const R = this.osmRes, i = Math.floor((x - DETAIL.x0) / DETAIL.size * R), j = Math.floor((z - DETAIL.z0) / DETAIL.size * R);
+    if (i < 0 || j < 0 || i >= R || j >= R) return this.mask(this.landMask, x, z) >= 0.5;
+    return this.osmLandRaster[j * R + i] === 1;
+  }
+  // 矩形（中心, 長さ方向ベクトル e, 長さ w, 幅 d, 余白 m）がすべて陸か
+  rectOnLand(x, z, e, w, d, m = 10) {
+    const nx = -e[1], nz = e[0];
+    for (let a = -1; a <= 1.001; a += 0.5) for (let b = -1; b <= 1.001; b += 0.5) {
+      const px = x + e[0] * a * (w / 2 + m) + nx * b * (d / 2 + m), pz = z + e[1] * a * (w / 2 + m) + nz * b * (d / 2 + m);
+      if (!this.isLandFine(px, pz)) return false;
+    }
+    return true;
+  }
+
+  // 海軍工廠・潜水艦基地の建物配置（乾ドックの向きにそろえた街区）。テクスチャと 3D の両方で使う
+  yardLayout() {
+    if (this._yard) return this._yard;
+    const rng = mulberry32(23);
+    const e1 = [0.835, 0.55], e2 = [-0.55, 0.835]; // 乾ドックと直交する向き（岸沿い）/ 内陸向き
+    const out = { buildings: [], crane: null };
+    const regions = [
+      { o: [323, 1453], u: [-1000, 1500], v: [-300, 1000], bu: 165, bv: 105 },   // 海軍工廠
+      { o: [1850, 700], u: [-500, 600], v: [-500, 500], bu: 125, bv: 90, small: true }, // 潜水艦基地周辺
+    ];
+    for (const r of regions) {
+      for (let u = r.u[0]; u <= r.u[1]; u += r.bu) for (let v = r.v[0]; v <= r.v[1]; v += r.bv) {
+        const w = (r.small ? 40 : 60) + rng() * (r.small ? 35 : 55), d = (r.small ? 18 : 24) + rng() * (r.small ? 14 : 22);
+        const x = r.o[0] + e1[0] * u + e2[0] * v, z = r.o[1] + e1[1] * u + e2[1] * v;
+        if (!this.rectOnLand(x, z, e1, w, d, 14)) continue;
+        if (Math.hypot(x - 1866, z - 3435) < 1900) continue; // ヒッカム飛行場の敷地は避ける
+        if (rng() < 0.18) continue; // 空き地
+        out.buildings.push({ x, z, w, d, h: (r.small ? 7 : 9) + rng() * (r.small ? 6 : 12), e: e1, big: !r.small && w > 95 });
+      }
+    }
+    // ハンマーヘッド・クレーン: 第1乾ドックの脇の岸壁
+    for (let s = 40; s < 200 && !out.crane; s += 10) for (const sg of [1, -1]) {
+      const x = 323 + e1[0] * s * sg, z = 1453 + e1[1] * s * sg;
+      if (!out.crane && this.isLandFine(x, z) && this.rectOnLand(x, z, e1, 12, 12, 2)) out.crane = [x, z];
+    }
+    this._yard = out;
+    return out;
   }
 
   mask(arr, x, z) {
@@ -351,20 +410,23 @@ export class Terrain {
     ctx.fillRect(-900 * k, -950 * k, 1300 * k, 420 * k); // エプロン
     ctx.restore();
     for (const f of AIRFIELDS) this._drawAirfield(ctx, f, tx, k, true);
-    // 海軍工廠
-    const yard = [fordPt(-900, 1250), fordPt(500, 1250), fordPt(500, 1900), fordPt(-900, 1900)];
-    ctx.fillStyle = '#8e8a80'; ctx.beginPath(); yard.forEach((p, i) => { const q = tx(p[0], p[1]); i ? ctx.lineTo(q[0], q[1]) : ctx.moveTo(q[0], q[1]); }); ctx.fill();
-    // 建物の屋根
+    // 海軍工廠・潜水艦基地: 街区ごとのコンクリート敷地と屋根
+    const Y = this.yardLayout();
     const rng = mulberry32(11);
-    ctx.save();
-    for (let i = 0; i < 180; i++) {
-      const t = -850 + rng() * 1300, off = 1300 + rng() * 550;
-      const p = tx(...fordPt(t, off));
-      ctx.fillStyle = `rgb(${90 + rng() * 60},${85 + rng() * 50},${80 + rng() * 40})`;
-      ctx.save(); ctx.translate(p[0], p[1]); ctx.rotate(-50 * Math.PI / 180);
-      ctx.fillRect(0, 0, (15 + rng() * 50) * k, (10 + rng() * 30) * k); ctx.restore();
+    const rect = (x, z, e, w, d) => {
+      const q = tx(x, z);
+      ctx.save(); ctx.translate(q[0], q[1]); ctx.rotate(Math.atan2(e[1], e[0]));
+      ctx.fillRect(-w * k / 2, -d * k / 2, w * k, d * k); ctx.restore();
+    };
+    ctx.fillStyle = '#8f8b81';
+    for (const b of Y.buildings) rect(b.x, b.z, b.e, b.w + 70, b.d + 55);   // 敷地（隣と繋がって街区になる）
+    ctx.fillStyle = 'rgba(70,68,62,0.35)';
+    for (const b of Y.buildings) rect(b.x + b.e[1] * (b.d / 2 + 14), b.z - b.e[0] * (b.d / 2 + 14), b.e, b.w + 70, 7); // 構内道路
+    for (const b of Y.buildings) {
+      const c = 95 + rng() * 45;
+      ctx.fillStyle = `rgb(${c + 10},${c + 4},${c - 6})`;
+      rect(b.x, b.z, b.e, b.w, b.d);
     }
-    ctx.restore();
     // 石油タンク群
     ctx.fillStyle = '#8f8f88';
     for (const p of this.tankPositions()) { const q = tx(p[0], p[1]); ctx.beginPath(); ctx.arc(q[0], q[1], 30 * k, 0, Math.PI * 2); ctx.fill(); }
@@ -409,7 +471,7 @@ export class Terrain {
       out.push([2500 + i * 110 + (j % 2) * 50, 150 + j * 100]);
     }
     for (let i = 0; i < 4; i++) out.push([3300 + i * 110, -400 - (i % 2) * 90]);
-    this._tanks = out;
+    this._tanks = out.filter(([x, z]) => this.isLandFine(x, z) && this.isLandFine(x + 30, z) && this.isLandFine(x - 30, z) && this.isLandFine(x, z + 30) && this.isLandFine(x, z - 30));
     return out;
   }
 

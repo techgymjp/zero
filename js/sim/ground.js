@@ -153,8 +153,11 @@ export class Ground {
     { const p = fp(-200, -420); this._structure('tower', p[0], p[1], { y: 2.5 }); }
     for (let i = 0; i < 6; i++) { const p = fp(-300 + i * 110, 330); this._structure('building', p[0], p[1], { rot: 50 * Math.PI / 180, w: 50, d: 15, h: 8, y: 2.5 }); }
     // 海軍工廠
-    for (let i = 0; i < 9; i++) { const p = fp(-800 + i * 140, 1500 + (i % 3) * 110); this._structure('building', p[0], p[1], { rot: 50 * Math.PI / 180, w: 70 + (i % 2) * 40, d: 30, h: 16, color: '#b9b3a3' }); }
-    { const p = fp(-300, 1250); this._structure('crane', p[0], p[1], { rot: 50 * Math.PI / 180 + Math.PI / 2 }); }
+    // 海軍工廠・潜水艦基地（実際の海岸線に合わせた街区。地面のテクスチャと同じ配置）
+    const Y = this.game.terrain.yardLayout();
+    const cols = ['#b9b3a3', '#c4bca8', '#a9a597', '#cfc6b0'];
+    Y.buildings.forEach((b, i) => this._structure('building', b.x, b.z, { rot: -Math.atan2(b.e[1], b.e[0]), w: b.w, d: b.d, h: b.h, color: cols[i % cols.length] }));
+    if (Y.crane) this._structure('crane', Y.crane[0], Y.crane[1], { rot: -Math.atan2(0.835, -0.55), name: 'ハンマーヘッド・クレーン' });
     // 石油タンク群
     for (const [x, z] of this.game.terrain.tankPositions()) {
       const t = this._structure('tank', x, z, { r: 25 });
