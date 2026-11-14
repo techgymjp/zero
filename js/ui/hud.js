@@ -115,8 +115,9 @@ export class HUD {
         const sp = this.project(ip);
         if (sp) {
           let onShip = false;
-          for (const s of g.ships) if (s.side === 'us' && !s.sunk && s.distanceToHull(ip) < 4) onShip = true;
-          c.strokeStyle = onShip ? RED : GREEN; c.lineWidth = 2;
+          for (const s of g.ships) if (s.side === 'us' && s.isTarget && !s.sunk && s.distanceToHull(ip) < 4) onShip = true;
+          if (!onShip) return; // 命中コースのときだけ表示
+          c.strokeStyle = RED; c.lineWidth = 2.5;
           c.beginPath(); c.moveTo(sp[0], sp[1] - 10); c.lineTo(sp[0] + 10, sp[1]); c.lineTo(sp[0], sp[1] + 10); c.lineTo(sp[0] - 10, sp[1]); c.closePath(); c.stroke();
         }
       }

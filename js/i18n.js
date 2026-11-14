@@ -83,7 +83,7 @@ const HTML_EN = {
     <ul>
       <li><b>Flight</b>: W/S (↑/↓) climb/dive, A/D (←/→) roll, Q/E rudder, Shift·R / Ctrl·F throttle</li>
       <li><b>Gun</b>: Space or click fires the 20 mm cannon</li>
-      <li><b>Bombs</b>: B drops 250 kg then 60 kg bombs. The green ◇ shows the impact point; red means on target. Dive to aim.</li>
+      <li><b>Bombs</b>: B drops 250 kg then 60 kg bombs. A red ◇ appears when a bomb would hit a battleship or carrier — release then. Dive to aim.</li>
       <li><b>Other</b>: G gear, V camera, middle-drag / Shift+drag to look around, T time warp, M map zoom, N wingman orders, K music, P pause, H help</li>
       <li><b>Phone / tablet</b> (landscape): <b>drag the left half to fly</b> (up = climb, down = dive, left/right = roll). Hold <b>GUN</b> to fire, <b>BOMB</b> to drop, hold <b>BOOST</b> for full power. A <b>Land</b> button appears near Akagi. Ⅱ at the top right pauses.</li>
       <li><b>Gamepad</b>: left stick to fly, right stick rudder, RT/LT gun, A bomb, Y camera, LB/RB throttle</li>
