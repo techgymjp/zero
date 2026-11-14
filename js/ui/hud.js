@@ -218,7 +218,6 @@ export class HUD {
   drawWarnings() {
     const g = this.game, pl = g.player, fl = pl.brain;
     this.drawSupply();
-    if (fl.stalled) this.text(t('失 速'), this.W / 2, this.H / 2 + 90, RED, 24, 'center', true);
     const gh = g.terrain.groundAt(pl.pos.x, pl.pos.z);
     if (!fl.onGround && pl.vel.y < -5 && (pl.pos.y - gh) / -pl.vel.y < 5) this.text(t('引き起こせ！'), this.W / 2, this.H / 2 + 118, RED, 22, 'center', true);
     if (pl.onFire) this.text(t('火災発生'), this.W / 2, this.H / 2 + 146, RED, 18, 'center', true);
