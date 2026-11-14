@@ -11,7 +11,8 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: #0e1112; col
 .panel.small { max-width: 420px; text-align: center; }
 .title-panel { text-align: center; }
 h1 { font-size: clamp(44px, 9vw, 88px); margin: 6px 0 0; letter-spacing: 0.08em; line-height: 1.05; }
-h1 span { display: block; font-size: 0.48em; color: var(--accent); letter-spacing: 0.3em; margin-top: 8px; }
+h1 span { display: inline-block; font-size: 0.62em; color: var(--accent); letter-spacing: 0.12em; margin-left: 0.4em; vertical-align: 0.08em; }
+h1 { white-space: nowrap; }
 h2 { margin-top: 0; color: var(--gold); }
 .sub { color: var(--gold); letter-spacing: 0.15em; font-size: 14px; }
 .sub2 { color: #9a978b; font-family: Georgia, serif; letter-spacing: 0.4em; font-size: 12px; margin-bottom: 14px; }
@@ -35,7 +36,8 @@ select { font-size: 15px; padding: 3px 8px; background: #222; color: var(--ink);
 #resBody td:last-child { text-align: right; color: var(--gold); }
 .rank { font-size: 26px; color: var(--gold); margin: 8px 0; }
 @media (max-width: 600px) { .panel { padding: 16px; } .brief { font-size: 13.5px; } }
-.lead { font-size: 17px; line-height: 1.9; margin: 14px 0 4px; }
+.lead { font-size: 18px; line-height: 1.75; margin: 14px 0 6px; color: #f3ecd8; font-weight: 600; }
+.lead b { color: var(--gold); }
 .sub-btn { background: transparent; border-color: var(--gold); color: var(--gold); font-size: 16px; padding: 8px 28px; }
 .help { max-height: 90vh; overflow-y: auto; background: #131512; }
 .help h3 { color: var(--gold); margin: 14px 0 4px; font-size: 16px; border-bottom: 1px solid rgba(217,180,90,0.3); }
@@ -60,7 +62,7 @@ select { font-size: 15px; padding: 3px 8px; background: #222; color: var(--ink);
 .tb.small { width: 54px; height: 40px; border-radius: 10px; font-size: 12px; }
 .tb.mini { width: 44px; height: 30px; border-radius: 8px; font-size: 11px; }
 @media (max-height: 420px) { .tb.fire { width: 72px; height: 72px; } .tb { width: 56px; height: 56px; } }
-.mobile-hint { display: none; font-size: 13px; color: #bdb8a8; }
+.mobile-hint { display: none; font-size: 14px; color: #ddd6c4; line-height: 1.5; }
 @media (pointer: coarse) { .mobile-hint { display: block; } }
 .tb.land { display: none; background: rgba(40,90,160,0.65); position: absolute; right: 50%; bottom: 18px; transform: translateX(50%); width: 96px; height: 44px; border-radius: 12px; font-size: 16px; }
 .tb.boost { width: 76px; height: 76px; background: rgba(200,160,40,0.5); font-size: 15px; }
@@ -76,7 +78,7 @@ body.app .screen { padding-bottom: 64px; }
 .btn.reward small { display: block; font-size: 12px; letter-spacing: 0; opacity: 0.85; }
 @media (max-height: 500px) and (orientation: landscape) {
   .panel { padding: 12px 18px; }
-  h1 { font-size: 40px; } h1 span { font-size: 0.55em; margin-top: 2px; }
+  h1 { font-size: 40px; }
   .lead { font-size: 14px; margin: 6px 0 2px; }
   .btn { font-size: 16px; padding: 7px 24px; margin: 4px; }
   #resBody { font-size: 13px; line-height: 1.5; margin-bottom: 6px; }
@@ -85,18 +87,25 @@ body.app .screen { padding-bottom: 64px; }
 #mapTap { position: absolute; pointer-events: auto; touch-action: none; }
 /* 背の低い横向き画面（スマホ横持ち）: タイトル画面を詰めて「出撃」が最初から見えるように */
 @media (max-height: 450px) and (orientation: landscape) {
-  #title .panel { padding: 8px 16px; }
+  #title .panel { padding: 10px 20px; }
   #title .sub, #title .sub2 { display: none; }
-  #title h1 { font-size: 30px; margin: 0; }
-  #title h1 span { font-size: 0.6em; margin-top: 0; letter-spacing: 0.2em; }
-  #title .langsw { margin: 4px 0 0; }
-  #title .lead { font-size: 13px; line-height: 1.5; margin: 4px 0 2px; }
-  #title .btn { font-size: 15px; padding: 6px 22px; margin: 3px; }
-  #title .appinfo { margin-top: 4px; }
-  #title .mobile-hint { margin: 2px 0 0; font-size: 12px; }
+  #title h1 { font-size: 34px; margin: 0; }
+  #title .langsw { margin: 6px 0 0; }
+  #title .langsw button { font-size: 14px; padding: 4px 14px; }
+  #title .lead { font-size: 16px; line-height: 1.55; margin: 6px 0 4px; }
+  #title .btn { font-size: 18px; padding: 8px 30px; margin: 4px 6px; }
+  #title .sub-btn { font-size: 16px; padding: 7px 24px; }
+  #title .appinfo { margin-top: 6px; font-size: 12px; }
+  #title .mobile-hint { margin: 4px 0 0; font-size: 13px; }
 }
 /* タッチ操作の端末ではキーの説明を隠し、PC ではタッチの説明を隠す */
 body.touch .pc-only { display: none !important; }
 body:not(.touch) .touch-only { display: none !important; }
 .tb .cnt { display: block; font-size: 12px; opacity: 0.9; margin-top: 1px; }
 .tb.empty { filter: grayscale(1) brightness(0.55); }
+/* 縦長のスマホ: 小さな副題が折り返さないように */
+@media (max-width: 600px) {
+  #title .sub { font-size: 12px; letter-spacing: 0.04em; }
+  #title .sub2 { display: none; }
+  #title .lead { font-size: 16px; }
+}
