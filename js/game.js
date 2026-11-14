@@ -105,10 +105,7 @@ export class Game {
     this.spawnPlayer('kahuku');
     spawnFirstWave(this, this.player.pos.clone(), this.player.fwd.clone());
     this.director.initialCAP();
-    this.message('昭和16年12月7日 07:40（現地時間）— カフク岬上空に到達', 'big');
-    setTimeout(() => this.message('第一次攻撃隊は西海岸沿いに南下、バーバーズ岬から真珠湾へ突入する', 'info'), 2500);
-    setTimeout(() => this.message('オパナ・レーダーが編隊を探知！ 米軍は迎撃態勢 — 強襲となる', 'bad'), 7000);
-    setTimeout(() => this.message('制空隊はホイラー・ヒッカム・カネオヘへ散開', 'info'), 11000);
+    setTimeout(() => this.message('目標：真珠湾', 'info'), 1500);
     this.lastFrame = performance.now();
     requestAnimationFrame(() => this.loop());
   }
@@ -159,9 +156,9 @@ export class Game {
       this.usLost++;
       if (attacker && attacker.isPlayer) {
         this.stats.kills++; this.stats.score += ac.spec.score;
-        this.message(`${ac.name} 撃墜！`, 'normal'); this.audio.beep(1200, 0.1);
-      } else if (attacker && attacker.wingman) this.message(`${attacker.name}、${ac.name}を撃墜`, 'info');
-    } else if (ac.wingman) this.message(`${ac.name} 被弾、墜落…`, 'bad');
+        this.message(`${ac.name} 撃墜`, 'normal'); this.audio.beep(1200, 0.1);
+      }
+    } else if (ac.wingman) this.message(`${ac.name} 被撃墜`, 'bad');
     if (ac.isPlayer) this.onPlayerDown();
   }
   onPlayerHit(d) { this.hud.hitFlash = Math.min(0.5, this.hud.hitFlash + d * 0.02); this.audio.hit(); }
@@ -171,23 +168,22 @@ export class Game {
     if (s.cls === 'CV') this.stats.cvSunk++;
     if (s.isTarget) this.stats.score += byP ? (s.cls === 'CV' ? 1500 : 1200) : 300;
     else if (byP) this.stats.score += 300;
-    this.message(`${s.name} 撃沈！${byP ? '（小隊長機の戦果）' : ''}`, 'big');
+    this.message(`${s.name.replace(/^(戦艦|空母)/, '')} 撃沈！`, 'big');
     if (this.stats.bbSunk >= 8 && this.stats.cvSunk >= 3 && this.state === 'play') setTimeout(() => this.finish(true), 4000);
   }
   onGroundDestroyed(t, owner) {
     if (owner && owner.isPlayer) {
       this.stats.ground++; this.stats.score += t.score || 50;
       if (t.kind === 'parked' && t.type !== 'b17' && t.type !== 'pby') this.usLost++;
-      if (t.name) this.message(`${t.name} 破壊！`);
     } else if (t.kind === 'parked') this.usLost++;
   }
   onTouchdown(surf, arrest) {
     if (surf.kind === 'deck') {
-      this.message(arrest ? '着艦成功 — 制動索に掛かった' : '甲板に接地', 'info');
+      this.message('着艦', 'info');
       this.stats.score += 200;
-    } else this.message('着陸');
+    }
   }
-  onTakeoff() { this.message('離陸'); }
+  onTakeoff() {}
   playerCrash(reason) {
     const p = this.player;
     if (!p || !p.alive) return;
@@ -214,8 +210,6 @@ export class Game {
     this.ui.hideRespawn();
     this.state = 'play';
     this.spawnPlayer(where);
-    if (where === 'kahuku') this.message('カフク岬上空より再出撃', 'info');
-    else this.message('空母赤城より再出撃 — 補給完了', 'info');
   }
   finish(win) {
     if (this.state === 'over') return;
@@ -233,7 +227,7 @@ export class Game {
     const fl = pl.brain;
     fl.gear = true; fl.onGround = { kind: 'deck', ship: ak }; fl.groundYaw = Math.atan2(ak.fwd.x, ak.fwd.z); fl.arrest = false;
     pl.throttle = 0;
-    this.message('着艦（自動）完了', 'info');
+    this.message('着艦', 'info');
   }
 
   rearm() {
@@ -243,20 +237,19 @@ export class Game {
     if (pl.smoke) { pl.smoke.dead = true; pl.smoke = null; }
     pl.ammo = pl.spec.guns.map(g => (g.ammo === 'mg20' ? 60 : 680) * g.pos.length);
     for (const s of pl.model.userData.stores) if (!s.parent) pl.model.add(s);
-    this.message('補給・整備完了 — 爆装・弾薬 満載', 'info');
+    this.message('補給完了', 'info');
     this.pendingWingmen = true;
   }
 
   dropBomb() {
     const pl = this.player;
     const st = pl.model.userData.stores.filter(s => s.parent);
-    if (!st.length) { this.message('爆弾なし — 赤城に着艦して補給せよ', 'bad'); return; }
+    if (!st.length) { this.message('爆弾なし（赤城で補給）', 'bad'); return; }
     const pick = st.find(s => s.userData.kind === 250) || st[0];
     pl.model.position.copy(pl.pos); pl.model.quaternion.copy(pl.quat); pl.model.updateMatrixWorld(true);
     const wp = pick.getWorldPosition(new THREE.Vector3());
     pl.model.remove(pick);
     this.bombs.drop(wp, pl.vel.clone().add(new THREE.Vector3(0, -1, 0)), pick.userData.kind, 'jp', pl, pl.quat);
-    this.message(`${pick.userData.kind}kg 爆弾 投下`);
     this.audio.bombRelease();
   }
 
@@ -295,16 +288,16 @@ export class Game {
       const near = this.aircraft.some(a => a.alive && a.side === 'us' && pl && a.pos.distanceTo(pl.pos) < 4000);
       if (this.timeScale > 1) this.timeScale = this.timeScale === 4 ? 8 : 1;
       else if (!near) this.timeScale = 4;
-      else this.message('敵機接近中 — 時間加速不可', 'bad');
+      else this.message('敵機接近 加速不可', 'bad');
       if (this.timeScale > 1) this.message(`時間加速 ×${this.timeScale}`);
     }
-    if (inp.hit('KeyN')) { this.wingOrder = this.wingOrder === 'free' ? 'cover' : 'free'; this.message(this.wingOrder === 'free' ? '列機へ: 自由戦闘を許可' : '列機へ: 編隊に戻れ・長機を援護せよ', 'info'); }
+    if (inp.hit('KeyN')) { this.wingOrder = this.wingOrder === 'free' ? 'cover' : 'free'; this.message(this.wingOrder === 'free' ? '列機：自由戦闘' : '列機：援護', 'info'); }
     if (inp.hit('KeyH')) this.ui.toggleHelp();
     if (inp.hit('KeyK')) { const on = this.music.toggle(); this.message(on ? 'BGM 入' : 'BGM 切'); this.ui.syncBgm?.(on); }
     if (this.state !== 'play' || !pl || !pl.alive) return;
     if (inp.hit('KeyB')) this.dropBomb();
     if (inp.hit('KeyL')) this.autoLand();
-    if (this.timeScale > 1 && this.aircraft.some(a => a.alive && a.side === 'us' && a.pos.distanceTo(pl.pos) < 3000)) { this.timeScale = 1; this.message('敵機接近！ 時間加速解除', 'bad'); }
+    if (this.timeScale > 1 && this.aircraft.some(a => a.alive && a.side === 'us' && a.pos.distanceTo(pl.pos) < 3000)) { this.timeScale = 1; this.message('敵機接近', 'bad'); }
   }
 
   step(dt) {
@@ -336,7 +329,6 @@ export class Game {
         if (alive.length < 2) {
           for (const w of alive) w.remove();
           this.wingmen = spawnWingmen(this, pl);
-          this.message('列機2機 合流', 'info');
         }
       }
       this.audio.setEngine(pl.throttle, pl.vel.length(), true);

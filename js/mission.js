@@ -186,7 +186,7 @@ export class Director {
     this.waveN++;
     const pref = this.waveN % 2 === 0 ? 'CV' : 'BB';
     const name = this.waveN === 1 ? '第二次攻撃隊' : `第${this.waveN + 1}次攻撃隊`;
-    g.message(`${name} 到着 — バーバーズ岬方面より進入（目標: ${pref === 'CV' ? '米空母' : '戦艦'}）`, 'info');
+    g.message('攻撃隊 増援', 'info');
     const origin = new THREE.Vector3(BARBERS[0] - 3000, 2600, BARBERS[1] + 3000);
     const target = pref === 'CV' ? new THREE.Vector3(US_TF.center[0], 0, US_TF.center[1]) : new THREE.Vector3(0, 0, 0);
     const fwd = target.clone().sub(origin).setY(0).normalize();

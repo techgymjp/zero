@@ -26,8 +26,9 @@ export class HUD {
     this.compact = this.forceCompact || innerHeight < 560 || innerWidth < 900;
   }
   message(text, kind = 'normal') {
-    this.msgs.unshift({ text, kind, t: kind === 'big' ? 6 : 4.5 });
-    if (this.msgs.length > 6) this.msgs.length = 6;
+    if (this.msgs.length && this.msgs[0].text === text) { this.msgs[0].t = kind === 'big' ? 3.5 : 2.5; return; }
+    this.msgs.unshift({ text, kind, t: kind === 'big' ? 3.5 : 2.5 });
+    if (this.msgs.length > 2) this.msgs.length = 2;
   }
 
   project(p) {
@@ -40,9 +41,9 @@ export class HUD {
 
   text(s, x, y, color = WHITE, size = 14, align = 'left', bold = false) {
     const c = this.ctx;
-    c.font = `${bold ? 'bold ' : ''}${size}px "Hiragino Mincho ProN","Yu Mincho","Noto Serif JP",serif`;
+    c.font = `${bold ? '800' : '600'} ${size}px "Hiragino Sans","Noto Sans JP","Yu Gothic","Meiryo",sans-serif`;
     c.textAlign = align; c.textBaseline = 'middle';
-    c.lineWidth = 3; c.strokeStyle = 'rgba(0,0,0,0.65)'; c.strokeText(s, x, y);
+    c.lineJoin = 'round'; c.lineWidth = 3.5; c.strokeStyle = 'rgba(0,0,0,0.8)'; c.strokeText(s, x, y);
     c.fillStyle = color; c.fillText(s, x, y);
   }
 
@@ -247,8 +248,8 @@ export class HUD {
 
   drawMinimap() {
     const g = this.game, c = this.ctx, W = this.W, H = this.H;
-    const S = this.compact ? Math.min(90, H * 0.22) : Math.min(240, Math.max(160, W * 0.17));
-    const x0 = this.compact ? 8 : W - S - 16, y0 = this.compact ? 54 : H - S - 16;
+    const S = this.compact ? Math.min(180, H * 0.42) : Math.min(240, Math.max(160, W * 0.17));
+    const x0 = this.compact ? 10 : W - S - 16, y0 = H - S - (this.compact ? 10 : 16);
     const pl = g.player || g.lastPlayer;
     const range = this.mapZoom === 0 ? TERRAIN.size : this.mapZoom === 1 ? 30000 : 10000;
     const cx = this.mapZoom === 0 ? TERRAIN.x0 + TERRAIN.size / 2 : (pl ? pl.pos.x : 0);
@@ -295,7 +296,7 @@ export class HUD {
     // 赤城の方位
     if (pl && g.akagi) {
       const d = g.akagi.pos.distanceTo(pl.pos);
-      if (this.compact) this.text(`赤城 ${(d / 1000).toFixed(1)}km`, x0, y0 + S + 10, BLUE, 11);
+      if (this.compact) this.text(`赤城 ${(d / 1000).toFixed(1)}km`, x0 + 2, y0 - 9, BLUE, 12);
       else this.text(`赤城まで ${(d / 1000).toFixed(1)}km`, x0 + S, y0 - 9, BLUE, 11, 'right');
     }
   }
@@ -306,9 +307,14 @@ export class HUD {
     for (const m of this.msgs) {
       const a = clamp(m.t, 0, 1);
       this.ctx.globalAlpha = a;
-      const col = m.kind === 'big' ? '#ffd166' : m.kind === 'bad' ? RED : m.kind === 'info' ? BLUE : WHITE;
-      this.text(m.text, this.W / 2, y, col, this.compact ? (m.kind === 'big' ? 16 : 13) : (m.kind === 'big' ? 24 : 17), 'center', true);
-      y += m.kind === 'big' ? 34 : 26;
+      const col = m.kind === 'big' ? '#ffe08a' : m.kind === 'bad' ? '#ff7a6a' : m.kind === 'info' ? '#a8dcff' : '#ffffff';
+      const size = this.compact ? (m.kind === 'big' ? 18 : 15) : (m.kind === 'big' ? 26 : 20);
+      const c = this.ctx;
+      c.font = `900 ${size}px "Hiragino Sans","Noto Sans JP","Yu Gothic","Meiryo",sans-serif`;
+      c.textAlign = 'center'; c.textBaseline = 'middle';
+      c.lineJoin = 'round'; c.lineWidth = 5; c.strokeStyle = 'rgba(0,0,0,0.85)'; c.strokeText(m.text, this.W / 2, y);
+      c.fillStyle = col; c.fillText(m.text, this.W / 2, y);
+      y += size + 12;
     }
     this.ctx.globalAlpha = 1;
   }

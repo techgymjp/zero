@@ -88,7 +88,7 @@ export class Ship {
     if (this.special === 'arizona' && kind === 'bomb' && bombKind === 250 && local && local.z > this.L * 0.1 && rand() < 0.45) {
       const p = this.localToWorld(new THREE.Vector3(0, 10, this.L * 0.25));
       g.fx.megaExplosion(p); g.audio.explosion(p, 3);
-      g.message(`${this.name} 前部弾薬庫 誘爆！`, 'big');
+      g.message(`${this.name.replace(/^戦艦/, '')} 誘爆！`, 'big');
       this.hp = 0;
       this.addFire(new THREE.Vector3(0, this.deckY, this.L * 0.25), 3);
       this.addFire(new THREE.Vector3(0, this.deckY, this.L * 0.05), 2.5);
