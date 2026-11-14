@@ -1,5 +1,5 @@
 // BGM: 軍艦行進曲風のオリジナル行進曲（WebAudio で合成）
-// 変ロ長調 4/4 拍子。旋律=金管、和声=トロンボーンの後打ち、低音=チューバ、打楽器=小太鼓・大太鼓・シンバル
+// 変ロ長調 4/4 拍子・128BPM。ブン・チャッの伴奏と小太鼓の刻みで行進曲らしく。旋律=金管、和声=トロンボーンの後打ち、低音=チューバ、打楽器=小太鼓・大太鼓・シンバル
 
 // [MIDI音高(0=休符), 拍]
 const INTRO = [
@@ -70,7 +70,7 @@ export class Music {
   constructor(audio) {
     this.audio = audio;
     this.playing = false;
-    this.bpm = 116;
+    this.bpm = 128; // 行進曲のテンポ
     this.volume = 0.38;
     this.buffer = null;
   }
@@ -87,6 +87,8 @@ export class Music {
     const loopN = Math.floor(total * SR);
     for (let i = loopN; i < N; i++) { this.L[i - loopN] += this.L[i]; this.R[i - loopN] += this.R[i]; }
     this.reverb(loopN);
+    let pk = 0; for (let i = 0; i < loopN; i++) pk = Math.max(pk, Math.abs(this.L[i]), Math.abs(this.R[i]));
+    if (pk > 0.95) { const k = 0.95 / pk; for (let i = 0; i < loopN; i++) { this.L[i] *= k; this.R[i] *= k; } }
     const ctx = this.audio.ctx;
     const buf = ctx.createBuffer(2, loopN, SR);
     buf.copyToChannel(this.L.subarray(0, loopN), 0); buf.copyToChannel(this.R.subarray(0, loopN), 1);
@@ -211,6 +213,8 @@ export class Music {
         this.trumpet(mtof(n) * 1.003, t + 0.006, dur, bar.soft ? 0.05 : 0.07, { vib: dur > 0.6 ? 0.004 : 0, pan: 0.25 });
         const root = bar.c[0] % 12;
         let h = n - 3; for (let k = 0; k < 4; k++) { const iv = ((h - root) % 12 + 12) % 12; if (bar.c[1].includes(iv)) break; h--; }
+        // トロンボーン（旋律の1オクターブ下）
+        this.voice(SAW_DARK, mtof(n - 12), t, dur, bar.soft ? 0.035 : 0.06, { cutoff: 4, att: 0.02, rel: 0.06, pan: -0.15 });
         // 2番トランペット（3度下のハーモニー）
         this.trumpet(mtof(h), t, dur, bar.soft ? 0.06 : 0.08, { vib: dur > 0.6 ? 0.004 : 0, pan: -0.35 });
       }
@@ -219,13 +223,22 @@ export class Music {
     const [root, chord] = bar.c;
     for (let b = 0; b < 4; b++) {
       const tb = t0 + b * beat;
-      if (b === 0 || b === 2) this.voice(TRI, mtof(b === 0 ? root : root + 7 - (root + 7 > 46 ? 12 : 0)), tb, beat * 0.75, 0.32, { cutoff: 5, att: 0.02, decay: 0.5 });
-      if (b === 1 || b === 3) for (const iv of chord.slice(0, 3)) this.voice(SAW_DARK, mtof(root + 24 + iv), tb, beat * 0.3, bar.soft ? 0.03 : 0.045, { cutoff: 3, att: 0.01, rel: 0.05, pan: 0.35 });
-      if (b === 0 || b === 2) this.sweep(tb, 110, 45, 0.3, 0.45);
-      if (!bar.soft) {
-        if (b === 1 || b === 3) this.noiseHit(tb, 0.14, 0.22, { bp: 2400 });
-        this.noiseHit(tb + beat * 0.75, 0.1, 0.07, { bp: 2400 });
+      // ブン（1・3拍）: チューバ＋トロンボーンの根音・5度
+      if (b === 0 || b === 2) {
+        const bn = b === 0 ? root : root + 7 - (root + 7 > 46 ? 12 : 0);
+        this.voice(TRI, mtof(bn), tb, beat * 0.6, 0.34, { cutoff: 5, att: 0.015, decay: 0.45 });
+        this.voice(SAW_DARK, mtof(bn + 12), tb, beat * 0.45, bar.soft ? 0.05 : 0.08, { cutoff: 4, att: 0.015, rel: 0.05, pan: -0.2 });
       }
+      // チャッ（2・4拍）: ホルンの後打ち和音
+      if (b === 1 || b === 3) for (const iv of chord.slice(0, 3)) this.voice(SAW_DARK, mtof(root + 24 + iv), tb, beat * 0.32, bar.soft ? 0.045 : 0.07, { cutoff: 3.5, att: 0.008, rel: 0.05, pan: 0.35 });
+      // 大太鼓（1・3拍）＋ 合わせシンバル
+      if (b === 0 || b === 2) { this.sweep(tb, 120, 45, 0.32, bar.soft ? 0.4 : 0.6); if (!bar.soft) this.noiseHit(tb, 0.35, 0.07, { hp: 1, pan: 0.2 }); }
+      // 小太鼓: 行進のリズム（8分刻み、2・4拍にアクセント、4拍目裏に装飾）
+      if (!bar.soft) {
+        this.noiseHit(tb, 0.12, b === 1 || b === 3 ? 0.3 : 0.15, { bp: 2600 });
+        this.noiseHit(tb + beat * 0.5, 0.1, 0.11, { bp: 2600 });
+        if (b === 3) { this.noiseHit(tb + beat * 0.75, 0.08, 0.13, { bp: 2600 }); this.noiseHit(tb + beat * 0.875, 0.08, 0.16, { bp: 2600 }); }
+      } else if (b === 1 || b === 3) this.noiseHit(tb, 0.08, 0.08, { bp: 2600 });
     }
     if (bar.crash) this.noiseHit(t0, 1.4, 0.1, { hp: 1 });
     if (bar.m.length && bar.m[bar.m.length - 1][0] === 65) for (let i = 0; i < 4; i++) this.noiseHit(t0 + beat * 3 + i * beat / 4, 0.1, 0.1 + i * 0.03, { bp: 2400 });
