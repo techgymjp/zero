@@ -106,22 +106,37 @@ export class HUD {
         c.beginPath(); c.moveTo(lp[0] - 14, lp[1]); c.lineTo(lp[0] - 9, lp[1]); c.moveTo(lp[0] + 9, lp[1]); c.lineTo(lp[0] + 14, lp[1]); c.stroke();
       }
     }
-    // 爆撃照準
+    // 爆撃照準: 爆弾が残っていれば、機銃照準から落下予測地点まで点線を常に表示。
+    // 落下地点が戦艦・空母に重なったら赤い◇
     const stores = pl.model.userData.stores.filter(s => s.parent);
+    const airborne = !pl.brain.onGround && !(g.akagi && pl.pos.distanceTo(g.akagi.pos) < 3000);
+    if (!stores.length || !airborne) return;
+    const ip = predictImpact(pl.pos, pl.vel, g.terrain, new THREE.Vector3());
+    if (!ip) return;
+    let sp = this.project(ip);
+    let onScreen = !!sp && sp[0] > 0 && sp[0] < this.W && sp[1] > 0 && sp[1] < this.H;
+    if (!sp) {
+      // 落下地点がカメラの後ろ側（水平飛行など）: 画面下方向へ点線を伸ばす
+      sp = [x, this.H];
+    }
+    // 画面外なら画面の縁で止める
+    const ex = clamp(sp[0], 4, this.W - 4), ey = clamp(sp[1], 4, this.H - 4);
+    const y0 = y + 14;
+    if (ey > y0 + 4 || Math.abs(ex - x) > 4) {
+      c.strokeStyle = 'rgba(255,255,255,0.75)'; c.lineWidth = 1.5; c.setLineDash([5, 6]);
+      c.beginPath(); c.moveTo(x, y0); c.lineTo(ex, ey); c.stroke(); c.setLineDash([]);
+    }
+    if (!onScreen) return;
     const agl = pl.pos.y - g.terrain.groundAt(pl.pos.x, pl.pos.z);
-    const aiming = !pl.brain.onGround && agl > 150 && agl < 3500 && pl.fwd.y < -0.05 && !(g.akagi && pl.pos.distanceTo(g.akagi.pos) < 3000);
-    if (stores.length && aiming) {
-      const ip = predictImpact(pl.pos, pl.vel, g.terrain, new THREE.Vector3());
-      if (ip) {
-        const sp = this.project(ip);
-        if (sp) {
-          let onShip = false;
-          for (const s of g.ships) if (s.side === 'us' && s.isTarget && !s.sunk && s.distanceToHull(ip) < 5) onShip = true;
-          if (!onShip) return; // 命中コースのときだけ表示
-          c.strokeStyle = RED; c.lineWidth = 2.5;
-          c.beginPath(); c.moveTo(sp[0], sp[1] - 10); c.lineTo(sp[0] + 10, sp[1]); c.lineTo(sp[0], sp[1] + 10); c.lineTo(sp[0] - 10, sp[1]); c.closePath(); c.stroke();
-        }
-      }
+    let onShip = false;
+    if (agl > 150) for (const s of g.ships) if (s.side === 'us' && s.isTarget && !s.sunk && s.distanceToHull(ip) < 5) onShip = true;
+    if (onShip) {
+      c.strokeStyle = RED; c.lineWidth = 2.5;
+      c.beginPath(); c.moveTo(sp[0], sp[1] - 10); c.lineTo(sp[0] + 10, sp[1]); c.lineTo(sp[0], sp[1] + 10); c.lineTo(sp[0] - 10, sp[1]); c.closePath(); c.stroke();
+    } else {
+      // 落下地点: 白い小さな丸
+      c.strokeStyle = 'rgba(255,255,255,0.9)'; c.lineWidth = 1.5;
+      c.beginPath(); c.arc(sp[0], sp[1], 4, 0, Math.PI * 2); c.stroke();
     }
   }
 
