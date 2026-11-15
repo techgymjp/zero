@@ -11,6 +11,8 @@ const Ads = window.Ads;
 const cap = window.Capacitor;
 const isApp = !!(cap && cap.isNativePlatform && cap.isNativePlatform());
 if (isApp) document.body.classList.add('app');
+// Google Play へのリンクは Web 版だけに出す（アプリ版では要素ごと消す）
+if (isApp) document.getElementById('playLinkBox')?.remove(); else document.getElementById('playLinkBox')?.removeAttribute('hidden');
 // タッチ操作の端末（スマホ・タブレット）: キーボードの説明を隠す
 if (isTouchDevice()) document.body.classList.add('touch');
 

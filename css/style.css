@@ -108,3 +108,9 @@ body:not(.touch) .touch-only { display: none !important; }
   #title .sub2 { display: none; }
   #title .lead { font-size: 16px; }
 }
+/* Web 版のみ: Google Play へのリンク */
+.playlink { margin-top: 10px; }
+.playlink a { display: inline-block; color: #fff; background: #1f6f3a; border: 1px solid #6fdc8c; padding: 6px 16px; font-size: 15px; text-decoration: none; letter-spacing: 0.05em; }
+.playlink a:hover { filter: brightness(1.15); }
+.playlink small { display: block; font-size: 10px; color: #8d8a80; margin-top: 3px; }
+@media (max-height: 450px) and (orientation: landscape) { .playlink { margin-top: 4px; } .playlink a { font-size: 14px; padding: 4px 14px; } }
