@@ -1,0 +1,18 @@
+<ja-JP>
+『零戦 真珠湾攻撃』初リリース！
+・空母赤城から発艦し、列機2機を率いて真珠湾へ
+・実際の地図データで再現した真珠湾とオアフ島
+・急降下爆撃：赤い◇で投下、どの戦艦・空母も2発命中で撃沈
+・空戦：20mm機銃は弾数無限
+・勝利条件は戦艦8隻・空母3隻の撃沈
+・日本語／英語に対応
+</ja-JP>
+<en-US>
+First release of "Zero: Pearl Harbor"!
+- Take off from the carrier Akagi and lead your section to Pearl Harbor
+- Pearl Harbor and Oahu rebuilt from real map data
+- Dive bombing: release on the red ◇; two hits sink any battleship or carrier
+- Dogfights with unlimited 20 mm cannon ammo
+- Goal: sink 8 battleships and 3 carriers
+- Japanese and English
+</en-US>
