@@ -38,4 +38,9 @@
     <!-- Permissions -->
 
     <uses-permission android:name="android.permission.INTERNET" />
+
+    <!-- 画面は横向き固定（sensorLandscape）だが、縦/横の画面機能は必須ではないと明示する。
+         固定するとストアが「横画面必須」と推定し、対象端末が絞られるのを防ぐため -->
+    <uses-feature android:name="android.hardware.screen.landscape" android:required="false" />
+    <uses-feature android:name="android.hardware.screen.portrait" android:required="false" />
 </manifest>
